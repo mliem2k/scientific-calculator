@@ -3,7 +3,8 @@ import { ASTNode, Cursor, HistoryEntry, CalculatorState, INITIAL_CURSOR, Functio
 import {
   insertDigit, insertDecimalPoint, insertOperator, insertFraction,
   insertExponent, insertRadical, insertSquare, insertFunction,
-  insertConstant, insertFactorial, insertNcr, insertNpr, insertParen, deleteCurrent, clearAll,
+  insertConstant, insertFactorial, insertNcr, insertNpr, insertParen,
+  insertReciprocal, deleteCurrent, clearAll,
 } from '@/lib/ast/builder'
 import { moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown } from '@/lib/ast/cursor'
 import { evaluate } from '@/lib/evaluator'
@@ -51,8 +52,10 @@ export function useCalculator() {
         case 'npr':      pair = insertNpr(e, c); break
         case 'paren_open':  pair = insertParen(e, c, 'open'); break
         case 'paren_close': pair = insertParen(e, c, 'close'); break
-        case 'pi':  pair = insertConstant(e, c, 'pi'); break
-        case 'Ans': pair = insertConstant(e, c, 'Ans'); break
+        case 'pi':      pair = insertConstant(e, c, 'pi'); break
+        case 'e_const': pair = insertConstant(e, c, 'e'); break
+        case 'Ans':     pair = insertConstant(e, c, 'Ans'); break
+        case 'reciprocal': pair = insertReciprocal(e, c); break
         case 'sin': case 'cos': case 'tan':
         case 'asin': case 'acos': case 'atan':
         case 'sinh': case 'cosh': case 'tanh':

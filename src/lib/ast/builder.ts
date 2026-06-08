@@ -110,6 +110,24 @@ export function insertParen(root: ASTNode[], cursor: Cursor, side: 'open' | 'clo
   return [root, { path: parentPath, insertAt: lastSeg.nodeIndex + 1 }]
 }
 
+export function insertReciprocal(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
+  const r = clone(root)
+  const list = getList(r, cursor.path)
+  const hasPrev = cursor.insertAt > 0
+  const prev = hasPrev ? list.splice(cursor.insertAt - 1, 1) : []
+  const idx = hasPrev ? cursor.insertAt - 1 : cursor.insertAt
+  const frac: FractionNode = {
+    type: 'fraction',
+    numerator: [{ type: 'number', value: '1' }],
+    denominator: prev,
+  }
+  list.splice(idx, 0, frac)
+  if (hasPrev) {
+    return [r, { path: cursor.path, insertAt: idx + 1 }]
+  }
+  return [r, { path: [...cursor.path, { nodeIndex: idx, slot: 'denominator' }], insertAt: 0 }]
+}
+
 export function deleteCurrent(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
   if (cursor.insertAt === 0 && cursor.path.length === 0) return [root, cursor]
   const r = clone(root)
