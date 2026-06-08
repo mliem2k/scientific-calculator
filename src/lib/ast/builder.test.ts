@@ -244,6 +244,6 @@ describe('insertNumberLiteral', () => {
   it('inserts a NumberNode with the given string value', () => {
     const [nodes, cur] = insertNumberLiteral([], INITIAL_CURSOR, '3.14')
     expect(nodes[0]).toEqual({ type: 'number', value: '3.14' })
-    expect(cur.insertAt).toBe(1)
+    expect(cur).toEqual({ path: [], insertAt: 1 })
   })
 })
