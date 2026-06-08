@@ -1,6 +1,6 @@
 export type NumberNode    = { type: 'number';    value: string }
 export type OperatorNode  = { type: 'operator';  op: '+' | '-' | '×' | '÷' }
-export type ConstantNode  = { type: 'constant';  name: 'pi' | 'e' | 'Ans' }
+export type ConstantNode  = { type: 'constant';  name: 'pi' | 'e' | 'Ans' | 'A' | 'B' | 'X' | 'Y' }
 export type FractionNode  = { type: 'fraction';  numerator: ASTNode[]; denominator: ASTNode[] }
 export type ExponentNode  = { type: 'exponent';  base: ASTNode[];      exponent: ASTNode[] }
 export type RadicalNode   = { type: 'radical';   degree: ASTNode[];    radicand: ASTNode[] }
@@ -15,7 +15,7 @@ export type FunctionName =
   | 'asin' | 'acos' | 'atan'
   | 'sinh' | 'cosh' | 'tanh'
   | 'asinh' | 'acosh' | 'atanh'
-  | 'log' | 'ln' | 'pow10' | 'exp'
+  | 'log' | 'ln' | 'pow10' | 'exp' | 'abs'
 
 export type ASTNode =
   | NumberNode | OperatorNode | ConstantNode
@@ -34,6 +34,8 @@ export interface Cursor {
 
 export const INITIAL_CURSOR: Cursor = { path: [], insertAt: 0 }
 
+export type MemorySlots = { A: number | null; B: number | null; X: number | null; Y: number | null }
+
 export interface HistoryEntry {
   id: string
   expression: ASTNode[]
@@ -50,5 +52,6 @@ export interface CalculatorState {
   shiftActive: boolean
   hypActive: boolean
   history: HistoryEntry[]
-  lastResult: string | null
+  memory: MemorySlots
+  stoMode: boolean
 }
