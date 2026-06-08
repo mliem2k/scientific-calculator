@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { evaluate } from './evaluator'
+import { evaluate, toFraction, toMixed, fromMixed } from './evaluator'
 import { ASTNode } from './ast/types'
 
 const num = (v: string): ASTNode => ({ type: 'number', value: v })
@@ -80,5 +80,45 @@ describe('evaluate', () => {
   it('evaluates ln(e) ≈ 1', () => {
     const result = evaluate([fn('ln', [con('e')])], 'RAD', null)
     expect(parseFloat(result!.value)).toBeCloseTo(1, 10)
+  })
+})
+
+describe('evaluate with memory scope', () => {
+  it('substitutes memory variable A', () => {
+    const nodes: ASTNode[] = [{ type: 'constant', name: 'A' }]
+    expect(evaluate(nodes, 'DEG', null, { A: 7, B: null, X: null, Y: null })?.value).toBe('7')
+  })
+
+  it('defaults unset memory variable to 0', () => {
+    const nodes: ASTNode[] = [{ type: 'constant', name: 'B' }]
+    expect(evaluate(nodes, 'DEG', null, { A: null, B: null, X: null, Y: null })?.value).toBe('0')
+  })
+})
+
+describe('toMixed', () => {
+  it('converts improper fraction to mixed', () => {
+    expect(toMixed('7/3')).toBe('2 1/3')
+  })
+
+  it('returns null for a proper fraction', () => {
+    expect(toMixed('1/3')).toBeNull()
+  })
+
+  it('returns whole number string when fraction divides evenly', () => {
+    expect(toMixed('6/3')).toBe('2')
+  })
+
+  it('returns null for non-fraction input', () => {
+    expect(toMixed('3.14')).toBeNull()
+  })
+})
+
+describe('fromMixed', () => {
+  it('converts mixed number to improper fraction', () => {
+    expect(fromMixed('2 1/3')).toBe('7/3')
+  })
+
+  it('returns null for an improper fraction string', () => {
+    expect(fromMixed('7/3')).toBeNull()
   })
 })
