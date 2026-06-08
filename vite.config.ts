@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -6,7 +7,7 @@ import path from 'path'
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    mode !== 'test' && VitePWA({
+    ...(mode !== 'test' ? [VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
       manifest: {
@@ -23,8 +24,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg}'] },
-    }),
-  ].filter(Boolean),
+    })] : []),
+  ],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   test: {
     environment: 'jsdom',
