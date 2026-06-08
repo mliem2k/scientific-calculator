@@ -1,62 +1,85 @@
 import { cn } from '@/lib/utils'
 import { DPad } from './DPad'
 
+// Button class presets by category
+const DIGIT = 'bg-zinc-900 border border-zinc-700/70 text-white'
+const FN    = 'bg-zinc-950 border border-zinc-800 text-zinc-300'
+const OP    = 'bg-zinc-900 border border-zinc-700/70 text-sky-300'
+const DEL   = 'bg-zinc-900 border border-zinc-700/70 text-red-400'
+const ANS   = 'bg-zinc-900 border border-zinc-700/70 text-amber-300'
+const EQ    = 'bg-blue-700 border border-blue-600 text-white'
+const CTRL  = 'bg-zinc-800 border border-zinc-700 text-zinc-200'
+const SHIFT_BTN = 'bg-orange-700 border border-orange-600 text-white'
+
 interface BtnDef {
-  id: string; label: string; shiftLabel?: string; hypLabel?: string; shiftHypLabel?: string; cls?: string
+  id: string
+  label: string
+  shiftLabel?: string
+  hypLabel?: string
+  shiftHypLabel?: string
+  cls: string
 }
 
-// Row 0 handled separately — col 1-2 are SHIFT/DEG_RAD, col 3-4 are the DPad (col-span-2)
+// Top row: SHIFT + DEG_RAD rendered beside DPad (col-span-2)
 const TOP_ROW: BtnDef[] = [
-  { id: 'SHIFT',   label: 'SHIFT',  cls: 'bg-orange-700' },
-  { id: 'DEG_RAD', label: 'DEG' },
+  { id: 'SHIFT',   label: 'SHIFT',  cls: SHIFT_BTN },
+  { id: 'DEG_RAD', label: 'DEG',    cls: CTRL },
 ]
 
-const ROWS: (BtnDef | null)[][] = [
+const ROWS: BtnDef[][] = [
   [
-    { id: 'log', label: 'log', shiftLabel: '10ˣ' },
-    { id: 'ln',  label: 'ln',  shiftLabel: 'eˣ'  },
-    { id: 'HYP', label: 'hyp' },
-    { id: 'factorial', label: 'x!' },
+    { id: 'log', label: 'log', shiftLabel: '10ˣ', cls: FN },
+    { id: 'ln',  label: 'ln',  shiftLabel: 'eˣ',  cls: FN },
+    { id: 'HYP', label: 'hyp',                    cls: FN },
+    { id: 'factorial', label: 'x!',               cls: FN },
   ],
   [
-    { id: 'sin', label: 'sin', shiftLabel: 'sin⁻¹', hypLabel: 'sinh', shiftHypLabel: 'sinh⁻¹' },
-    { id: 'cos', label: 'cos', shiftLabel: 'cos⁻¹', hypLabel: 'cosh', shiftHypLabel: 'cosh⁻¹' },
-    { id: 'tan', label: 'tan', shiftLabel: 'tan⁻¹', hypLabel: 'tanh', shiftHypLabel: 'tanh⁻¹' },
-    { id: 'exponent', label: 'xʸ' },
+    { id: 'sin', label: 'sin', shiftLabel: 'sin⁻¹', hypLabel: 'sinh', shiftHypLabel: 'sinh⁻¹', cls: FN },
+    { id: 'cos', label: 'cos', shiftLabel: 'cos⁻¹', hypLabel: 'cosh', shiftHypLabel: 'cosh⁻¹', cls: FN },
+    { id: 'tan', label: 'tan', shiftLabel: 'tan⁻¹', hypLabel: 'tanh', shiftHypLabel: 'tanh⁻¹', cls: FN },
+    { id: 'exponent', label: 'xʸ', cls: FN },
   ],
   [
-    { id: 'sqrt',    label: '√',   shiftLabel: 'x²' },
-    { id: 'cbrt',    label: '∛' },
-    { id: 'fraction', label: 'a/b' },
-    { id: 'square',  label: 'x²' },
+    { id: 'sqrt',    label: '√',   shiftLabel: 'x²', cls: FN },
+    { id: 'cbrt',    label: '∛',                     cls: FN },
+    { id: 'fraction', label: 'a/b',                  cls: FN },
+    { id: 'square',  label: 'x²',                    cls: FN },
   ],
   [
-    { id: 'ncr',         label: 'nCr' },
-    { id: 'npr',         label: 'nPr' },
-    { id: 'paren_open',  label: '('   },
-    { id: 'paren_close', label: ')'   },
+    { id: 'ncr',         label: 'nCr', cls: FN },
+    { id: 'npr',         label: 'nPr', cls: FN },
+    { id: 'paren_open',  label: '(',   cls: FN },
+    { id: 'paren_close', label: ')',   cls: FN },
   ],
   [
-    { id: '7', label: '7' }, { id: '8', label: '8' }, { id: '9', label: '9' },
-    { id: 'DEL', label: 'DEL', cls: 'bg-zinc-700' },
+    { id: '7', label: '7', cls: DIGIT },
+    { id: '8', label: '8', cls: DIGIT },
+    { id: '9', label: '9', cls: DIGIT },
+    { id: 'DEL', label: 'DEL', shiftLabel: 'AC', cls: DEL },
   ],
   [
-    { id: '4', label: '4' }, { id: '5', label: '5' }, { id: '6', label: '6' },
-    { id: 'multiply', label: '×' },
+    { id: '4', label: '4', cls: DIGIT },
+    { id: '5', label: '5', cls: DIGIT },
+    { id: '6', label: '6', cls: DIGIT },
+    { id: 'multiply', label: '×', cls: OP },
   ],
   [
-    { id: '1', label: '1' }, { id: '2', label: '2' }, { id: '3', label: '3' },
-    { id: 'divide', label: '÷' },
+    { id: '1', label: '1', cls: DIGIT },
+    { id: '2', label: '2', cls: DIGIT },
+    { id: '3', label: '3', cls: DIGIT },
+    { id: 'divide', label: '÷', cls: OP },
   ],
   [
-    { id: '0', label: '0' }, { id: '.', label: '.' }, { id: 'Ans', label: 'Ans' },
-    { id: 'plus', label: '+' },
+    { id: '0',   label: '0',   cls: DIGIT },
+    { id: '.',   label: '.',   cls: DIGIT },
+    { id: 'Ans', label: 'Ans', cls: ANS   },
+    { id: 'plus', label: '+',  cls: OP    },
   ],
   [
-    null,
-    { id: '=', label: '=', cls: 'bg-blue-700' },
-    null,
-    { id: 'minus', label: '−' },
+    { id: 'CLEAR',   label: 'AC',  cls: DEL },
+    { id: '=',       label: '=',   cls: EQ  },
+    { id: '_empty2', label: '',    cls: 'invisible' },
+    { id: 'minus',   label: '−',   cls: OP  },
   ],
 ]
 
@@ -72,8 +95,14 @@ export function ButtonGrid({ angleMode, shiftActive, hypActive, onButton }: Prop
     if (btn.id === 'DEG_RAD') return angleMode
     if (shiftActive && hypActive && btn.shiftHypLabel) return btn.shiftHypLabel
     if (shiftActive && btn.shiftLabel) return btn.shiftLabel
-    if (hypActive && btn.hypLabel) return btn.hypLabel
+    if (hypActive   && btn.hypLabel)   return btn.hypLabel
     return btn.label
+  }
+
+  function secondaryLabel(btn: BtnDef): string | null {
+    // Show SHIFT-alt in orange only when shift is not active (acts as a key legend)
+    if (!shiftActive && !hypActive && btn.shiftLabel) return btn.shiftLabel
+    return null
   }
 
   function actionId(btn: BtnDef): string {
@@ -95,33 +124,45 @@ export function ButtonGrid({ angleMode, shiftActive, hypActive, onButton }: Prop
       if (hypActive)   return 'tanh'
       return 'tan'
     }
+    if (btn.id === 'DEL'  && shiftActive) return 'CLEAR'
     if (btn.id === 'log'  && shiftActive) return 'pow10'
     if (btn.id === 'ln'   && shiftActive) return 'exp'
     if (btn.id === 'sqrt' && shiftActive) return 'square'
     return btn.id
   }
 
-  function renderBtn(btn: BtnDef | null, i: number) {
-    if (!btn) return <div key={i} />
+  function renderBtn(btn: BtnDef, i: number) {
+    if (btn.id.startsWith('_empty')) return <div key={btn.id + i} />
+
+    const secondary = secondaryLabel(btn)
+
     return (
       <button
         key={btn.id + i}
         onClick={() => onButton(actionId(btn))}
         className={cn(
-          'h-12 rounded text-white text-sm font-medium active:scale-95 transition-transform select-none',
-          btn.cls ?? 'bg-zinc-800 hover:bg-zinc-700',
-          btn.id === 'SHIFT' && shiftActive && 'ring-1 ring-orange-400',
-          btn.id === 'HYP'   && hypActive   && 'ring-1 ring-blue-400',
+          'rounded text-sm font-medium select-none',
+          'active:scale-95 active:brightness-75 transition-all duration-75',
+          // Height: taller for function rows that have secondary labels
+          secondary ? 'h-12 flex flex-col items-center justify-center gap-0' : 'h-11 flex items-center justify-center',
+          btn.cls,
+          btn.id === 'SHIFT' && shiftActive && 'ring-1 ring-orange-300 brightness-125',
+          btn.id === 'HYP'   && hypActive   && 'ring-1 ring-indigo-300 brightness-125',
         )}
       >
-        {label(btn)}
+        {secondary && (
+          <span className="text-[7px] text-orange-400 leading-none mb-0.5 font-normal tracking-wide">
+            {secondary}
+          </span>
+        )}
+        <span className="leading-none">{label(btn)}</span>
       </button>
     )
   }
 
   return (
-    <div className="grid grid-cols-4 gap-1 p-2 bg-zinc-950 flex-shrink-0">
-      {/* Top row: SHIFT + DEG/RAD take cols 1-2, DPad spans cols 3-4 */}
+    <div className="grid grid-cols-4 gap-[3px] p-2 bg-zinc-950 flex-shrink-0">
+      {/* Top row: SHIFT + DEG_RAD in cols 1-2, DPad spans cols 3-4 */}
       {TOP_ROW.map((btn, i) => renderBtn(btn, i))}
       <DPad onButton={onButton} />
 

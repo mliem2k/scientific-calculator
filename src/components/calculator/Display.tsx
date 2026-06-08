@@ -21,21 +21,24 @@ export function Display({ expression, cursor, result }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-28 p-3 gap-2 bg-black border-b border-zinc-800 overflow-hidden">
-      <div className="flex-1 overflow-x-auto flex items-center text-white text-2xl font-light">
+    <div className="flex flex-col px-4 pb-3 pt-2 min-h-[7.5rem] overflow-hidden">
+      {/* Expression — right-aligned, LCD font */}
+      <div className="flex-1 overflow-x-auto flex items-center justify-end font-display text-white text-[1.75rem] leading-snug">
         {empty
-          ? <span className="text-zinc-700">0</span>
+          ? <span className="text-zinc-800">0</span>
           : <ASTRenderer nodes={expression} cursor={cursor} path={[]} />
         }
       </div>
+
+      {/* Result line — tap to copy */}
       {result !== null && (
         <button
           onClick={copyResult}
-          className="text-right text-base select-none active:scale-95 transition-all"
+          className="self-end mt-1 select-none active:opacity-60 transition-opacity"
           aria-label="copy result"
         >
-          <span className={copied ? 'text-green-400' : 'text-zinc-400'}>
-            {copied ? 'copied!' : `= ${result}`}
+          <span className={copied ? 'font-display text-base text-green-400' : 'font-display text-base text-zinc-500'}>
+            {copied ? '✓ copied' : `= ${result}`}
           </span>
         </button>
       )}
