@@ -42,6 +42,18 @@ export function evaluate(nodes: ASTNode[], angleMode: 'DEG' | 'RAD', lastResult:
   }
 }
 
+export function toFraction(decimalStr: string): string | null {
+  try {
+    const n = parseFloat(decimalStr)
+    if (!isFinite(n) || isNaN(n) || Number.isInteger(n)) return null
+    const frac = mathDeg.fraction(n) as unknown as { n: number; d: number; s: number }
+    if (frac.d <= 1 || frac.d > 999) return null
+    return frac.s < 0 ? `-${frac.n}/${frac.d}` : `${frac.n}/${frac.d}`
+  } catch {
+    return null
+  }
+}
+
 function formatNumber(n: number): string {
   if (Number.isInteger(n) && Math.abs(n) < 1e15) return String(n)
   const s = n.toPrecision(10)

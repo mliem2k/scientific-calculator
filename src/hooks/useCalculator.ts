@@ -4,16 +4,16 @@ import {
   insertDigit, insertDecimalPoint, insertOperator, insertFraction,
   insertExponent, insertRadical, insertSquare, insertFunction,
   insertConstant, insertFactorial, insertNcr, insertNpr, insertParen,
-  insertReciprocal, deleteCurrent, clearAll,
+  insertReciprocal, insertExp, insertNegate, deleteCurrent, clearAll,
 } from '@/lib/ast/builder'
 import { moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown } from '@/lib/ast/cursor'
-import { evaluate } from '@/lib/evaluator'
+import { evaluate, toFraction } from '@/lib/evaluator'
 import { loadHistory, addEntry } from '@/lib/history'
 
 type State = CalculatorState & { lastResult: string | null }
 
 const INIT: State = {
-  expression: [], cursor: INITIAL_CURSOR, result: null,
+  expression: [], cursor: INITIAL_CURSOR, result: null, resultMode: 'decimal',
   angleMode: 'DEG', shiftActive: false, hypActive: false,
   history: loadHistory(), lastResult: null,
 }
@@ -31,6 +31,17 @@ export function useCalculator() {
 
       const deshift = { shiftActive: false, hypActive: false }
       type Pair = [ASTNode[], Cursor]
+
+      // S⇔D: toggle between decimal and fraction display of the current result
+      if (id === 'S_TO_D') {
+        if (!prev.result) return { ...prev, ...deshift }
+        if (prev.resultMode === 'fraction') {
+          return { ...prev, ...deshift, result: prev.lastResult, resultMode: 'decimal' }
+        }
+        const fracStr = toFraction(prev.result)
+        if (!fracStr) return { ...prev, ...deshift }
+        return { ...prev, ...deshift, lastResult: prev.result, result: fracStr, resultMode: 'fraction' }
+      }
 
       let pair: Pair
       switch (id) {
@@ -52,10 +63,12 @@ export function useCalculator() {
         case 'npr':      pair = insertNpr(e, c); break
         case 'paren_open':  pair = insertParen(e, c, 'open'); break
         case 'paren_close': pair = insertParen(e, c, 'close'); break
-        case 'pi':      pair = insertConstant(e, c, 'pi'); break
-        case 'e_const': pair = insertConstant(e, c, 'e'); break
-        case 'Ans':     pair = insertConstant(e, c, 'Ans'); break
+        case 'pi':         pair = insertConstant(e, c, 'pi'); break
+        case 'e_const':    pair = insertConstant(e, c, 'e'); break
+        case 'Ans':        pair = insertConstant(e, c, 'Ans'); break
         case 'reciprocal': pair = insertReciprocal(e, c); break
+        case 'EXP':        pair = insertExp(e, c); break
+        case 'negate':     pair = insertNegate(e, c); break
         case 'sin': case 'cos': case 'tan':
         case 'asin': case 'acos': case 'atan':
         case 'sinh': case 'cosh': case 'tanh':
@@ -72,14 +85,26 @@ export function useCalculator() {
           const evalResult = evaluate(e, angleMode, lastResult)
           if (!evalResult) return { ...prev, ...deshift }
           const newHistory = addEntry(history, e, evalResult.value)
-          return { ...prev, ...deshift, history: newHistory, result: evalResult.value, lastResult: evalResult.value }
+          return {
+            ...prev, ...deshift,
+            history: newHistory,
+            result: evalResult.value,
+            resultMode: 'decimal',
+            lastResult: evalResult.value,
+          }
         }
         default: return prev
       }
 
       const [newExpr, newCursor] = pair
       const evalResult = evaluate(newExpr, angleMode, lastResult)
-      return { ...prev, ...deshift, expression: newExpr, cursor: newCursor, result: evalResult?.value ?? null }
+      return {
+        ...prev, ...deshift,
+        expression: newExpr,
+        cursor: newCursor,
+        result: evalResult?.value ?? null,
+        resultMode: 'decimal',
+      }
     })
   }, [])
 
@@ -89,6 +114,7 @@ export function useCalculator() {
       expression: entry.expression,
       cursor: { path: [], insertAt: entry.expression.length },
       result: entry.result,
+      resultMode: 'decimal',
       shiftActive: false,
       hypActive: false,
     }))

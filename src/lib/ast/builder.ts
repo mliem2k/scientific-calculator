@@ -110,6 +110,32 @@ export function insertParen(root: ASTNode[], cursor: Cursor, side: 'open' | 'clo
   return [root, { path: parentPath, insertAt: lastSeg.nodeIndex + 1 }]
 }
 
+export function insertExp(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
+  const r = clone(root)
+  const list = getList(r, cursor.path)
+  const opNode: ASTNode = { type: 'operator', op: '×' }
+  const expNode: ExponentNode = {
+    type: 'exponent',
+    base: [{ type: 'number', value: '10' }],
+    exponent: [],
+  }
+  list.splice(cursor.insertAt, 0, opNode, expNode)
+  const expIdx = cursor.insertAt + 1
+  return [r, { path: [...cursor.path, { nodeIndex: expIdx, slot: 'exponent' }], insertAt: 0 }]
+}
+
+export function insertNegate(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
+  const r = clone(root)
+  const list = getList(r, cursor.path)
+  const prev = cursor.insertAt > 0 ? list[cursor.insertAt - 1] : null
+  if (prev?.type === 'number') {
+    prev.value = prev.value.startsWith('-') ? prev.value.slice(1) : '-' + prev.value
+    return [r, cursor]
+  }
+  list.splice(cursor.insertAt, 0, { type: 'operator', op: '-' })
+  return [r, { path: cursor.path, insertAt: cursor.insertAt + 1 }]
+}
+
 export function insertReciprocal(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
   const r = clone(root)
   const list = getList(r, cursor.path)

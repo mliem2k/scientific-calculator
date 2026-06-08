@@ -45,6 +45,7 @@ export interface CalculatorState {
   expression: ASTNode[]
   cursor: Cursor
   result: string | null
+  resultMode: 'decimal' | 'fraction'
   angleMode: 'DEG' | 'RAD'
   shiftActive: boolean
   hypActive: boolean

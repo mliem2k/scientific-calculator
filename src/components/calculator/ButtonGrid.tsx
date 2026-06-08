@@ -6,7 +6,6 @@ const DIGIT = 'bg-zinc-900 border border-zinc-700/70 text-white'
 const FN    = 'bg-zinc-950 border border-zinc-800 text-zinc-300'
 const OP    = 'bg-zinc-900 border border-zinc-700/70 text-sky-300'
 const DEL   = 'bg-zinc-900 border border-zinc-700/70 text-red-400'
-const ANS   = 'bg-zinc-900 border border-zinc-700/70 text-amber-300'
 const EQ    = 'bg-blue-700 border border-blue-600 text-white'
 const CTRL  = 'bg-zinc-800 border border-zinc-700 text-zinc-200'
 const SHIFT_BTN = 'bg-orange-700 border border-orange-600 text-white'
@@ -75,16 +74,16 @@ const ROWS: BtnDef[][] = [
     { id: 'divide', label: '÷', cls: OP    },
   ],
   [
-    { id: '0',   label: '0',   cls: DIGIT },
-    { id: '.',   label: '.',   cls: DIGIT },
-    { id: 'Ans', label: 'Ans', cls: ANS   },
-    { id: 'plus', label: '+',  cls: OP    },
+    { id: '0',    label: '0',   cls: DIGIT },
+    { id: '.',    label: '.',   cls: DIGIT },
+    { id: 'EXP',  label: 'EXP',              cls: FN    },
+    { id: 'plus', label: '+',                cls: OP    },
   ],
   [
-    { id: 'CLEAR', label: 'AC', cls: DEL  },
-    { id: '=',     label: '=',  cls: EQ   },
-    { id: '_gap',  label: '',   cls: 'invisible' },
-    { id: 'minus', label: '−',  cls: OP   },
+    { id: 'negate', label: '(−)', shiftLabel: 'Ans', cls: DIGIT },
+    { id: '=',      label: '=',                      cls: EQ    },
+    { id: 'S_TO_D', label: 'S⇔D',                   cls: FN    },
+    { id: 'minus',  label: '−',                      cls: OP    },
   ],
 ]
 
@@ -135,6 +134,7 @@ export function ButtonGrid({ angleMode, shiftActive, hypActive, onButton }: Prop
     if (btn.id === 'fraction' && shiftActive) return 'reciprocal'
     if (btn.id === 'ncr'      && shiftActive) return 'npr'
     if (btn.id === 'DEL'      && shiftActive) return 'CLEAR'
+    if (btn.id === 'negate'   && shiftActive) return 'Ans'
     return btn.id
   }
 
