@@ -1,16 +1,17 @@
 import { cn } from '@/lib/utils'
+import { DPad } from './DPad'
 
 interface BtnDef {
   id: string; label: string; shiftLabel?: string; hypLabel?: string; shiftHypLabel?: string; cls?: string
 }
 
+// Row 0 handled separately — col 1-2 are SHIFT/DEG_RAD, col 3-4 are the DPad (col-span-2)
+const TOP_ROW: BtnDef[] = [
+  { id: 'SHIFT',   label: 'SHIFT',  cls: 'bg-orange-700' },
+  { id: 'DEG_RAD', label: 'DEG' },
+]
+
 const ROWS: (BtnDef | null)[][] = [
-  [
-    { id: 'SHIFT',   label: 'SHIFT',  cls: 'bg-orange-700' },
-    { id: 'DEG_RAD', label: 'DEG' },
-    { id: 'LEFT',    label: '◄' },
-    { id: 'RIGHT',   label: '►' },
-  ],
   [
     { id: 'log', label: 'log', shiftLabel: '10ˣ' },
     { id: 'ln',  label: 'ln',  shiftLabel: 'eˣ'  },
@@ -24,10 +25,10 @@ const ROWS: (BtnDef | null)[][] = [
     { id: 'exponent', label: 'xʸ' },
   ],
   [
-    { id: 'sqrt',   label: '√',   shiftLabel: 'x²' },
-    { id: 'cbrt',   label: '∛' },
+    { id: 'sqrt',    label: '√',   shiftLabel: 'x²' },
+    { id: 'cbrt',    label: '∛' },
     { id: 'fraction', label: 'a/b' },
-    { id: 'square', label: 'x²' },
+    { id: 'square',  label: 'x²' },
   ],
   [
     { id: 'ncr',         label: 'nCr' },
@@ -100,25 +101,32 @@ export function ButtonGrid({ angleMode, shiftActive, hypActive, onButton }: Prop
     return btn.id
   }
 
+  function renderBtn(btn: BtnDef | null, i: number) {
+    if (!btn) return <div key={i} />
+    return (
+      <button
+        key={btn.id + i}
+        onClick={() => onButton(actionId(btn))}
+        className={cn(
+          'h-12 rounded text-white text-sm font-medium active:scale-95 transition-transform select-none',
+          btn.cls ?? 'bg-zinc-800 hover:bg-zinc-700',
+          btn.id === 'SHIFT' && shiftActive && 'ring-1 ring-orange-400',
+          btn.id === 'HYP'   && hypActive   && 'ring-1 ring-blue-400',
+        )}
+      >
+        {label(btn)}
+      </button>
+    )
+  }
+
   return (
     <div className="grid grid-cols-4 gap-1 p-2 bg-zinc-950 flex-shrink-0">
-      {ROWS.flat().map((btn, i) => {
-        if (!btn) return <div key={i} />
-        return (
-          <button
-            key={btn.id + i}
-            onClick={() => onButton(actionId(btn))}
-            className={cn(
-              'h-12 rounded text-white text-sm font-medium active:scale-95 transition-transform select-none',
-              btn.cls ?? 'bg-zinc-800 hover:bg-zinc-700',
-              btn.id === 'SHIFT' && shiftActive && 'ring-1 ring-orange-400',
-              btn.id === 'HYP'   && hypActive   && 'ring-1 ring-blue-400',
-            )}
-          >
-            {label(btn)}
-          </button>
-        )
-      })}
+      {/* Top row: SHIFT + DEG/RAD take cols 1-2, DPad spans cols 3-4 */}
+      {TOP_ROW.map((btn, i) => renderBtn(btn, i))}
+      <DPad onButton={onButton} />
+
+      {/* Remaining rows */}
+      {ROWS.flat().map((btn, i) => renderBtn(btn, i + TOP_ROW.length))}
     </div>
   )
 }
