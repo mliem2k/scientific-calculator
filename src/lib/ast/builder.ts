@@ -175,3 +175,29 @@ export function deleteCurrent(root: ASTNode[], cursor: Cursor): [ASTNode[], Curs
 export function clearAll(): [ASTNode[], Cursor] {
   return [[], clone(INITIAL_CURSOR)]
 }
+
+export function insertCube(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
+  const [r, c] = wrapPrev(root, cursor, (prev) => ({
+    type: 'exponent', base: prev, exponent: [{ type: 'number', value: '3' }],
+  } as ExponentNode))
+  return [r, c]
+}
+
+export function insertNthRadical(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
+  const [r, c] = spliceInsert(root, cursor, { type: 'radical', degree: [], radicand: [] } as RadicalNode)
+  return [r, { path: [...c.path, { nodeIndex: c.insertAt - 1, slot: 'degree' }], insertAt: 0 }]
+}
+
+export function insertMixed(root: ASTNode[], cursor: Cursor): [ASTNode[], Cursor] {
+  const r = clone(root)
+  const list = getList(r, cursor.path)
+  const wholeNode: ASTNode = { type: 'number', value: '0' }
+  const fracNode: FractionNode = { type: 'fraction', numerator: [], denominator: [] }
+  list.splice(cursor.insertAt, 0, wholeNode, fracNode)
+  const fracIndex = cursor.insertAt + 1
+  return [r, { path: [...cursor.path, { nodeIndex: fracIndex, slot: 'numerator' }], insertAt: 0 }]
+}
+
+export function insertNumberLiteral(root: ASTNode[], cursor: Cursor, value: string): [ASTNode[], Cursor] {
+  return spliceInsert(root, cursor, { type: 'number', value })
+}

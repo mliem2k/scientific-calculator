@@ -4,6 +4,7 @@ import {
   insertFraction, insertExponent, insertRadical, insertSquare,
   insertFunction, insertConstant, insertFactorial, insertNcr, insertNpr,
   insertParen, deleteCurrent, clearAll,
+  insertCube, insertNthRadical, insertMixed, insertNumberLiteral,
 } from './builder'
 import { ASTNode, Cursor, INITIAL_CURSOR } from './types'
 
@@ -201,5 +202,48 @@ describe('clearAll', () => {
     const [nodes, cur] = clearAll()
     expect(nodes).toEqual([])
     expect(cur).toEqual(INITIAL_CURSOR)
+  })
+})
+
+describe('insertCube', () => {
+  it('wraps previous node as base with exponent 3', () => {
+    const init: ASTNode[] = [{ type: 'number', value: '5' }]
+    const [nodes] = insertCube(init, C(1))
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0]).toMatchObject({ type: 'exponent', exponent: [{ type: 'number', value: '3' }] })
+    expect((nodes[0] as any).base).toEqual([{ type: 'number', value: '5' }])
+  })
+
+  it('inserts empty-base exponent^3 when no previous node', () => {
+    const [nodes] = insertCube([], INITIAL_CURSOR)
+    expect(nodes[0]).toMatchObject({ type: 'exponent', base: [], exponent: [{ type: 'number', value: '3' }] })
+  })
+})
+
+describe('insertNthRadical', () => {
+  it('inserts radical with empty degree and cursor in degree slot', () => {
+    const [nodes, cur] = insertNthRadical([], INITIAL_CURSOR)
+    expect(nodes[0]).toMatchObject({ type: 'radical', degree: [], radicand: [] })
+    expect(cur.path).toEqual([{ nodeIndex: 0, slot: 'degree' }])
+    expect(cur.insertAt).toBe(0)
+  })
+})
+
+describe('insertMixed', () => {
+  it('inserts whole-number 0 then empty fraction, cursor starts in numerator', () => {
+    const [nodes, cur] = insertMixed([], INITIAL_CURSOR)
+    expect(nodes).toHaveLength(2)
+    expect(nodes[0]).toMatchObject({ type: 'number', value: '0' })
+    expect(nodes[1]).toMatchObject({ type: 'fraction', numerator: [], denominator: [] })
+    expect(cur.path).toEqual([{ nodeIndex: 1, slot: 'numerator' }])
+    expect(cur.insertAt).toBe(0)
+  })
+})
+
+describe('insertNumberLiteral', () => {
+  it('inserts a NumberNode with the given string value', () => {
+    const [nodes, cur] = insertNumberLiteral([], INITIAL_CURSOR, '3.14')
+    expect(nodes[0]).toEqual({ type: 'number', value: '3.14' })
+    expect(cur.insertAt).toBe(1)
   })
 })
