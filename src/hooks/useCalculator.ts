@@ -16,6 +16,7 @@ const INIT: State = {
   expression: [], cursor: INITIAL_CURSOR, result: null, resultMode: 'decimal',
   angleMode: 'DEG', shiftActive: false, hypActive: false,
   history: loadHistory(), lastResult: null,
+  memory: { A: null, B: null, X: null, Y: null }, stoMode: false,
 }
 
 export function useCalculator() {
