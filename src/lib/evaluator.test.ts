@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { evaluate, toFraction, toMixed, fromMixed } from './evaluator'
+import { evaluate, toMixed, fromMixed } from './evaluator'
 import { ASTNode } from './ast/types'
 
 const num = (v: string): ASTNode => ({ type: 'number', value: v })

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { ASTNode, Cursor, CursorSegment, HistoryEntry, CalculatorState, MemorySlots, INITIAL_CURSOR, FunctionName } from '@/lib/ast/types'
+import { ASTNode, Cursor, CursorSegment, HistoryEntry, CalculatorState, INITIAL_CURSOR, FunctionName } from '@/lib/ast/types'
 import {
   insertDigit, insertDecimalPoint, insertOperator, insertFraction,
   insertExponent, insertRadical, insertSquare, insertFunction,

@@ -80,7 +80,7 @@ export function insertFunction(root: ASTNode[], cursor: Cursor, name: FunctionNa
   return [r, { path: [...c.path, { nodeIndex: c.insertAt - 1, slot: 'argument' }], insertAt: 0 }]
 }
 
-export function insertConstant(root: ASTNode[], cursor: Cursor, name: 'pi' | 'e' | 'Ans'): [ASTNode[], Cursor] {
+export function insertConstant(root: ASTNode[], cursor: Cursor, name: 'pi' | 'e' | 'Ans' | 'A' | 'B' | 'X' | 'Y'): [ASTNode[], Cursor] {
   return spliceInsert(root, cursor, { type: 'constant', name })
 }
 
