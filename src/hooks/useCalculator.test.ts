@@ -85,4 +85,56 @@ describe('useCalculator', () => {
     act(() => result.current.handleRestore(entry))
     expect(result.current.state.result).toBe('9')
   })
+
+  it('Sto sets stoMode true', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleButton('Sto'))
+    expect(result.current.state.stoMode).toBe(true)
+  })
+
+  it('pressing a non-memory button cancels stoMode', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleButton('Sto'))
+    act(() => result.current.handleButton('5'))
+    expect(result.current.state.stoMode).toBe(false)
+  })
+
+  it('stores result to memory slot A after Sto + A', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleButton('5'))
+    act(() => result.current.handleButton('='))
+    act(() => result.current.handleButton('Sto'))
+    act(() => result.current.handleButton('A'))
+    expect(result.current.state.memory.A).toBe(5)
+    expect(result.current.state.stoMode).toBe(false)
+  })
+
+  it('inserts memory constant when A pressed without stoMode', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleButton('A'))
+    expect(result.current.state.expression[0]).toMatchObject({ type: 'constant', name: 'A' })
+  })
+
+  it('handleCursorJump moves cursor to given path+insertAt', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleCursorJump([{ nodeIndex: 0, slot: 'numerator' }], 2))
+    expect(result.current.state.cursor).toEqual({
+      path: [{ nodeIndex: 0, slot: 'numerator' }],
+      insertAt: 2,
+    })
+  })
+
+  it('cube action wraps previous node in exponent^3', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleButton('4'))
+    act(() => result.current.handleButton('cube'))
+    expect(result.current.state.expression[0]).toMatchObject({ type: 'exponent' })
+  })
+
+  it('AC clears expression', () => {
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.handleButton('5'))
+    act(() => result.current.handleButton('AC'))
+    expect(result.current.state.expression).toEqual([])
+  })
 })
