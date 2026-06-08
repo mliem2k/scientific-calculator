@@ -6,16 +6,17 @@ const LABELS: Record<string, string> = {
   asin: 'sin⁻¹', acos: 'cos⁻¹', atan: 'tan⁻¹',
   sinh: 'sinh', cosh: 'cosh', tanh: 'tanh',
   asinh: 'sinh⁻¹', acosh: 'cosh⁻¹', atanh: 'tanh⁻¹',
-  log: 'log', ln: 'ln', pow10: '10ˣ', exp: 'eˣ',
+  log: 'log', ln: 'ln', pow10: '10ˣ', exp: 'eˣ', abs: 'abs',
 }
 
-interface Props { node: FunctionNode; cursor: Cursor; path: CursorSegment[]; nodeIndex: number }
+type JumpFn = (path: CursorSegment[], insertAt: number) => void
+interface Props { node: FunctionNode; cursor: Cursor; path: CursorSegment[]; nodeIndex: number; onCursorJump?: JumpFn }
 
-export function FunctionNodeView({ node, cursor, path, nodeIndex }: Props) {
+export function FunctionNodeView({ node, cursor, path, nodeIndex, onCursorJump }: Props) {
   return (
     <span className="inline-flex items-center">
       <span className="text-sm opacity-90 mr-px">{LABELS[node.name] ?? node.name}(</span>
-      <ASTRenderer nodes={node.argument} cursor={cursor} path={[...path, { nodeIndex, slot: 'argument' }]} />
+      <ASTRenderer nodes={node.argument} cursor={cursor} path={[...path, { nodeIndex, slot: 'argument' }]} onCursorJump={onCursorJump} />
       <span className="text-sm opacity-90 ml-px">)</span>
     </span>
   )
