@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ButtonGrid } from './ButtonGrid'
 
-const props = { angleMode: 'DEG' as const, shiftActive: false, hypActive: false, onButton: vi.fn() }
+const props = { shiftActive: false, onButton: vi.fn(), onPaste: vi.fn() }
 
 describe('ButtonGrid', () => {
   it('renders = button', () => {
@@ -17,23 +17,27 @@ describe('ButtonGrid', () => {
     expect(onButton).toHaveBeenCalledWith('7')
   })
 
-  it('shows sin label when shift inactive', () => {
+  it('shows sin( label when shift inactive', () => {
     render(<ButtonGrid {...props} />)
-    expect(screen.getByText('sin')).toBeInTheDocument()
+    expect(screen.getByText('sin(')).toBeInTheDocument()
   })
 
-  it('shows sin⁻¹ label when shift active', () => {
-    render(<ButtonGrid {...props} shiftActive />)
-    expect(screen.getByText('sin⁻¹')).toBeInTheDocument()
+  it('shows asin action when shift active and sin( pressed', () => {
+    const onButton = vi.fn()
+    render(<ButtonGrid {...props} shiftActive onButton={onButton} />)
+    fireEvent.click(screen.getByText('sin⁻¹('))
+    expect(onButton).toHaveBeenCalledWith('asin')
   })
 
-  it('shows sinh label when hyp active', () => {
-    render(<ButtonGrid {...props} hypActive />)
-    expect(screen.getByText('sinh')).toBeInTheDocument()
+  it('renders AC button', () => {
+    render(<ButtonGrid {...props} />)
+    expect(screen.getByText('AC')).toBeInTheDocument()
   })
 
-  it('shows DEG label matching angleMode', () => {
-    render(<ButtonGrid {...props} angleMode="RAD" />)
-    expect(screen.getByText('RAD')).toBeInTheDocument()
+  it('AC calls onButton with AC', () => {
+    const onButton = vi.fn()
+    render(<ButtonGrid {...props} onButton={onButton} />)
+    fireEvent.click(screen.getByText('AC'))
+    expect(onButton).toHaveBeenCalledWith('AC')
   })
 })
