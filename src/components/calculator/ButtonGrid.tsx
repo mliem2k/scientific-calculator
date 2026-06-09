@@ -1,11 +1,11 @@
 import { cn } from '@/lib/utils'
 
-const DIGIT = 'bg-zinc-900 border border-zinc-700/70 text-white'
-const FN    = 'bg-zinc-950 border border-zinc-800 text-zinc-300'
-const OP    = 'bg-zinc-900 border border-zinc-700/70 text-sky-300'
-const DEL   = 'bg-zinc-900 border border-zinc-700/70 text-red-400'
-const AC    = 'bg-zinc-900 border border-zinc-700/70 text-red-500 font-semibold'
-const EQ    = 'bg-blue-700 border border-blue-600 text-white'
+const DIGIT = 'bg-black text-white'
+const FN    = 'bg-black text-white'
+const OP    = 'bg-black text-white'
+const DEL   = 'bg-black text-red-500 font-semibold'
+const AC    = 'bg-black text-red-500 font-semibold'
+const EQ    = 'bg-white text-black font-semibold'
 
 interface BtnDef {
   id: string
@@ -120,27 +120,29 @@ export function ButtonGrid({ shiftActive, onButton, onPaste }: Props) {
         key={key}
         onClick={() => handleClick(btn)}
         className={cn(
-          'rounded text-sm font-medium select-none',
-          'active:scale-95 active:brightness-75 transition-all duration-75',
-          secondary
-            ? 'h-12 flex flex-col items-center justify-center gap-0'
-            : 'h-11 flex items-center justify-center',
+          'flex-1 flex flex-col items-center justify-center select-none',
+          'border-r border-b border-zinc-800',
+          'active:bg-zinc-900 transition-colors duration-75',
           btn.cls,
         )}
       >
         {secondary && (
-          <span className="text-[7px] text-orange-400 leading-none mb-0.5 font-normal tracking-wide">
+          <span className="text-[8px] text-zinc-500 leading-none mb-0.5 font-normal">
             {secondary}
           </span>
         )}
-        <span className="leading-none">{displayLabel(btn)}</span>
+        <span className="text-sm font-medium leading-none">{displayLabel(btn)}</span>
       </button>
     )
   }
 
   return (
-    <div className="grid grid-cols-5 gap-[3px] p-2 bg-zinc-950 flex-shrink-0">
-      {ROWS.flat().map((btn, i) => renderBtn(btn, btn.id + i))}
+    <div className="flex-1 flex flex-col border-l border-t border-zinc-800 bg-black">
+      {ROWS.map((row, rowIdx) => (
+        <div key={rowIdx} className="flex-1 flex">
+          {row.map((btn, i) => renderBtn(btn, btn.id + i))}
+        </div>
+      ))}
     </div>
   )
 }
