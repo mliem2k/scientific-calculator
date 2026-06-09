@@ -90,7 +90,7 @@ export function Display({
             className="self-end mt-1 select-none active:opacity-60 transition-opacity"
             aria-label="copy result"
           >
-            <span className={copied ? 'font-display text-base text-green-400' : 'font-display text-base text-zinc-400'}>
+            <span className={copied ? 'font-display text-2xl text-green-400' : 'font-display text-2xl text-zinc-400'}>
               {copied ? '✓ copied' : result}
             </span>
           </button>
