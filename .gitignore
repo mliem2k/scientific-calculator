@@ -1,1 +1,4 @@
 node_modules
+dist/
+.playwright-mcp/
+tsconfig.node.tsbuildinfo
