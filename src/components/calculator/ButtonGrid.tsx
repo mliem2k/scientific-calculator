@@ -122,7 +122,8 @@ export function ButtonGrid({ shiftActive, onButton, onPaste }: Props) {
         className={cn(
           'flex-1 flex flex-col items-center justify-center select-none',
           'border-r border-b border-zinc-800',
-          'active:bg-zinc-900 transition-colors duration-75',
+          btn.id === '=' ? 'active:bg-zinc-100' : 'active:bg-zinc-900',
+          'transition-colors duration-75',
           btn.cls,
         )}
       >
