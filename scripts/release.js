@@ -13,13 +13,13 @@ const apk = 'build/app/outputs/flutter-apk/app-release.apk';
 const renamedApk = `build/app/outputs/flutter-apk/scientific-calculator-${tag}.apk`;
 const apkAsset = `${renamedApk}#scientific-calculator-${tag}.apk`;
 
-for (const tool of ['flutter', 'gh']) {
+for (const tool of ['fvm', 'gh']) {
   const found = await $`which ${tool}`.quiet().nothrow();
   if (found.exitCode !== 0) { console.error(`${tool} not found`); process.exit(1); }
 }
 
 console.log(`Building nightly APK (build ${build})...`);
-await $`flutter build apk --release --build-number=${build} --dart-define=BUILD_NUMBER=${build}`;
+await $`fvm flutter build apk --release --build-number=${build} --dart-define=BUILD_NUMBER=${build}`;
 await $`cp ${apk} ${renamedApk}`;
 
 // Delete any existing same-day releases (tags matching nightly-YYYYMMDD-*).
