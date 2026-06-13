@@ -7,10 +7,11 @@ const int _buildNumber = int.fromEnvironment('BUILD_NUMBER', defaultValue: 0);
 
 const _repo = 'mliem2k/scientific-calculator';
 
-// Use /releases?per_page=1 instead of /releases/latest.
-// /releases/latest returns 404 for repos that only have prerelease releases,
-// which would make every check silently report "up to date".
-const _apiUrl = 'https://api.github.com/repos/$_repo/releases?per_page=1';
+// Fetch up to 10 recent releases and pick the one with the highest embedded
+// build number. Using per_page=1 is fragile because GitHub CDN caching or
+// eventual consistency can return a stale result as the first item; scanning
+// the batch is order-independent and handles same-day re-releases correctly.
+const _apiUrl = 'https://api.github.com/repos/$_repo/releases?per_page=10';
 
 class UpdateInfo {
   final String tagName;
@@ -26,7 +27,8 @@ Future<UpdateInfo?> checkForUpdate() async {
     final req = await client.getUrl(Uri.parse(_apiUrl));
     req.headers
       ..set('User-Agent', 'scientific-calculator/$_buildNumber')
-      ..set('Accept', 'application/vnd.github+json');
+      ..set('Accept', 'application/vnd.github+json')
+      ..set('Cache-Control', 'no-cache');
     final res = await req.close();
     if (res.statusCode != 200) return null;
 
@@ -34,30 +36,25 @@ Future<UpdateInfo?> checkForUpdate() async {
     final list = jsonDecode(body) as List<dynamic>;
     if (list.isEmpty) return null;
 
-    final json = list[0] as Map<String, dynamic>;
-    final tagName = json['tag_name'] as String?;
-    final htmlUrl = json['html_url'] as String?;
-    if (tagName == null || htmlUrl == null) return null;
+    // Scan all returned releases; pick the one with the highest build number.
+    // This is robust to out-of-order results and in-flight same-day cleanups.
+    int bestBuild = _buildNumber;
+    UpdateInfo? best;
 
-    // Primary: parse build number from tag "nightly-YYYYMMDD-BUILDNUM".
-    // This is exact and immune to timestamp drift between build and release.
-    final latestBuild = _parseBuildFromTag(tagName);
-    if (latestBuild != null) {
-      return latestBuild > _buildNumber
-          ? UpdateInfo(tagName: tagName, releaseUrl: htmlUrl)
-          : null;
+    for (final item in list) {
+      final json = item as Map<String, dynamic>;
+      final tagName = json['tag_name'] as String?;
+      final htmlUrl = json['html_url'] as String?;
+      if (tagName == null || htmlUrl == null) continue;
+
+      final build = _parseBuildFromTag(tagName);
+      if (build != null && build > bestBuild) {
+        bestBuild = build;
+        best = UpdateInfo(tagName: tagName, releaseUrl: htmlUrl);
+      }
     }
 
-    // Fallback for old-format tags without an embedded build number.
-    // A 300-second grace period absorbs the ~40s gap between _buildNumber
-    // (captured at script start) and published_at (set when gh release create
-    // finishes), preventing false "update available" for the current build.
-    final publishedAt = json['published_at'] as String?;
-    if (publishedAt == null) return null;
-    final latestTs = DateTime.parse(publishedAt).millisecondsSinceEpoch ~/ 1000;
-    return latestTs > _buildNumber + 300
-        ? UpdateInfo(tagName: tagName, releaseUrl: htmlUrl)
-        : null;
+    return best;
   } catch (_) {
     return null;
   } finally {
