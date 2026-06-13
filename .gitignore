@@ -1,4 +1,18 @@
-node_modules
+# Flutter
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+
+# IDE
+.idea/
+
+# Web / Node
+node_modules/
 dist/
-.playwright-mcp/
 tsconfig.node.tsbuildinfo
+.playwright-mcp/
+
+# Superpowers plans (never commit)
+docs/superpowers/plans/
