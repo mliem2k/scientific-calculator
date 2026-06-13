@@ -46,4 +46,18 @@ describe('FeatureSection', () => {
     });
     expect(html).toContain('md:order-last');
   });
+
+  it('applies md:order-first class when imageRight is false', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(FeatureSection, {
+      props: {
+        headline: 'Test',
+        body: 'Body',
+        imageSrc: '/screenshots/screenshot-1.webp',
+        imageAlt: 'Alt text',
+        imageRight: false,
+      },
+    });
+    expect(html).toContain('md:order-first');
+  });
 });
