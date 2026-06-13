@@ -194,7 +194,7 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: ct.opText,
           letterSpacing: 1.2,
@@ -299,7 +299,7 @@ class _ThemeCard extends StatelessWidget {
                       name,
                       style: TextStyle(
                         color: preview.expressionText,
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

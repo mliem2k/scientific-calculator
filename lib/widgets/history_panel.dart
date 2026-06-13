@@ -36,7 +36,7 @@ class HistoryPanel extends StatelessWidget {
               ),
               subtitle: Text(
                 exprText,
-                style: TextStyle(color: ct.secondaryLabel, fontSize: 12),
+                style: TextStyle(color: ct.secondaryLabel, fontSize: 15),
                 overflow: TextOverflow.ellipsis,
               ),
               onTap: () => controller.handleRestore(entry),

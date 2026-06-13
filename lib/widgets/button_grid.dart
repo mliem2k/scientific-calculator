@@ -244,7 +244,7 @@ class _CalcButtonState extends State<_CalcButton> {
                 child: Text(
                   btn.shiftLabel!,
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 10,
                     color: ct.secondaryLabel,
                   ),
                 ),
@@ -253,7 +253,7 @@ class _CalcButtonState extends State<_CalcButton> {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 17,
                   color: labelColor,
                 ),
                 textAlign: TextAlign.center,

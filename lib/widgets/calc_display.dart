@@ -82,7 +82,7 @@ class CalcDisplay extends StatelessWidget {
                         alignment: Alignment.centerRight,
                         child: Text(
                           '0',
-                          style: TextStyle(color: ct.buttonBorder, fontSize: 28),
+                          style: TextStyle(color: ct.buttonBorder, fontSize: 32),
                         ),
                       );
                     }
@@ -92,7 +92,7 @@ class CalcDisplay extends StatelessWidget {
                       child: DefaultTextStyle(
                         style: TextStyle(
                           color: ct.expressionText,
-                          fontSize: 28,
+                          fontSize: 32,
                         ),
                         child: ASTRenderer(
                           nodes: data.expression,
@@ -116,7 +116,7 @@ class CalcDisplay extends StatelessWidget {
                         result,
                         style: TextStyle(
                           color: ct.resultText,
-                          fontSize: 24,
+                          fontSize: 28,
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -155,7 +155,7 @@ class _DisplayStrip extends StatelessWidget {
               child: Text(
                 '≡',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 22,
                   color: shiftActive ? ct.shiftActiveColor : ct.secondaryLabel,
                   fontWeight:
                       shiftActive ? FontWeight.bold : FontWeight.normal,
@@ -178,7 +178,7 @@ class _DisplayStrip extends StatelessWidget {
               child: Text(
                 '◁',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 17,
                   color: result != null ? ct.secondaryLabel : ct.buttonBorder,
                 ),
               ),
@@ -195,7 +195,7 @@ class _DisplayStrip extends StatelessWidget {
               child: Text(
                 angleMode == AngleMode.deg ? 'DEG' : 'RAD',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: angleMode == AngleMode.rad
                       ? const Color(0xFF4FC3F7)
                       : ct.secondaryLabel,
@@ -227,7 +227,7 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 9, color: Colors.white),
+        style: const TextStyle(fontSize: 11, color: Colors.white),
       ),
     );
   }
