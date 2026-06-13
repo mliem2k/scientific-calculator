@@ -17,7 +17,7 @@ for (const tool of ['flutter', 'gh']) {
 }
 
 console.log(`Building nightly APK (build ${build})...`);
-await $`flutter build apk --release --build-number=${build}`;
+await $`flutter build apk --release --build-number=${build} --dart-define=BUILD_NUMBER=${build}`;
 
 console.log(`Creating GitHub Release ${tag}...`);
 await $`gh release create ${tag} --title ${'Nightly ' + dateStr} --notes ${'Automated nightly build (' + dateStr + ', build ' + build + ').'} --prerelease ${apkAsset}`;

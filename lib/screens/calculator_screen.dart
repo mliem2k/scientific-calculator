@@ -1,13 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/calculator_controller.dart';
+import '../services/updater.dart';
 import '../theme/calc_theme.dart';
 import '../widgets/button_grid.dart';
 import '../widgets/calc_display.dart';
 import 'settings_screen.dart';
 
-class CalculatorScreen extends StatelessWidget {
+class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
+
+  @override
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkForUpdate());
+  }
+
+  Future<void> _checkForUpdate() async {
+    final info = await checkForUpdate();
+    if (info == null || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Update available: ${info.tagName}'),
+        duration: const Duration(seconds: 10),
+        action: SnackBarAction(
+          label: 'Download',
+          onPressed: () => launchUrl(
+            Uri.parse(info.releaseUrl),
+            mode: LaunchMode.externalApplication,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
