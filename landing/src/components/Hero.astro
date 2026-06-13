@@ -4,7 +4,7 @@ interface Props {
 }
 const { heroImageSrc } = Astro.props;
 ---
-<section class="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-24 px-6 overflow-hidden">
+<section class="relative min-h-screen flex flex-col items-center justify-center pt-28 pb-24 px-6 overflow-hidden">
   <!-- Indigo glow -->
   <div
     class="pointer-events-none absolute inset-0"
@@ -66,7 +66,7 @@ const { heroImageSrc } = Astro.props;
         <div class="absolute top-3.5 left-1/2 -translate-x-1/2 h-5 w-20 rounded-b-2xl bg-black z-10"></div>
         <img
           src={heroImageSrc}
-          alt="Scientific Calculator showing natural textbook display"
+          alt=""
           class="block w-[240px] rounded-[2.25rem] md:w-[280px]"
           loading="eager"
           fetchpriority="high"
