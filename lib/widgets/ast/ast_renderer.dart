@@ -198,23 +198,27 @@ class _FractionWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DefaultTextStyle(
-            style: currentStyle.copyWith(fontSize: childSize),
-            child: ASTRenderer(
-              nodes: node.numerator,
-              cursor: cursor,
-              path: numPath,
-              onCursorJump: onCursorJump,
+          Center(
+            child: DefaultTextStyle(
+              style: currentStyle.copyWith(fontSize: childSize),
+              child: ASTRenderer(
+                nodes: node.numerator,
+                cursor: cursor,
+                path: numPath,
+                onCursorJump: onCursorJump,
+              ),
             ),
           ),
-          Container(height: 1, color: ct.expressionText),
-          DefaultTextStyle(
-            style: currentStyle.copyWith(fontSize: childSize),
-            child: ASTRenderer(
-              nodes: node.denominator,
-              cursor: cursor,
-              path: denPath,
-              onCursorJump: onCursorJump,
+          Container(height: 2, color: ct.expressionText),
+          Center(
+            child: DefaultTextStyle(
+              style: currentStyle.copyWith(fontSize: childSize),
+              child: ASTRenderer(
+                nodes: node.denominator,
+                cursor: cursor,
+                path: denPath,
+                onCursorJump: onCursorJump,
+              ),
             ),
           ),
         ],

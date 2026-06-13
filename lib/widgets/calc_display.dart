@@ -93,7 +93,7 @@ class CalcDisplay extends StatelessWidget {
                         style: TextStyle(
                           color: ct.expressionText,
                           fontSize: 40,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                         ),
                         child: ASTRenderer(
                           nodes: data.expression,
