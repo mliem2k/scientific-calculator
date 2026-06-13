@@ -1,0 +1,37 @@
+---
+interface Shot {
+  src: string;
+  alt: string;
+  label: string;
+}
+interface Props {
+  shots: Shot[];
+}
+const { shots } = Astro.props;
+---
+<section class="border-t border-[#18181b] bg-black px-6 py-20">
+  <div class="mx-auto max-w-6xl">
+    <h2 class="mb-3 text-center text-3xl font-bold tracking-tight text-white md:text-4xl">
+      Every screen, dialled in.
+    </h2>
+    <p class="mx-auto mb-14 max-w-md text-center text-[#71717a]">
+      Four themes. Tap-to-edit expressions. Full history.
+    </p>
+
+    <div class="flex flex-wrap justify-center gap-5">
+      {shots.map(s => (
+        <div class="flex flex-col items-center gap-3">
+          <div class="rounded-[2rem] border border-[#27272a] bg-[#0a0a0a] p-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+            <img
+              src={s.src}
+              alt={s.alt}
+              class="block w-[150px] rounded-[1.5rem] md:w-[165px]"
+              loading="lazy"
+            />
+          </div>
+          <span class="text-xs font-medium text-[#52525b]">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

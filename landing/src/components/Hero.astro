@@ -1,23 +1,77 @@
 ---
+interface Props {
+  heroImageSrc: string;
+}
+const { heroImageSrc } = Astro.props;
 ---
-<section class="relative bg-black py-40 px-6 text-center overflow-hidden">
-  <!-- radial glow -->
-  <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-    <div class="w-[600px] h-[600px] rounded-full bg-white opacity-[0.04] blur-[120px]"></div>
+<section class="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-24 px-6 overflow-hidden">
+  <!-- Indigo glow -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    aria-hidden="true"
+  >
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
+         style="background:radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)">
+    </div>
   </div>
 
-  <div class="relative z-10">
-    <h1 class="text-6xl font-bold mb-6 bg-gradient-to-b from-white to-[#A1A1AA] bg-clip-text text-transparent leading-tight">
-      Scientific Calculator
+  <div class="relative z-10 flex flex-col items-center text-center max-w-2xl">
+    <!-- Badge -->
+    <div class="mb-8 inline-flex items-center gap-2 rounded-full border border-[#27272a] bg-[#0f0f0f] px-3.5 py-1.5 text-xs font-medium text-[#a1a1aa]">
+      <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e]"></span>
+      Free · Open source · Android
+    </div>
+
+    <!-- Headline -->
+    <h1 class="mb-5 text-5xl font-bold leading-[1.08] tracking-tight text-white md:text-7xl">
+      Math the way<br />
+      <span class="text-[#818cf8]">you write it.</span>
     </h1>
-    <p class="text-xl text-[#71717A] mb-12 max-w-sm mx-auto leading-relaxed">
-      Natural textbook display. For Android.
+
+    <!-- Sub -->
+    <p class="mb-10 max-w-sm text-base text-[#71717a] leading-relaxed md:text-lg">
+      Natural textbook notation for fractions, powers, and trig.
+      Scientific functions. AMOLED black.
     </p>
-    <a
-      href="https://github.com/mliem2k/scientific-calculator/releases/latest"
-      class="inline-block bg-white text-black font-semibold text-lg px-10 py-4 rounded-xl shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.25)] hover:scale-105 transition-all duration-200"
-    >
-      Download APK
-    </a>
+
+    <!-- CTAs -->
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <a
+        href="https://github.com/mliem2k/scientific-calculator/releases"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-black transition-colors hover:bg-[#e4e4e7]"
+      >
+        Download APK
+      </a>
+      <a
+        href="https://github.com/mliem2k/scientific-calculator"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center justify-center gap-2 rounded-xl border border-[#27272a] bg-[#0f0f0f] px-8 py-3.5 text-base font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+      >
+        View on GitHub
+      </a>
+    </div>
+
+    <!-- Phone mockup -->
+    <div class="relative mt-16">
+      <!-- Glow halo -->
+      <div
+        class="pointer-events-none absolute -inset-6 rounded-[3.5rem] blur-2xl"
+        style="background:rgba(99,102,241,0.10)"
+        aria-hidden="true"
+      ></div>
+      <!-- Frame -->
+      <div class="relative rounded-[2.75rem] border border-[#2e2e32] bg-[#0a0a0a] p-3 shadow-[0_48px_120px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <!-- Pill notch -->
+        <div class="absolute top-3.5 left-1/2 -translate-x-1/2 h-5 w-20 rounded-b-2xl bg-black z-10"></div>
+        <img
+          src={heroImageSrc}
+          alt="Scientific Calculator showing natural textbook display"
+          class="block w-[240px] rounded-[2.25rem] md:w-[280px]"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
   </div>
 </section>

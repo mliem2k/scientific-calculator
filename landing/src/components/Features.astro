@@ -1,0 +1,30 @@
+---
+const features = [
+  {
+    icon: "𝑓(x)",
+    title: "Textbook notation",
+    body: "Fractions, powers, roots, and trig display exactly as your textbook writes them — not as a/b.",
+  },
+  {
+    icon: "◼",
+    title: "AMOLED black",
+    body: "Pure black pixels switch off on OLED screens, saving real battery every time you calculate.",
+  },
+  {
+    icon: "∑",
+    title: "Fully scientific",
+    body: "sin, cos, tan, log, ln, √, xⁿ, factorials, and more. Everything you need for maths and physics.",
+  },
+];
+---
+<section class="border-t border-[#18181b] bg-[#040404] px-6 py-20">
+  <div class="mx-auto max-w-5xl grid grid-cols-1 gap-4 md:grid-cols-3">
+    {features.map(f => (
+      <div class="rounded-2xl border border-[#18181b] bg-[#0a0a0a] p-6 transition-colors hover:border-[#27272a]">
+        <div class="mb-4 text-2xl font-mono text-[#818cf8]">{f.icon}</div>
+        <h3 class="mb-2 text-base font-semibold text-white">{f.title}</h3>
+        <p class="text-sm text-[#71717a] leading-relaxed">{f.body}</p>
+      </div>
+    ))}
+  </div>
+</section>
