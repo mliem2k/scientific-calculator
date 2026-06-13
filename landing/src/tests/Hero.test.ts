@@ -1,4 +1,4 @@
-import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import { experimental_AstroContainer as AstroContainer } from 'astro/container'; // experimental_ prefix is Astro 6.x's stable container API name
 import { describe, it, expect } from 'vitest';
 import Hero from '../components/Hero.astro';
 
