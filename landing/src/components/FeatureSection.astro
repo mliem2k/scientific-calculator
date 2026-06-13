@@ -1,0 +1,27 @@
+---
+interface Props {
+  headline: string;
+  body: string;
+  imageSrc: string;
+  imageAlt: string;
+  imageRight: boolean;
+}
+
+const { headline, body, imageSrc, imageAlt, imageRight } = Astro.props;
+---
+<section class="bg-black border-t border-[#27272A] py-20 px-6">
+  <div class={`max-w-5xl mx-auto flex flex-col gap-12 items-center md:grid md:grid-cols-2 md:gap-16 ${imageRight ? '' : 'md:[&>*:first-child]:order-last'}`}>
+    <div class={`flex justify-center ${imageRight ? 'md:order-last' : ''}`}>
+      <img
+        src={imageSrc}
+        alt={imageAlt}
+        class="max-w-[280px] w-full object-contain"
+        loading="lazy"
+      />
+    </div>
+    <div class="flex flex-col justify-center text-center md:text-left">
+      <h2 class="text-4xl font-bold text-white mb-4">{headline}</h2>
+      <p class="text-lg text-[#A1A1AA] leading-relaxed">{body}</p>
+    </div>
+  </div>
+</section>
