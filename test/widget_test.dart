@@ -71,12 +71,16 @@ void main() {
       expect(icon.size, 20.0);
     });
 
-    testWidgets('SHIFT toggle is 28px', (tester) async {
+    testWidgets('SHIFT toggle is 28px w500 (inactive)', (tester) async {
       await tester.pumpWidget(_wrapCalcDisplay());
       await tester.pump();
       final text = tester.widget<Text>(find.text('≡'));
       expect(text.style?.fontSize, 28.0);
+      expect(text.style?.fontWeight, FontWeight.w500);
     });
+
+    // TODO: result text (34px w500) and copy button (20px) require non-null
+    // calculator result to appear in the widget tree; tracked as follow-up.
 
     testWidgets('DEG label is 15px w700', (tester) async {
       await tester.pumpWidget(_wrapCalcDisplay());
