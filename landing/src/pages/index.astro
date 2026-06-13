@@ -1,17 +1,51 @@
 ---
-import '../styles/global.css';
----
+import Hero from '../components/Hero.astro';
+import FeatureSection from '../components/FeatureSection.astro';
+import Footer from '../components/Footer.astro';
 
+import screenshot1 from '../assets/screenshots/screenshot-1.webp';
+import screenshot3 from '../assets/screenshots/screenshot-3.webp';
+import screenshot4 from '../assets/screenshots/screenshot-4.webp';
+import screenshot5 from '../assets/screenshots/screenshot-5.webp';
+---
+<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Scientific Calculator — natural textbook display for Android." />
+    <title>Scientific Calculator</title>
+  </head>
+  <body class="bg-black">
+    <Hero />
+    <FeatureSection
+      headline="Faster than the rest."
+      body="No more pressing buttons. Tap to edit. Pinch to zoom. Fly through long equations."
+      imageSrc={screenshot1.src}
+      imageAlt="Calculator showing tap-to-edit with finger"
+      imageRight={true}
+    />
+    <FeatureSection
+      headline="Extreme Battery Life."
+      body="You use your calculator a lot. Use it 2x longer with our AMOLED theme."
+      imageSrc={screenshot3.src}
+      imageAlt="Calculator in AMOLED black theme"
+      imageRight={false}
+    />
+    <FeatureSection
+      headline="Share and discuss."
+      body="Share equations with Favorites and History. Share them with friends or classmates."
+      imageSrc={screenshot4.src}
+      imageAlt="Calculator history panel showing equations"
+      imageRight={true}
+    />
+    <FeatureSection
+      headline="Always with you."
+      body="Leave your bulky scientific calculator at home. Always in the palm of your hand."
+      imageSrc={screenshot5.src}
+      imageAlt="Full calculator interface"
+      imageRight={false}
+    />
+    <Footer />
+  </body>
 </html>
