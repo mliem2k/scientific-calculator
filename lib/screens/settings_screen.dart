@@ -1,12 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/settings_controller.dart';
 import '../core/ast/types.dart';
+import '../services/updater.dart';
 import '../theme/calc_theme.dart';
 import '../theme/themes.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _checking = false;
+
+  Future<void> _checkForUpdate() async {
+    setState(() => _checking = true);
+    final info = await checkForUpdate();
+    if (!mounted) return;
+    setState(() => _checking = false);
+    if (info == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('App is up to date.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Update available: ${info.tagName}'),
+          duration: const Duration(seconds: 10),
+          action: SnackBarAction(
+            label: 'Download',
+            onPressed: () => launchUrl(
+              Uri.parse(info.releaseUrl),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +152,29 @@ class SettingsScreen extends StatelessWidget {
             value: settings.hapticFeedback,
             onChanged: settings.setHapticFeedback,
           ),
+          _SectionHeader(label: 'ABOUT', ct: ct),
+          ListTile(
+            tileColor: ct.buttonBg,
+            textColor: ct.expressionText,
+            iconColor: ct.expressionText,
+            title: const Text('Check for updates'),
+            subtitle: Text(
+              'Compare with latest GitHub release',
+              style: TextStyle(color: ct.resultText),
+            ),
+            trailing: _checking
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: ct.shiftActiveColor,
+                    ),
+                  )
+                : Icon(Icons.system_update_outlined, color: ct.expressionText),
+            onTap: _checking ? null : _checkForUpdate,
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );

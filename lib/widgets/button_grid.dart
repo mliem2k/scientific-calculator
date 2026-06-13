@@ -129,25 +129,33 @@ class ButtonGrid extends StatelessWidget {
       child: Selector<CalculatorController, bool>(
         selector: (_, c) => c.state.shiftActive,
         builder: (context, shiftActive, _) {
-          return Column(
-            children: [
-              for (final row in _rows)
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final btn in row)
-                        Expanded(
-                          child: _CalcButton(
-                            btn: btn,
-                            shiftActive: shiftActive,
-                            onTap: _handleTap,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-            ],
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final rowH = constraints.maxHeight.isFinite
+                  ? constraints.maxHeight / _rows.length
+                  : 60.0;
+              return Column(
+                children: [
+                  for (final row in _rows)
+                    SizedBox(
+                      height: rowH,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final btn in row)
+                            Expanded(
+                              child: _CalcButton(
+                                btn: btn,
+                                shiftActive: shiftActive,
+                                onTap: _handleTap,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
           );
         },
       ),
