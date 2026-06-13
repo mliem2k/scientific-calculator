@@ -22,9 +22,10 @@ console.log(`Building nightly APK (build ${build})...`);
 await $`fvm flutter build apk --release --build-number=${build} --dart-define=BUILD_NUMBER=${build}`;
 await $`cp ${apk} ${renamedApk}`;
 
-// Delete any existing same-day releases (tags matching nightly-YYYYMMDD-*).
-// Each run creates a distinct tag, so we clean up stale same-day builds here.
-const sameDayPrefix = `nightly-${dateStr}-`;
+// Delete any existing same-day releases. Prefix is nightly-YYYYMMDD (no trailing
+// dash) so it also catches old-format tags like "nightly-20260613" that predate
+// the embedded build number format.
+const sameDayPrefix = `nightly-${dateStr}`;
 const listJson = await $`gh release list --json tagName`.text().catch(() => '[]');
 const allReleases = JSON.parse(listJson);
 for (const { tagName: t } of allReleases) {
