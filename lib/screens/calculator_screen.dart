@@ -51,15 +51,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CalcDisplay(
-              onSettings: () => _openSettings(context),
+            // IntrinsicHeight caps the display at its natural content height.
+            // Without it, Row(crossAxisAlignment: stretch) inside CalcDisplay
+            // uses constraints.maxHeight (full screen) as the tight child height,
+            // which makes CalcDisplay consume the entire screen and leave zero
+            // height for ButtonGrid.
+            IntrinsicHeight(
+              child: CalcDisplay(
+                onSettings: () => _openSettings(context),
+              ),
             ),
             Expanded(
-              child: RepaintBoundary(
-                child: ButtonGrid(
-                  onButton: controller.handleButton,
-                  onPaste: controller.handlePaste,
-                ),
+              child: ButtonGrid(
+                onButton: controller.handleButton,
+                onPaste: controller.handlePaste,
               ),
             ),
           ],
