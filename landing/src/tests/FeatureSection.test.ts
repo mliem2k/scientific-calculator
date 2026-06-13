@@ -32,4 +32,18 @@ describe('FeatureSection', () => {
     expect(html).toContain('Calculator tap-to-edit');
     expect(html).toContain('screenshot-1.webp');
   });
+
+  it('applies md:order-last class when imageRight is true', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(FeatureSection, {
+      props: {
+        headline: 'Test',
+        body: 'Body',
+        imageSrc: '/screenshots/screenshot-1.webp',
+        imageAlt: 'Alt text',
+        imageRight: true,
+      },
+    });
+    expect(html).toContain('md:order-last');
+  });
 });
