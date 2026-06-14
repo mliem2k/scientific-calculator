@@ -16,3 +16,6 @@ tsconfig.node.tsbuildinfo
 
 # Superpowers plans (never commit)
 docs/superpowers/plans/
+
+# FVM Version Cache
+.fvm/
