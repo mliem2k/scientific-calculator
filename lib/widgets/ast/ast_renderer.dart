@@ -187,11 +187,56 @@ class _FractionWidget extends StatelessWidget {
     required this.ct,
   });
 
+  Widget _slot(
+    BuildContext context,
+    TextStyle style,
+    double childSize,
+    List<ASTNode> nodes,
+    List<CursorSegment> slotPath,
+  ) {
+    final isActive = _pathEquals(cursor.path, slotPath);
+    final isEmpty = nodes.isEmpty && !isActive;
+
+    Widget content = DefaultTextStyle(
+      style: style,
+      child: isEmpty
+          ? Text(
+              '□',
+              style: TextStyle(
+                color: ct.expressionText.withAlpha(80),
+                fontSize: childSize,
+              ),
+            )
+          : ASTRenderer(
+              nodes: nodes,
+              cursor: cursor,
+              path: slotPath,
+              onCursorJump: onCursorJump,
+            ),
+    );
+
+    if (isEmpty) {
+      content = GestureDetector(
+        onTapDown: (_) => onCursorJump(slotPath, 0),
+        child: content,
+      );
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: childSize * 0.6,
+        minHeight: childSize * 0.8,
+      ),
+      child: Center(child: content),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentStyle = DefaultTextStyle.of(context).style;
     final currentSize = currentStyle.fontSize ?? 16.0;
     final childSize = currentSize * 0.7;
+    final childStyle = currentStyle.copyWith(fontSize: childSize);
 
     final numPath = [...path, CursorSegment(nodeIndex, 'numerator')];
     final denPath = [...path, CursorSegment(nodeIndex, 'denominator')];
@@ -201,29 +246,9 @@ class _FractionWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: DefaultTextStyle(
-              style: currentStyle.copyWith(fontSize: childSize),
-              child: ASTRenderer(
-                nodes: node.numerator,
-                cursor: cursor,
-                path: numPath,
-                onCursorJump: onCursorJump,
-              ),
-            ),
-          ),
+          _slot(context, childStyle, childSize, node.numerator, numPath),
           Container(height: 2, color: ct.expressionText),
-          Center(
-            child: DefaultTextStyle(
-              style: currentStyle.copyWith(fontSize: childSize),
-              child: ASTRenderer(
-                nodes: node.denominator,
-                cursor: cursor,
-                path: denPath,
-                onCursorJump: onCursorJump,
-              ),
-            ),
-          ),
+          _slot(context, childStyle, childSize, node.denominator, denPath),
         ],
       ),
     );

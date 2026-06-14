@@ -16,7 +16,8 @@ const _apiUrl = 'https://api.github.com/repos/$_repo/releases?per_page=10';
 class UpdateInfo {
   final String tagName;
   final String releaseUrl;
-  const UpdateInfo({required this.tagName, required this.releaseUrl});
+  final String? apkUrl;
+  const UpdateInfo({required this.tagName, required this.releaseUrl, this.apkUrl});
 }
 
 Future<UpdateInfo?> checkForUpdate() async {
@@ -50,7 +51,19 @@ Future<UpdateInfo?> checkForUpdate() async {
       final build = _parseBuildFromTag(tagName);
       if (build != null && build > bestBuild) {
         bestBuild = build;
-        best = UpdateInfo(tagName: tagName, releaseUrl: htmlUrl);
+        final assets = json['assets'] as List<dynamic>?;
+        String? apkUrl;
+        if (assets != null) {
+          for (final asset in assets) {
+            final assetMap = asset as Map<String, dynamic>;
+            final name = assetMap['name'] as String? ?? '';
+            if (name.endsWith('.apk')) {
+              apkUrl = assetMap['browser_download_url'] as String?;
+              break;
+            }
+          }
+        }
+        best = UpdateInfo(tagName: tagName, releaseUrl: htmlUrl, apkUrl: apkUrl);
       }
     }
 
