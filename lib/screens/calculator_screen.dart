@@ -48,26 +48,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Scaffold(
       backgroundColor: ct.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // IntrinsicHeight caps the display at its natural content height.
-            // Without it, Row(crossAxisAlignment: stretch) inside CalcDisplay
-            // uses constraints.maxHeight (full screen) as the tight child height,
-            // which makes CalcDisplay consume the entire screen and leave zero
-            // height for ButtonGrid.
-            IntrinsicHeight(
-              child: CalcDisplay(
-                onSettings: () => _openSettings(context),
-              ),
-            ),
-            Expanded(
-              child: ButtonGrid(
-                onButton: controller.handleButton,
-                onPaste: controller.handlePaste,
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Fix display height so ButtonGrid's Expanded always gets the same
+            // remaining height regardless of whether a result is shown.
+            final displayH =
+                (constraints.maxHeight * 0.20).clamp(160.0, 210.0);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: displayH,
+                  child: CalcDisplay(
+                    onSettings: () => _openSettings(context),
+                  ),
+                ),
+                Expanded(
+                  child: ButtonGrid(
+                    onButton: controller.handleButton,
+                    onPaste: controller.handlePaste,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

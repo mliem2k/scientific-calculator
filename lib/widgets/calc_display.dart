@@ -51,7 +51,6 @@ class CalcDisplay extends StatelessWidget {
     return Container(
       color: ct.displayBg,
       padding: const EdgeInsets.all(12),
-      constraints: const BoxConstraints(minHeight: 120),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -62,7 +61,7 @@ class CalcDisplay extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // Top row: status badges + settings button
                 Row(
@@ -137,8 +136,7 @@ class _DisplayStrip extends StatelessWidget {
     final controller = context.read<CalculatorController>();
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // SHIFT toggle
         Selector<CalculatorController, bool>(
@@ -278,18 +276,22 @@ class _ExpressionAreaState extends State<_ExpressionArea> {
       onLongPressEnd: (_) { _dragging = false; },
       onLongPressCancel: () { _dragging = false; },
       child: Selector<CalculatorController,
-          ({List<ASTNode> expression, Cursor cursor})>(
+          ({List<ASTNode> expression, Cursor cursor, bool hasResult})>(
         selector: (_, c) => (
           expression: c.state.expression,
           cursor: c.state.cursor,
+          hasResult: c.state.result != null,
         ),
         builder: (ctx, data, __) {
+          // Scale expression down when result is visible so both fit in the
+          // fixed-height display without pushing the button grid.
+          final exprFontSize = data.hasResult ? 28.0 : 40.0;
           if (data.expression.isEmpty) {
             return Align(
               alignment: Alignment.centerRight,
               child: Text(
                 '0',
-                style: TextStyle(color: ct.buttonBorder, fontSize: 40),
+                style: TextStyle(color: ct.buttonBorder, fontSize: exprFontSize),
               ),
             );
           }
@@ -299,7 +301,7 @@ class _ExpressionAreaState extends State<_ExpressionArea> {
             child: DefaultTextStyle(
               style: TextStyle(
                 color: ct.expressionText,
-                fontSize: 40,
+                fontSize: exprFontSize,
                 fontWeight: FontWeight.w700,
               ),
               child: ASTRenderer(
