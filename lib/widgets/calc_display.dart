@@ -61,9 +61,8 @@ class CalcDisplay extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Top row: status badges + settings button
+                // Top row: status badges + settings button (pinned to top)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -94,7 +93,7 @@ class CalcDisplay extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const Spacer(),
                 // Expression area
                 const _ExpressionArea(),
                 const SizedBox(height: 4),
@@ -146,9 +145,9 @@ class _DisplayStrip extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
               child: Text(
-                '≡',
+                '⇧',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 24,
                   color: shiftActive ? ct.shiftActiveColor : ct.secondaryLabel,
                   fontWeight:
                       shiftActive ? FontWeight.bold : FontWeight.w500,

@@ -73,11 +73,11 @@ void main() {
       expect(icon.size, 20.0);
     });
 
-    testWidgets('SHIFT toggle is 28px w500 (inactive)', (tester) async {
+    testWidgets('SHIFT toggle is 24px w500 (inactive)', (tester) async {
       await tester.pumpWidget(_wrapCalcDisplay());
       await tester.pump();
-      final text = tester.widget<Text>(find.text('≡'));
-      expect(text.style?.fontSize, 28.0);
+      final text = tester.widget<Text>(find.text('⇧'));
+      expect(text.style?.fontSize, 24.0);
       expect(text.style?.fontWeight, FontWeight.w500);
     });
 
