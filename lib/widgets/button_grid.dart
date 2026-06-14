@@ -241,29 +241,105 @@ class _CalcButtonState extends State<_CalcButton> {
               Positioned(
                 top: 2,
                 left: 4,
-                child: Text(
-                  btn.shiftLabel!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: ct.secondaryLabel,
-                  ),
-                ),
+                child: btn.id == 'fraction'
+                    ? _FractionIcon(size: 13, color: ct.secondaryLabel, mixed: true)
+                    : Text(
+                        btn.shiftLabel!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: ct.secondaryLabel,
+                        ),
+                      ),
               ),
             Center(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: labelColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              child: btn.id == 'fraction'
+                  ? _FractionIcon(
+                      size: 22,
+                      color: labelColor,
+                      mixed: shiftActive,
+                    )
+                  : Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: labelColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _FractionIcon extends StatelessWidget {
+  final double size;
+  final Color color;
+  final bool mixed;
+
+  const _FractionIcon({
+    required this.size,
+    required this.color,
+    required this.mixed,
+  });
+
+  Widget _stackedFraction() {
+    final subSize = size * 0.42;
+    return IntrinsicWidth(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Text(
+              'a',
+              style: TextStyle(
+                fontSize: subSize,
+                fontWeight: FontWeight.w700,
+                color: color,
+                height: 1.1,
+              ),
+            ),
+          ),
+          Container(height: 1.5, color: color),
+          Center(
+            child: Text(
+              'b',
+              style: TextStyle(
+                fontSize: subSize,
+                fontWeight: FontWeight.w700,
+                color: color,
+                height: 1.1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!mixed) return _stackedFraction();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          '1',
+          style: TextStyle(
+            fontSize: size * 0.55,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 2),
+        _stackedFraction(),
+      ],
     );
   }
 }

@@ -260,6 +260,37 @@ class CalculatorController extends ChangeNotifier {
       );
     }
 
+    // Fraction button on a visible result converts decimal ↔ fraction,
+    // matching Casio a b/c key behavior.
+    if (id == 'fraction' && prev.result != null) {
+      if (prev.resultMode == 'fraction') {
+        return prev.copyWith(
+          result: prev.lastResult,
+          lastResult: null,
+          resultMode: 'decimal',
+          shiftActive: false,
+          hypActive: false,
+          stoMode: false,
+        );
+      }
+      final fracStr = toFraction(prev.result!);
+      if (fracStr != null) {
+        return prev.copyWith(
+          lastResult: prev.result,
+          result: fracStr,
+          resultMode: 'fraction',
+          shiftActive: false,
+          hypActive: false,
+          stoMode: false,
+        );
+      }
+      return prev.copyWith(
+        shiftActive: false,
+        hypActive: false,
+        stoMode: false,
+      );
+    }
+
     final (expr, cur) = _applyInsert(prev, id);
     if (expr == null) {
       return prev.copyWith(
