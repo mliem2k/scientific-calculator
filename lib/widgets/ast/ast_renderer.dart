@@ -18,6 +18,7 @@ class ASTRenderer extends StatelessWidget {
   final Cursor cursor;
   final List<CursorSegment> path;
   final void Function(List<CursorSegment> path, int insertAt) onCursorJump;
+  final GlobalKey? rowKey;
 
   const ASTRenderer({
     super.key,
@@ -25,6 +26,7 @@ class ASTRenderer extends StatelessWidget {
     required this.cursor,
     required this.path,
     required this.onCursorJump,
+    this.rowKey,
   });
 
   @override
@@ -42,6 +44,7 @@ class ASTRenderer extends StatelessWidget {
     }
 
     return Row(
+      key: rowKey,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: children,

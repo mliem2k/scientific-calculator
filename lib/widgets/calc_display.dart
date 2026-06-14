@@ -1,10 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../controllers/calculator_controller.dart';
 import '../core/ast/types.dart';
 import '../theme/calc_theme.dart';
 import 'ast/ast_renderer.dart';
+
+int _cursorAtX(
+  RenderBox rowBox,
+  double globalX,
+  int nodeCount,
+  int? cursorChildIndex,
+) {
+  final localX = rowBox.globalToLocal(Offset(globalX, 0)).dx;
+  final nodeMidpoints = <double>[];
+  int childIndex = 0;
+
+  rowBox.visitChildren((child) {
+    if (childIndex == cursorChildIndex) {
+      childIndex++;
+      return;
+    }
+    final childBox = child as RenderBox;
+    final data = child.parentData as FlexParentData;
+    nodeMidpoints.add(data.offset.dx + childBox.size.width / 2);
+    childIndex++;
+  });
+
+  for (int i = 0; i < nodeMidpoints.length; i++) {
+    if (localX <= nodeMidpoints[i]) return i;
+  }
+  return nodeCount;
+}
 
 class CalcDisplay extends StatelessWidget {
   final VoidCallback? onSettings;
@@ -19,7 +47,6 @@ class CalcDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ct = Theme.of(context).extension<CalcTheme>()!;
-    final controller = context.read<CalculatorController>();
 
     return Container(
       color: ct.displayBg,
@@ -70,41 +97,7 @@ class CalcDisplay extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 // Expression area
-                Selector<CalculatorController,
-                    ({List<ASTNode> expression, Cursor cursor})>(
-                  selector: (_, c) => (
-                    expression: c.state.expression,
-                    cursor: c.state.cursor,
-                  ),
-                  builder: (ctx, data, __) {
-                    if (data.expression.isEmpty) {
-                      return Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          '0',
-                          style: TextStyle(color: ct.buttonBorder, fontSize: 40),
-                        ),
-                      );
-                    }
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: DefaultTextStyle(
-                        style: TextStyle(
-                          color: ct.expressionText,
-                          fontSize: 40,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        child: ASTRenderer(
-                          nodes: data.expression,
-                          cursor: data.cursor,
-                          path: const [],
-                          onCursorJump: controller.handleCursorJump,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                const _ExpressionArea(),
                 const SizedBox(height: 4),
                 // Result area
                 Selector<CalculatorController, String?>(
@@ -230,6 +223,95 @@ class _StatusBadge extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(fontSize: 14, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class _ExpressionArea extends StatefulWidget {
+  const _ExpressionArea();
+
+  @override
+  State<_ExpressionArea> createState() => _ExpressionAreaState();
+}
+
+class _ExpressionAreaState extends State<_ExpressionArea> {
+  final GlobalKey _rowKey = GlobalKey();
+  // reserved for future drag-highlight affordance
+  bool _dragging = false;
+
+  void _moveCursorTo(double globalX) {
+    if (!mounted) return;
+    final renderBox =
+        _rowKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final controller = context.read<CalculatorController>();
+    final state = controller.state;
+    final nodeCount = state.expression.length;
+    // cursorChildIndex reflects mutated state; render tree is one frame behind,
+    // but the 2px cursor widget makes any single-event skip error imperceptible.
+    final cursorChildIndex =
+        state.cursor.path.isEmpty ? state.cursor.insertAt : null;
+    final index =
+        _cursorAtX(renderBox, globalX, nodeCount, cursorChildIndex);
+    controller.handleCursorJump([], index);
+  }
+
+  void _onLongPressStart(LongPressStartDetails details) {
+    _dragging = true;
+    HapticFeedback.selectionClick();
+    _moveCursorTo(details.globalPosition.dx);
+  }
+
+  void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    _moveCursorTo(details.globalPosition.dx);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ct = Theme.of(context).extension<CalcTheme>()!;
+    final controller = context.read<CalculatorController>();
+
+    return GestureDetector(
+      onLongPressStart: _onLongPressStart,
+      onLongPressMoveUpdate: _onLongPressMoveUpdate,
+      onLongPressEnd: (_) { _dragging = false; },
+      onLongPressCancel: () { _dragging = false; },
+      child: Selector<CalculatorController,
+          ({List<ASTNode> expression, Cursor cursor})>(
+        selector: (_, c) => (
+          expression: c.state.expression,
+          cursor: c.state.cursor,
+        ),
+        builder: (ctx, data, __) {
+          if (data.expression.isEmpty) {
+            return Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '0',
+                style: TextStyle(color: ct.buttonBorder, fontSize: 40),
+              ),
+            );
+          }
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            child: DefaultTextStyle(
+              style: TextStyle(
+                color: ct.expressionText,
+                fontSize: 40,
+                fontWeight: FontWeight.w700,
+              ),
+              child: ASTRenderer(
+                rowKey: _rowKey,
+                nodes: data.expression,
+                cursor: data.cursor,
+                path: const [],
+                onCursorJump: controller.handleCursorJump,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

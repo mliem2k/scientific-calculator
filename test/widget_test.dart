@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:scientific_calculator/controllers/calculator_controller.dart';
 import 'package:scientific_calculator/controllers/settings_controller.dart';
+import 'package:scientific_calculator/core/ast/types.dart';
 import 'package:scientific_calculator/theme/themes.dart';
+import 'package:scientific_calculator/widgets/ast/ast_renderer.dart';
 import 'package:scientific_calculator/widgets/button_grid.dart';
 import 'package:scientific_calculator/widgets/calc_display.dart';
 
@@ -90,4 +92,76 @@ void main() {
       expect(text.style?.fontWeight, FontWeight.w700);
     });
   });
+
+  group('ast renderer', () {
+    testWidgets('rowKey is attached to root Row after pump', (tester) async {
+      final key = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: darkTheme,
+          home: Scaffold(
+            body: ASTRenderer(
+              rowKey: key,
+              nodes: [NumberNode('1'), NumberNode('2')],
+              cursor: const Cursor([], 2),
+              path: const [],
+              onCursorJump: (_, __) {},
+            ),
+          ),
+        ),
+      );
+      expect(key.currentContext, isNotNull);
+      expect(key.currentContext!.findRenderObject(), isA<RenderBox>());
+    });
+  });
+
+  group('long-press drag cursor', () {
+    testWidgets('long-press on expression moves cursor from end', (tester) async {
+      final controller = CalculatorController();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: controller),
+            ChangeNotifierProvider(create: (_) => SettingsController()),
+          ],
+          child: MaterialApp(
+            theme: darkTheme,
+            home: Scaffold(
+              body: SizedBox(
+                width: 400,
+                height: 150,
+                child: CalcDisplay(onSettings: () {}),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Build a 3-node expression: "1 + 2"
+      controller.handleButton('1');
+      controller.handleButton('plus');
+      controller.handleButton('2');
+      await tester.pump();
+
+      // Cursor starts at end of expression
+      expect(controller.state.cursor.path, isEmpty);
+      expect(controller.state.cursor.insertAt, 3);
+
+      // Long-press the far-left edge of the expression scroll view
+      final scrollView = find.byType(SingleChildScrollView).first;
+      final rect = tester.getRect(scrollView);
+      final target = Offset(rect.left + rect.width * 0.05, rect.center.dy);
+
+      final gesture = await tester.startGesture(target);
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      // Cursor moved earlier in the expression
+      expect(controller.state.cursor.path, isEmpty);
+      expect(controller.state.cursor.insertAt, lessThan(3));
+    });
+  });
 }
+
