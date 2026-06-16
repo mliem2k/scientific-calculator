@@ -422,10 +422,6 @@ class CalculatorController extends ChangeNotifier {
         final (expr, cur) = insertExp(e, c);
         return (expr, cur);
 
-      case 'negate':
-        final (expr, cur) = insertNegate(e, c);
-        return (expr, cur);
-
       case 'abs':
         final (expr, cur) = insertFunction(e, c, FunctionName.abs);
         return (expr, cur);

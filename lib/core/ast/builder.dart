@@ -230,22 +230,6 @@ List<ASTNode> _slotOf(ASTNode node, String slot) {
   return (r, Cursor([...cursor.path, CursorSegment(expIdx, 'exponent')], 0));
 }
 
-(List<ASTNode>, Cursor) insertNegate(List<ASTNode> root, Cursor cursor) {
-  final r = _deepCopy(root);
-  final list = _getList(r, cursor.path);
-  if (cursor.insertAt > 0) {
-    final prev = list[cursor.insertAt - 1];
-    if (prev is NumberNode) {
-      prev.value = prev.value.startsWith('-')
-          ? prev.value.substring(1)
-          : '-${prev.value}';
-      return (r, cursor);
-    }
-  }
-  list.insert(cursor.insertAt, OperatorNode('-'));
-  return (r, Cursor(cursor.path, cursor.insertAt + 1));
-}
-
 (List<ASTNode>, Cursor) insertReciprocal(List<ASTNode> root, Cursor cursor) {
   final r = _deepCopy(root);
   final list = _getList(r, cursor.path);

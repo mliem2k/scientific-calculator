@@ -77,7 +77,6 @@ const _rows = [
   [
     _BtnDef('0',      '0',   role: _BtnRole.digit, flex: 2),
     _BtnDef('.',      '.',   shiftLabel: 'EXP',    role: _BtnRole.digit),
-    _BtnDef('negate', '(−)',                        role: _BtnRole.digit),
     _BtnDef('=',      '=',   shiftLabel: 'S⇔D',   role: _BtnRole.eq),
   ],
 ];
