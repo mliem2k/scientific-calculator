@@ -23,17 +23,39 @@ class _UpdateDialogState extends State<UpdateDialog> {
   double _progress = 0;
   String? _apkPath;
 
+  // nightly-20260616-1781592056 → "Nightly · Jun 16, 2026"
+  String _formatTag(String tag) {
+    final parts = tag.split('-');
+    if (parts.length >= 2) {
+      final dateStr = parts[1];
+      if (dateStr.length == 8) {
+        final year = dateStr.substring(0, 4);
+        final month = int.tryParse(dateStr.substring(4, 6));
+        final day = int.tryParse(dateStr.substring(6, 8));
+        const months = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        ];
+        if (month != null && month >= 1 && month <= 12 && day != null) {
+          return 'Nightly · ${months[month - 1]} $day, $year';
+        }
+      }
+    }
+    return tag;
+  }
+
   Future<void> _download() async {
     final apkUrl = widget.info.apkUrl;
     if (apkUrl == null) {
-      await launchUrl(
-        Uri.parse(widget.info.releaseUrl),
-        mode: LaunchMode.externalApplication,
-      );
+      await _openInBrowser();
+      if (mounted) Navigator.of(context).pop();
       return;
     }
 
-    setState(() => _state = _DownloadState.downloading);
+    setState(() {
+      _state = _DownloadState.downloading;
+      _progress = 0;
+    });
 
     try {
       final dir = await getTemporaryDirectory();
@@ -46,16 +68,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
         final total = res.contentLength;
         var received = 0;
-        final file = File(path).openWrite();
+        final sink = File(path).openWrite();
         await for (final chunk in res) {
-          file.add(chunk);
+          sink.add(chunk);
           received += chunk.length;
           if (total > 0 && mounted) {
             setState(() => _progress = received / total);
           }
         }
-        await file.flush();
-        await file.close();
+        await sink.flush();
+        await sink.close();
       } finally {
         client.close();
       }
@@ -72,9 +94,22 @@ class _UpdateDialogState extends State<UpdateDialog> {
   }
 
   Future<void> _install() async {
-    if (_apkPath == null) return;
-    await OpenFile.open(_apkPath!);
+    final path = _apkPath;
+    if (path == null) return;
+    final result = await OpenFile.open(path);
+    if (!mounted) return;
+    // Fall back to browser if system installer can't open the APK
+    // (e.g. "Install unknown apps" permission not yet granted, then granted
+    // and retried — or the open_file call fails for any other reason).
+    if (result.type != ResultType.done) {
+      await _openInBrowser();
+    }
   }
+
+  Future<void> _openInBrowser() => launchUrl(
+        Uri.parse(widget.info.releaseUrl),
+        mode: LaunchMode.externalApplication,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -89,41 +124,69 @@ class _UpdateDialogState extends State<UpdateDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Update Available',
-              style: TextStyle(
-                color: ct.expressionText,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(Icons.system_update_outlined,
+                    color: ct.shiftActiveColor, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Update Available',
+                        style: TextStyle(
+                          color: ct.expressionText,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _formatTag(widget.info.tagName),
+                        style:
+                            TextStyle(color: ct.secondaryLabel, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              widget.info.tagName,
-              style: TextStyle(color: ct.secondaryLabel, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             if (_state == _DownloadState.downloading) ...[
-              LinearProgressIndicator(
-                value: _progress > 0 ? _progress : null,
-                backgroundColor: ct.buttonBorder.withAlpha(60),
-                valueColor: AlwaysStoppedAnimation<Color>(ct.shiftActiveColor),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: _progress > 0 ? _progress : null,
+                  minHeight: 6,
+                  backgroundColor: ct.buttonBorder.withAlpha(60),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(ct.shiftActiveColor),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 _progress > 0
-                    ? '${(_progress * 100).toStringAsFixed(0)}%'
-                    : 'Downloading...',
+                    ? 'Downloading ${(_progress * 100).toStringAsFixed(0)}%'
+                    : 'Starting download...',
                 style: TextStyle(color: ct.secondaryLabel, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
-            ] else if (_state == _DownloadState.error) ...[
-              Text(
-                'Download failed. Tap below to open in browser.',
-                style: TextStyle(color: ct.opText, fontSize: 13),
+              const SizedBox(height: 8),
+            ] else if (_state == _DownloadState.done) ...[
+              _StatusBanner(
+                icon: Icons.check_circle_outline,
+                color: ct.shiftActiveColor,
+                text: 'Ready to install',
               ),
+              const SizedBox(height: 12),
+            ] else if (_state == _DownloadState.error) ...[
+              _StatusBanner(
+                icon: Icons.error_outline,
+                color: ct.delText,
+                text: 'Download failed. Open in browser to install manually.',
+              ),
+              const SizedBox(height: 12),
             ],
-            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -136,40 +199,93 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 ),
                 const SizedBox(width: 8),
                 if (_state == _DownloadState.done)
-                  ElevatedButton(
+                  _ActionButton(
+                    label: 'Install',
+                    icon: Icons.install_mobile_outlined,
+                    color: ct.shiftActiveColor,
                     onPressed: _install,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ct.shiftActiveColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Install'),
+                  )
+                else if (_state == _DownloadState.error)
+                  _ActionButton(
+                    label: 'Open in Browser',
+                    icon: Icons.open_in_new,
+                    color: ct.shiftActiveColor,
+                    onPressed: _openInBrowser,
                   )
                 else if (_state != _DownloadState.downloading)
-                  ElevatedButton(
-                    onPressed: _state == _DownloadState.error
-                        ? () => launchUrl(
-                              Uri.parse(widget.info.releaseUrl),
-                              mode: LaunchMode.externalApplication,
-                            )
-                        : _download,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ct.shiftActiveColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      _state == _DownloadState.error ? 'Open in Browser' : 'Download',
-                    ),
+                  _ActionButton(
+                    label: 'Download',
+                    icon: Icons.download_outlined,
+                    color: ct.shiftActiveColor,
+                    onPressed: _download,
                   ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StatusBanner extends StatelessWidget {
+  const _StatusBanner({
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: color, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -190,7 +306,8 @@ class UpToDateDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_outline, size: 52, color: ct.shiftActiveColor),
+            Icon(Icons.check_circle_outline,
+                size: 52, color: ct.shiftActiveColor),
             const SizedBox(height: 16),
             Text(
               'Up to Date',
@@ -202,7 +319,7 @@ class UpToDateDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'You\'re running the latest version.',
+              "You're running the latest version.",
               style: TextStyle(color: ct.secondaryLabel, fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -215,8 +332,7 @@ class UpToDateDialog extends StatelessWidget {
                   backgroundColor: ct.shiftActiveColor,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 child: const Text('Got it'),
               ),

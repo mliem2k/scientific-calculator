@@ -75,12 +75,21 @@ const CalcTheme retroCalcTheme = CalcTheme(
 );
 
 ThemeData themeDataFor(CalcTheme ct) {
+  final isDark = ThemeData.estimateBrightnessForColor(ct.background) == Brightness.dark;
+  final base = isDark ? const ColorScheme.dark() : const ColorScheme.light();
   return ThemeData(
     scaffoldBackgroundColor: ct.background,
     canvasColor: ct.background,
+    colorScheme: base.copyWith(
+      surface: ct.background,
+      onSurface: ct.expressionText,
+      primary: ct.shiftActiveColor,
+      onPrimary: isDark ? Colors.black : Colors.white,
+    ),
     appBarTheme: AppBarTheme(
       backgroundColor: ct.background,
       foregroundColor: ct.expressionText,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
     ),
     extensions: <ThemeExtension<dynamic>>[ct],
