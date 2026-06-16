@@ -77,6 +77,7 @@ const CalcTheme retroCalcTheme = CalcTheme(
 ThemeData themeDataFor(CalcTheme ct) {
   return ThemeData(
     scaffoldBackgroundColor: ct.background,
+    canvasColor: ct.background,
     appBarTheme: AppBarTheme(
       backgroundColor: ct.background,
       foregroundColor: ct.expressionText,

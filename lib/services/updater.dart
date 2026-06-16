@@ -3,7 +3,7 @@ import 'dart:io';
 
 // Baked in at build time via --dart-define=BUILD_NUMBER=<unix_ts>.
 // Zero means a dev build — update checks are skipped.
-const int _buildNumber = int.fromEnvironment('BUILD_NUMBER', defaultValue: 0);
+const int kBuildNumber = int.fromEnvironment('BUILD_NUMBER', defaultValue: 0);
 
 const _repo = 'mliem2k/scientific-calculator';
 
@@ -21,13 +21,13 @@ class UpdateInfo {
 }
 
 Future<UpdateInfo?> checkForUpdate() async {
-  if (_buildNumber == 0) return null;
+  if (kBuildNumber == 0) return null;
 
   final client = HttpClient();
   try {
     final req = await client.getUrl(Uri.parse(_apiUrl));
     req.headers
-      ..set('User-Agent', 'scientific-calculator/$_buildNumber')
+      ..set('User-Agent', 'scientific-calculator/$kBuildNumber')
       ..set('Accept', 'application/vnd.github+json')
       ..set('Cache-Control', 'no-cache');
     final res = await req.close();
@@ -39,7 +39,7 @@ Future<UpdateInfo?> checkForUpdate() async {
 
     // Scan all returned releases; pick the one with the highest build number.
     // This is robust to out-of-order results and in-flight same-day cleanups.
-    int bestBuild = _buildNumber;
+    int bestBuild = kBuildNumber;
     UpdateInfo? best;
 
     for (final item in list) {

@@ -6,6 +6,7 @@ import '../core/ast/types.dart';
 import '../services/updater.dart';
 import '../theme/calc_theme.dart';
 import '../theme/themes.dart';
+import '../widgets/update_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -23,24 +24,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() => _checking = false);
     if (info == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('App is up to date.')),
+      await showDialog<void>(
+        context: context,
+        builder: (_) => const UpToDateDialog(),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Update available: ${info.tagName}'),
-          duration: const Duration(seconds: 10),
-          action: SnackBarAction(
-            label: 'Download',
-            onPressed: () => launchUrl(
-              Uri.parse(info.releaseUrl),
-              mode: LaunchMode.externalApplication,
-            ),
-          ),
-        ),
+      await showDialog<void>(
+        context: context,
+        builder: (_) => UpdateDialog(info: info),
       );
     }
+  }
+
+  String _buildVersionString() {
+    if (kBuildNumber == 0) return 'Dev build';
+    final dt = DateTime.fromMillisecondsSinceEpoch(kBuildNumber * 1000);
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return 'Build $y-$m-$d';
   }
 
   @override
@@ -153,10 +155,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: settings.setHapticFeedback,
           ),
           _SectionHeader(label: 'ABOUT', ct: ct),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/icon.png',
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Scientific Calculator',
+                      style: TextStyle(
+                        color: ct.expressionText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _buildVersionString(),
+                      style: TextStyle(color: ct.secondaryLabel, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           ListTile(
             tileColor: ct.buttonBg,
             textColor: ct.expressionText,
             iconColor: ct.expressionText,
+            leading: const Icon(Icons.system_update_outlined),
             title: const Text('Check for updates'),
             subtitle: Text(
               'Compare with latest GitHub release',
@@ -171,8 +209,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: ct.shiftActiveColor,
                     ),
                   )
-                : Icon(Icons.system_update_outlined, color: ct.expressionText),
+                : null,
             onTap: _checking ? null : _checkForUpdate,
+          ),
+          ListTile(
+            tileColor: ct.buttonBg,
+            textColor: ct.expressionText,
+            iconColor: ct.expressionText,
+            leading: const Icon(Icons.code_outlined),
+            title: const Text('Source code'),
+            subtitle: Text(
+              'github.com/mliem2k/scientific-calculator',
+              style: TextStyle(color: ct.resultText),
+            ),
+            trailing: Icon(Icons.open_in_new, size: 16, color: ct.secondaryLabel),
+            onTap: () => launchUrl(
+              Uri.parse('https://github.com/mliem2k/scientific-calculator'),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+          ListTile(
+            tileColor: ct.buttonBg,
+            textColor: ct.expressionText,
+            iconColor: ct.expressionText,
+            leading: const Icon(Icons.article_outlined),
+            title: const Text('Open source licenses'),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'Scientific Calculator',
+              applicationVersion: _buildVersionString(),
+            ),
           ),
           const SizedBox(height: 24),
         ],
