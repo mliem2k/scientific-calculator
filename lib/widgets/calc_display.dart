@@ -36,8 +36,9 @@ int _cursorAtX(
 
 class CalcDisplay extends StatelessWidget {
   final VoidCallback? onSettings;
+  final VoidCallback? onHistory;
 
-  const CalcDisplay({super.key, this.onSettings});
+  const CalcDisplay({super.key, this.onSettings, this.onHistory});
 
   void _copyResult(String? result) {
     if (result == null) return;
@@ -51,73 +52,80 @@ class CalcDisplay extends StatelessWidget {
     return Container(
       color: ct.displayBg,
       padding: const EdgeInsets.all(12),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Left strip: SHIFT, copy, angle toggle
-          _DisplayStrip(ct: ct),
-          const SizedBox(width: 8),
-          // Main area
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Top row: status badges + settings button (pinned to top)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+          // Header row
+          Row(
+            children: [
+              const _DegRadBadge(),
+              Selector<CalculatorController,
+                  ({bool shift, bool hyp, bool sto})>(
+                selector: (_, c) => (
+                  shift: c.state.shiftActive,
+                  hyp: c.state.hypActive,
+                  sto: c.state.stoMode,
+                ),
+                builder: (_, badges, __) => Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Selector<CalculatorController, ({bool hyp, bool sto})>(
-                      selector: (_, c) => (
-                        hyp: c.state.hypActive,
-                        sto: c.state.stoMode,
+                    if (badges.shift)
+                      _StatusBadge(
+                        label: 'SHIFT',
+                        ct: ct,
+                        bgColor: ct.shiftActiveColor,
                       ),
-                      builder: (_, badges, __) => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (badges.hyp) _StatusBadge(label: 'HYP', ct: ct),
-                          if (badges.sto) _StatusBadge(label: 'STO', ct: ct),
-                        ],
-                      ),
-                    ),
-                    if (onSettings != null)
-                      GestureDetector(
-                        onTap: onSettings,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Icon(
-                            Icons.settings,
-                            size: 20,
-                            color: ct.secondaryLabel,
-                          ),
-                        ),
-                      ),
+                    if (badges.hyp) _StatusBadge(label: 'HYP', ct: ct),
+                    if (badges.sto) _StatusBadge(label: 'STO', ct: ct),
                   ],
                 ),
-                const Spacer(),
-                // Expression area
-                const _ExpressionArea(),
-                const SizedBox(height: 4),
-                // Result area
-                Selector<CalculatorController, String?>(
-                  selector: (_, c) => c.state.result,
-                  builder: (_, result, __) {
-                    if (result == null) return const SizedBox.shrink();
-                    return GestureDetector(
-                      onTap: () => _copyResult(result),
-                      child: Text(
-                        result,
-                        style: TextStyle(
-                          color: ct.resultText,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    );
-                  },
+              ),
+              const Spacer(),
+              if (onHistory != null)
+                GestureDetector(
+                  onTap: onHistory,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(
+                      Icons.history,
+                      size: 20,
+                      color: ct.secondaryLabel,
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              if (onSettings != null)
+                GestureDetector(
+                  onTap: onSettings,
+                  child: Icon(
+                    Icons.settings,
+                    size: 20,
+                    color: ct.secondaryLabel,
+                  ),
+                ),
+            ],
+          ),
+          const Spacer(),
+          // Expression area — full width
+          const _ExpressionArea(),
+          const SizedBox(height: 4),
+          // Result — full width, tap to copy
+          Selector<CalculatorController, String?>(
+            selector: (_, c) => c.state.result,
+            builder: (_, result, __) {
+              if (result == null) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: () => _copyResult(result),
+                child: Text(
+                  result,
+                  style: TextStyle(
+                    color: ct.resultText,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -125,79 +133,32 @@ class CalcDisplay extends StatelessWidget {
   }
 }
 
-class _DisplayStrip extends StatelessWidget {
-  final CalcTheme ct;
-
-  const _DisplayStrip({required this.ct});
+class _DegRadBadge extends StatelessWidget {
+  const _DegRadBadge();
 
   @override
   Widget build(BuildContext context) {
+    final ct = Theme.of(context).extension<CalcTheme>()!;
     final controller = context.read<CalculatorController>();
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // SHIFT toggle
-        Selector<CalculatorController, bool>(
-          selector: (_, c) => c.state.shiftActive,
-          builder: (_, shiftActive, __) => GestureDetector(
-            onTap: () => controller.handleButton('SHIFT'),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-              child: Text(
-                '⇧',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: shiftActive ? ct.shiftActiveColor : ct.secondaryLabel,
-                  fontWeight:
-                      shiftActive ? FontWeight.bold : FontWeight.w500,
-                ),
-              ),
+    return Selector<CalculatorController, AngleMode>(
+      selector: (_, c) => c.state.angleMode,
+      builder: (_, angleMode, __) => GestureDetector(
+        onTap: () => controller.handleButton('DEG_RAD'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          child: Text(
+            angleMode == AngleMode.deg ? 'DEG' : 'RAD',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: angleMode == AngleMode.rad
+                  ? const Color(0xFF4FC3F7)
+                  : ct.secondaryLabel,
             ),
           ),
         ),
-        // Copy result button
-        Selector<CalculatorController, String?>(
-          selector: (_, c) => c.state.result,
-          builder: (_, result, __) => GestureDetector(
-            onTap: () {
-              if (result != null) {
-                Clipboard.setData(ClipboardData(text: result));
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-              child: Text(
-                '◁',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: result != null ? ct.secondaryLabel : ct.buttonBorder,
-                ),
-              ),
-            ),
-          ),
-        ),
-        // Angle mode toggle
-        Selector<CalculatorController, AngleMode>(
-          selector: (_, c) => c.state.angleMode,
-          builder: (_, angleMode, __) => GestureDetector(
-            onTap: () => controller.handleButton('DEG_RAD'),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-              child: Text(
-                angleMode == AngleMode.deg ? 'DEG' : 'RAD',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: angleMode == AngleMode.rad
-                      ? const Color(0xFF4FC3F7)
-                      : ct.secondaryLabel,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -205,8 +166,9 @@ class _DisplayStrip extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   final String label;
   final CalcTheme ct;
+  final Color? bgColor;
 
-  const _StatusBadge({required this.label, required this.ct});
+  const _StatusBadge({required this.label, required this.ct, this.bgColor});
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +176,7 @@ class _StatusBadge extends StatelessWidget {
       margin: const EdgeInsets.only(left: 4),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       decoration: BoxDecoration(
-        color: ct.statusBadgeColor,
+        color: bgColor ?? ct.statusBadgeColor,
         borderRadius: BorderRadius.circular(3),
       ),
       child: Text(

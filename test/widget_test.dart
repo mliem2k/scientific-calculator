@@ -33,7 +33,10 @@ Widget _wrapCalcDisplay() => MultiProvider(
       child: MaterialApp(
         theme: darkTheme,
         home: Scaffold(
-          body: CalcDisplay(onSettings: () {}),
+          body: CalcDisplay(
+            onSettings: () {},
+            onHistory: () {},
+          ),
         ),
       ),
     );
@@ -73,14 +76,6 @@ void main() {
       expect(icon.size, 20.0);
     });
 
-    testWidgets('SHIFT toggle is 24px w500 (inactive)', (tester) async {
-      await tester.pumpWidget(_wrapCalcDisplay());
-      await tester.pump();
-      final text = tester.widget<Text>(find.text('⇧'));
-      expect(text.style?.fontSize, 24.0);
-      expect(text.style?.fontWeight, FontWeight.w500);
-    });
-
     // TODO: result text (34px w500) and copy button (20px) require non-null
     // calculator result to appear in the widget tree; tracked as follow-up.
 
@@ -90,6 +85,47 @@ void main() {
       final text = tester.widget<Text>(find.text('DEG'));
       expect(text.style?.fontSize, 15.0);
       expect(text.style?.fontWeight, FontWeight.w700);
+    });
+  });
+
+  group('display header', () {
+    testWidgets('DEG badge is visible by default', (tester) async {
+      await tester.pumpWidget(_wrapCalcDisplay());
+      await tester.pump();
+      expect(find.text('DEG'), findsOneWidget);
+    });
+
+    testWidgets('DEG badge tap toggles angle mode to RAD', (tester) async {
+      final controller = CalculatorController();
+      await tester.pumpWidget(MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: controller),
+          ChangeNotifierProvider(create: (_) => SettingsController()),
+        ],
+        child: MaterialApp(
+          theme: darkTheme,
+          home: Scaffold(
+            body: CalcDisplay(onSettings: () {}, onHistory: () {}),
+          ),
+        ),
+      ));
+      await tester.pump();
+      expect(controller.state.angleMode, AngleMode.deg);
+      await tester.tap(find.text('DEG'));
+      await tester.pump();
+      expect(controller.state.angleMode, AngleMode.rad);
+    });
+
+    testWidgets('history icon is present', (tester) async {
+      await tester.pumpWidget(_wrapCalcDisplay());
+      await tester.pump();
+      expect(find.byIcon(Icons.history), findsOneWidget);
+    });
+
+    testWidgets('SHIFT toggle symbol ⇧ is not in the display', (tester) async {
+      await tester.pumpWidget(_wrapCalcDisplay());
+      await tester.pump();
+      expect(find.text('⇧'), findsNothing);
     });
   });
 
@@ -130,7 +166,7 @@ void main() {
               body: SizedBox(
                 width: 400,
                 height: 150,
-                child: CalcDisplay(onSettings: () {}),
+                child: CalcDisplay(onSettings: () {}, onHistory: () {}),
               ),
             ),
           ),

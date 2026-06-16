@@ -10,6 +10,7 @@ import '../services/updater.dart';
 import '../theme/calc_theme.dart';
 import '../widgets/button_grid.dart';
 import '../widgets/calc_display.dart';
+import '../widgets/history_panel.dart';
 import 'settings_screen.dart';
 
 class CalculatorScreen extends StatefulWidget {
@@ -63,6 +64,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   height: displayH,
                   child: CalcDisplay(
                     onSettings: () => _openSettings(context),
+                    onHistory: () => _openHistory(context),
                   ),
                 ),
                 Expanded(
@@ -83,6 +85,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => const SettingsScreen(),
+      ),
+    );
+  }
+
+  void _openHistory(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('History')),
+          body: const HistoryPanel(),
+        ),
       ),
     );
   }
