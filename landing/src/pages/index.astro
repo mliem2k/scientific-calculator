@@ -6,10 +6,7 @@ import PhoneGallery from '../components/PhoneGallery.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
-import shot1 from '../assets/screenshots/screenshot-1.webp';
-import shot3 from '../assets/screenshots/screenshot-3.webp';
-import shot4 from '../assets/screenshots/screenshot-4.webp';
-import shot5 from '../assets/screenshots/screenshot-5.webp';
+import appScreenshot from '../assets/screenshots/app-screenshot.png';
 ---
 <!doctype html>
 <html lang="en">
@@ -23,14 +20,14 @@ import shot5 from '../assets/screenshots/screenshot-5.webp';
   </head>
   <body class="bg-black text-white antialiased">
     <Nav />
-    <Hero heroImageSrc={shot5.src} />
+    <Hero heroImageSrc={appScreenshot.src} />
     <Features />
     <PhoneGallery
       shots={[
-        { src: shot5.src, alt: "Calculator main screen", label: "AMOLED" },
-        { src: shot1.src, alt: "Tap-to-edit expression", label: "Tap-to-edit" },
-        { src: shot3.src, alt: "Scientific functions", label: "Scientific" },
-        { src: shot4.src, alt: "History panel", label: "History" },
+        { src: appScreenshot.src, alt: "Calculator main screen", label: "AMOLED" },
+        { src: appScreenshot.src, alt: "Scientific functions", label: "Scientific" },
+        { src: appScreenshot.src, alt: "Tap-to-edit expression", label: "Tap-to-edit" },
+        { src: appScreenshot.src, alt: "History panel", label: "History" },
       ]}
     />
     <Footer />
