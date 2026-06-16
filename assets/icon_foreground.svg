@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Transparent background. Content scaled to 1.22× and centered so it
+       sits within the adaptive icon safe zone (66dp of 108dp frame). -->
+  <g transform="translate(200, 200) scale(1.22)">
+    <!-- Display panel -->
+    <rect x="28" y="28" width="456" height="140" rx="16" fill="#111111"/>
+    <text x="44" y="90" font-size="30" font-family="monospace" fill="#3f3f46">sin²(x)</text>
+    <text x="468" y="148" text-anchor="end" font-size="88" font-weight="200" fill="#ffffff" font-family="sans-serif">0</text>
+
+    <!-- Row 1 -->
+    <rect x="28"  y="192" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="69"  y="233" text-anchor="middle" font-size="20" font-family="monospace" fill="#ffffff">sin</text>
+    <rect x="122" y="192" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="163" y="233" text-anchor="middle" font-size="20" font-family="monospace" fill="#ffffff">cos</text>
+    <rect x="216" y="192" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="257" y="233" text-anchor="middle" font-size="20" font-family="monospace" fill="#ffffff">tan</text>
+    <rect x="310" y="192" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="351" y="233" text-anchor="middle" font-size="20" font-family="monospace" fill="#ffffff">log</text>
+    <rect x="404" y="192" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="445" y="235" text-anchor="middle" font-size="28" font-family="sans-serif" fill="#ffffff">√</text>
+
+    <!-- Row 2 -->
+    <rect x="28"  y="268" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="69"  y="313" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">7</text>
+    <rect x="122" y="268" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="163" y="313" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">8</text>
+    <rect x="216" y="268" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="257" y="313" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">9</text>
+    <rect x="310" y="268" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="351" y="310" text-anchor="middle" font-size="22" font-family="sans-serif" fill="#ef4444">DEL</text>
+    <rect x="404" y="268" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="445" y="310" text-anchor="middle" font-size="22" font-family="sans-serif" fill="#ef4444">AC</text>
+
+    <!-- Row 3 -->
+    <rect x="28"  y="344" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="69"  y="389" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">4</text>
+    <rect x="122" y="344" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="163" y="389" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">5</text>
+    <rect x="216" y="344" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="257" y="389" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">6</text>
+    <rect x="310" y="344" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="351" y="389" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">×</text>
+    <rect x="404" y="344" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="445" y="389" text-anchor="middle" font-size="36" font-family="sans-serif" fill="#ffffff">÷</text>
+
+    <!-- Row 4 -->
+    <rect x="28"  y="420" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="69"  y="466" text-anchor="middle" font-size="40" font-family="sans-serif" fill="#ffffff">0</text>
+    <rect x="122" y="420" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="163" y="468" text-anchor="middle" font-size="44" font-family="sans-serif" fill="#ffffff">.</text>
+    <rect x="216" y="420" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="257" y="460" text-anchor="middle" font-size="22" font-family="sans-serif" fill="#ffffff">EXP</text>
+    <rect x="310" y="420" width="82" height="66" rx="9" fill="#ffffff"/>
+    <text x="351" y="467" text-anchor="middle" font-size="44" font-family="sans-serif" fill="#000000">=</text>
+    <rect x="404" y="420" width="82" height="66" rx="9" fill="#1c1c1c"/>
+    <text x="445" y="460" text-anchor="middle" font-size="22" font-family="sans-serif" fill="#ffffff">(−)</text>
+  </g>
+</svg>
