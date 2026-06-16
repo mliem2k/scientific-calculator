@@ -56,7 +56,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             // Fix display height so ButtonGrid's Expanded always gets the same
             // remaining height regardless of whether a result is shown.
             final displayH =
-                (constraints.maxHeight * 0.20).clamp(160.0, 210.0);
+                (constraints.maxHeight * 0.25).clamp(180.0, 240.0);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
