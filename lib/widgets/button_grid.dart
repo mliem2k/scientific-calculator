@@ -73,13 +73,12 @@ const _rows = [
     _BtnDef('plus',  '+', role: _BtnRole.op),
     _BtnDef('minus', '−', role: _BtnRole.op),
   ],
-  // Row 8
+  // Row 8 — Bottom (double-wide 0, = last)
   [
-    _BtnDef('0',      '0',   role: _BtnRole.digit),
-    _BtnDef('.',      '.',   role: _BtnRole.digit),
-    _BtnDef('EXP',    'EXP', role: _BtnRole.fn),
-    _BtnDef('=',      '=',   shiftLabel: 'S⇔D', role: _BtnRole.eq),
-    _BtnDef('negate', '(−)', role: _BtnRole.digit),
+    _BtnDef('0',      '0',   role: _BtnRole.digit, flex: 2),
+    _BtnDef('.',      '.',   shiftLabel: 'EXP',    role: _BtnRole.digit),
+    _BtnDef('negate', '(−)',                        role: _BtnRole.digit),
+    _BtnDef('=',      '=',   shiftLabel: 'S⇔D',   role: _BtnRole.eq),
   ],
 ];
 

@@ -215,5 +215,26 @@ void main() {
       expect(fired, contains('pi'));
     });
   });
+
+  group('bottom row', () {
+    testWidgets('= is to the right of (−)', (tester) async {
+      await tester.pumpWidget(_wrapButtonGrid());
+      await tester.pump();
+      final eqPos = tester.getCenter(find.text('='));
+      final negatePos = tester.getCenter(find.text('(−)'));
+      expect(eqPos.dx, greaterThan(negatePos.dx));
+    });
+
+    testWidgets('EXP is not a 22px primary button label', (tester) async {
+      await tester.pumpWidget(_wrapButtonGrid());
+      await tester.pump();
+      // When shift is inactive, EXP only appears as a 12px corner shift label.
+      // If no Text('EXP') is present at all, the test also passes.
+      final expWidgets = tester.widgetList<Text>(find.text('EXP')).toList();
+      for (final t in expWidgets) {
+        expect(t.style?.fontSize, isNot(22.0));
+      }
+    });
+  });
 }
 
