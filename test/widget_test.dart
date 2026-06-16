@@ -236,5 +236,56 @@ void main() {
       }
     });
   });
+
+  group('shift action mappings', () {
+    Widget buildTrackedGrid(CalculatorController controller, List<String> fired) {
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: controller),
+          ChangeNotifierProvider(create: (_) => SettingsController()),
+        ],
+        child: MaterialApp(
+          theme: darkTheme,
+          home: Scaffold(
+            body: ButtonGrid(
+              onButton: (id) {
+                fired.add(id);
+                controller.handleButton(id);
+              },
+              onPaste: () async {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('SHIFT + e fires exp (eˣ)', (tester) async {
+      final controller = CalculatorController();
+      final fired = <String>[];
+      await tester.pumpWidget(buildTrackedGrid(controller, fired));
+      await tester.pump();
+      await tester.tap(find.text('SHIFT'));
+      await tester.pump();
+      expect(controller.state.shiftActive, isTrue);
+      // When shiftActive, 'e' button shows 'eˣ' as its primary label
+      await tester.tap(find.text('eˣ'));
+      await tester.pump();
+      expect(fired, contains('exp'));
+    });
+
+    testWidgets('SHIFT + . fires EXP', (tester) async {
+      final controller = CalculatorController();
+      final fired = <String>[];
+      await tester.pumpWidget(buildTrackedGrid(controller, fired));
+      await tester.pump();
+      await tester.tap(find.text('SHIFT'));
+      await tester.pump();
+      expect(controller.state.shiftActive, isTrue);
+      // When shiftActive, '.' button shows 'EXP' as its primary label
+      await tester.tap(find.text('EXP'));
+      await tester.pump();
+      expect(fired, contains('EXP'));
+    });
+  });
 }
 

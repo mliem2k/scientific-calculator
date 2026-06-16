@@ -101,6 +101,8 @@ String _actionId(String id, bool shiftActive) {
     case 'square':      return 'X';
     case 'paren_close': return 'Y';
     case 'Sto':         return 'PasteCode';
+    case 'e_const':     return 'exp';  // SHIFT+e → eˣ
+    case '.':           return 'EXP';  // SHIFT+. → EXP notation
     default:            return id;
   }
 }
