@@ -13,7 +13,7 @@ const CalcTheme amoledCalcTheme = CalcTheme(
   eqBg: Color(0xFFffffff),
   eqText: Color(0xFF000000),
   delText: Color(0xFFEF4444),
-  secondaryLabel: Color(0xFF52525b),
+  secondaryLabel: Color(0xFFa1a1aa),
   expressionText: Color(0xFFffffff),
   resultText: Color(0xFFa1a1aa),
   shiftActiveColor: Color(0xFFfb923c),

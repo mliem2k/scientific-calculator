@@ -61,15 +61,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
       final dir = await getTemporaryDirectory();
       final path = '${dir.path}/update-${widget.info.tagName}.apk';
 
-      final client = HttpClient();
+      final client = HttpClient()
+        ..connectionTimeout = const Duration(seconds: 10);
       try {
         final req = await client.getUrl(Uri.parse(apkUrl));
-        final res = await req.close();
+        final res = await req.close().timeout(const Duration(seconds: 15));
 
         final total = res.contentLength;
         var received = 0;
         final sink = File(path).openWrite();
-        await for (final chunk in res) {
+        await for (final chunk in res.timeout(const Duration(seconds: 30))) {
           sink.add(chunk);
           received += chunk.length;
           if (total > 0 && mounted) {

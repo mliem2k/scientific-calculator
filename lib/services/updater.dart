@@ -23,17 +23,21 @@ class UpdateInfo {
 Future<UpdateInfo?> checkForUpdate() async {
   if (kBuildNumber == 0) return null;
 
-  final client = HttpClient();
+  final client = HttpClient()
+    ..connectionTimeout = const Duration(seconds: 10);
   try {
     final req = await client.getUrl(Uri.parse(_apiUrl));
     req.headers
       ..set('User-Agent', 'scientific-calculator/$kBuildNumber')
       ..set('Accept', 'application/vnd.github+json')
       ..set('Cache-Control', 'no-cache');
-    final res = await req.close();
+    final res = await req.close().timeout(const Duration(seconds: 15));
     if (res.statusCode != 200) return null;
 
-    final body = await res.transform(utf8.decoder).join();
+    final body = await res
+        .transform(utf8.decoder)
+        .join()
+        .timeout(const Duration(seconds: 15));
     final list = jsonDecode(body) as List<dynamic>;
     if (list.isEmpty) return null;
 
