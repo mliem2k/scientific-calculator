@@ -10,7 +10,8 @@ class _BtnDef {
   final String label;
   final String? shiftLabel;
   final _BtnRole role;
-  const _BtnDef(this.id, this.label, {this.shiftLabel, required this.role});
+  final int flex;
+  const _BtnDef(this.id, this.label, {this.shiftLabel, required this.role, this.flex = 1});
 }
 
 enum _BtnRole { digit, fn, op, del, eq }
@@ -144,6 +145,7 @@ class ButtonGrid extends StatelessWidget {
                         children: [
                           for (final btn in row)
                             Expanded(
+                              flex: btn.flex,
                               child: _CalcButton(
                                 btn: btn,
                                 shiftActive: shiftActive,
