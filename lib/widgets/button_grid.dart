@@ -17,7 +17,15 @@ class _BtnDef {
 enum _BtnRole { digit, fn, op, del, eq }
 
 const _rows = [
-  // Row 1
+  // Row 1 — Control
+  [
+    _BtnDef('SHIFT',   'SHIFT',                       role: _BtnRole.fn),
+    _BtnDef('HYP',     'HYP',                         role: _BtnRole.fn),
+    _BtnDef('pi',      'π',                           role: _BtnRole.fn),
+    _BtnDef('e_const', 'e',   shiftLabel: 'eˣ',      role: _BtnRole.fn),
+    _BtnDef('Ans',     'Ans',                         role: _BtnRole.fn),
+  ],
+  // Row 2
   [
     _BtnDef('Sto',         'Sto',    shiftLabel: 'Paste Code', role: _BtnRole.fn),
     _BtnDef('exponent',    'xʸ',     shiftLabel: 'ⁿ√',     role: _BtnRole.fn),
@@ -25,7 +33,7 @@ const _rows = [
     _BtnDef('cos',         'cos(',   shiftLabel: 'cos⁻¹(', role: _BtnRole.fn),
     _BtnDef('tan',         'tan(',   shiftLabel: 'tan⁻¹(', role: _BtnRole.fn),
   ],
-  // Row 2
+  // Row 3
   [
     _BtnDef('abs',         'Abs',                          role: _BtnRole.fn),
     _BtnDef('fraction',    'a/b',    shiftLabel: 'mix',    role: _BtnRole.fn),
@@ -33,7 +41,7 @@ const _rows = [
     _BtnDef('log',         'log(',   shiftLabel: 'a↔cd/e', role: _BtnRole.fn),
     _BtnDef('ln',          'ln(',    shiftLabel: 'Dec↔a/b',role: _BtnRole.fn),
   ],
-  // Row 3
+  // Row 4
   [
     _BtnDef('factorial',   'x!',     shiftLabel: 'A',      role: _BtnRole.fn),
     _BtnDef('cube',        'x³',     shiftLabel: 'B',      role: _BtnRole.fn),
@@ -41,7 +49,7 @@ const _rows = [
     _BtnDef('paren_open',  '(',                            role: _BtnRole.fn),
     _BtnDef('paren_close', ')',       shiftLabel: 'Y',      role: _BtnRole.fn),
   ],
-  // Row 4
+  // Row 5
   [
     _BtnDef('7',    '7',   role: _BtnRole.digit),
     _BtnDef('8',    '8',   role: _BtnRole.digit),
@@ -49,7 +57,7 @@ const _rows = [
     _BtnDef('DEL',  'DEL', role: _BtnRole.del),
     _BtnDef('AC',   'AC',  role: _BtnRole.del),
   ],
-  // Row 5
+  // Row 6
   [
     _BtnDef('4',        '4', role: _BtnRole.digit),
     _BtnDef('5',        '5', role: _BtnRole.digit),
@@ -57,7 +65,7 @@ const _rows = [
     _BtnDef('multiply', '×', shiftLabel: 'nPr', role: _BtnRole.op),
     _BtnDef('divide',   '÷', shiftLabel: 'nCr', role: _BtnRole.op),
   ],
-  // Row 6
+  // Row 7
   [
     _BtnDef('1',     '1', role: _BtnRole.digit),
     _BtnDef('2',     '2', role: _BtnRole.digit),
@@ -65,7 +73,7 @@ const _rows = [
     _BtnDef('plus',  '+', role: _BtnRole.op),
     _BtnDef('minus', '−', role: _BtnRole.op),
   ],
-  // Row 7
+  // Row 8
   [
     _BtnDef('0',      '0',   role: _BtnRole.digit),
     _BtnDef('.',      '.',   role: _BtnRole.digit),

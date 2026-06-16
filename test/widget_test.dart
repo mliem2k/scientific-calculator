@@ -163,5 +163,57 @@ void main() {
       expect(controller.state.cursor.insertAt, lessThan(3));
     });
   });
+
+  group('control row', () {
+    testWidgets('SHIFT, HYP, π, e, Ans buttons are all present', (tester) async {
+      await tester.pumpWidget(_wrapButtonGrid());
+      await tester.pump();
+      expect(find.text('SHIFT'), findsOneWidget);
+      expect(find.text('HYP'), findsOneWidget);
+      expect(find.text('π'), findsOneWidget);
+      expect(find.text('e'), findsOneWidget);
+      expect(find.text('Ans'), findsOneWidget);
+    });
+
+    testWidgets('tapping SHIFT fires SHIFT action', (tester) async {
+      final fired = <String>[];
+      await tester.pumpWidget(MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => CalculatorController()),
+          ChangeNotifierProvider(create: (_) => SettingsController()),
+        ],
+        child: MaterialApp(
+          theme: darkTheme,
+          home: Scaffold(
+            body: ButtonGrid(onButton: fired.add, onPaste: () async {}),
+          ),
+        ),
+      ));
+      await tester.pump();
+      await tester.tap(find.text('SHIFT'));
+      await tester.pump();
+      expect(fired, contains('SHIFT'));
+    });
+
+    testWidgets('tapping π fires pi action', (tester) async {
+      final fired = <String>[];
+      await tester.pumpWidget(MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => CalculatorController()),
+          ChangeNotifierProvider(create: (_) => SettingsController()),
+        ],
+        child: MaterialApp(
+          theme: darkTheme,
+          home: Scaffold(
+            body: ButtonGrid(onButton: fired.add, onPaste: () async {}),
+          ),
+        ),
+      ));
+      await tester.pump();
+      await tester.tap(find.text('π'));
+      await tester.pump();
+      expect(fired, contains('pi'));
+    });
+  });
 }
 
