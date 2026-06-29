@@ -159,7 +159,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 child: LinearProgressIndicator(
                   value: _progress > 0 ? _progress : null,
                   minHeight: 6,
-                  backgroundColor: ct.buttonBorder.withAlpha(60),
+                  backgroundColor: ct.buttonBorder.withValues(alpha: 60 / 255),
                   valueColor:
                       AlwaysStoppedAnimation<Color>(ct.shiftActiveColor),
                 ),
@@ -245,7 +245,7 @@ class _StatusBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withAlpha(25),
+        color: color.withValues(alpha: 25 / 255),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
