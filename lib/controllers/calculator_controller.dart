@@ -1,44 +1,42 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/ast/types.dart';
 import '../core/ast/builder.dart';
 import '../core/ast/cursor.dart';
 import '../core/evaluator.dart';
 import '../core/history.dart';
 
-class CalculatorController extends ChangeNotifier {
-  CalculatorState _state;
-
-  CalculatorController() : _state = CalculatorState.initial() {
+class CalculatorNotifier extends Notifier<CalculatorState> {
+  @override
+  CalculatorState build() {
     _initHistory();
+    return CalculatorState.initial();
   }
-
-  CalculatorState get state => _state;
 
   Future<void> _initHistory() async {
     final h = await loadHistory();
-    _state = _state.copyWith(history: h);
-    notifyListeners();
+    state = state.copyWith(history: h);
   }
 
   void handleButton(String id) {
-    _state = _reduce(_state, id);
-    notifyListeners();
+    state = _reduce(state, id);
   }
 
   void handleCursorJump(List<CursorSegment> path, int insertAt) {
-    _state = _state.copyWith(cursor: Cursor(path, insertAt));
-    notifyListeners();
+    state = state.copyWith(cursor: Cursor(path, insertAt));
   }
 
   Future<void> handlePaste() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text?.trim() ?? '';
-    if (!RegExp(r'^-?[\d]+(\.[\d]+)?([eE][+-]?[\d]+)?$').hasMatch(text)) return;
+    if (!RegExp(r'^-?[\d]+(\.[\d]+)?([eE][+-]?[\d]+)?$').hasMatch(text)) {
+      return;
+    }
     final (expr, cur) =
-        insertNumberLiteral(_state.expression, _state.cursor, text);
-    final res = evaluate(expr, _state.angleMode, _state.lastResult, _state.memory);
-    _state = _state.copyWith(
+        insertNumberLiteral(state.expression, state.cursor, text);
+    final res =
+        evaluate(expr, state.angleMode, state.lastResult, state.memory);
+    state = state.copyWith(
       expression: expr,
       cursor: cur,
       result: res,
@@ -47,11 +45,10 @@ class CalculatorController extends ChangeNotifier {
       hypActive: false,
       stoMode: false,
     );
-    notifyListeners();
   }
 
   void handleRestore(HistoryEntry entry) {
-    _state = _state.copyWith(
+    state = state.copyWith(
       expression: entry.expression,
       cursor: Cursor(const [], entry.expression.length),
       result: entry.result,
@@ -60,37 +57,28 @@ class CalculatorController extends ChangeNotifier {
       hypActive: false,
       stoMode: false,
     );
-    notifyListeners();
   }
 
   CalculatorState _reduce(CalculatorState prev, String id) {
     if (id == 'SHIFT') {
-      return prev.copyWith(
-        shiftActive: !prev.shiftActive,
-        hypActive: false,
-      );
+      return prev.copyWith(shiftActive: !prev.shiftActive, hypActive: false);
     }
 
     if (id == 'HYP') {
-      return prev.copyWith(
-        hypActive: !prev.hypActive,
-        shiftActive: false,
-      );
+      return prev.copyWith(hypActive: !prev.hypActive, shiftActive: false);
     }
 
     if (id == 'DEG_RAD') {
       return prev.copyWith(
-        angleMode: prev.angleMode == AngleMode.deg ? AngleMode.rad : AngleMode.deg,
+        angleMode:
+            prev.angleMode == AngleMode.deg ? AngleMode.rad : AngleMode.deg,
         shiftActive: false,
       );
     }
 
     if (id == 'Sto') {
       return prev.copyWith(
-        stoMode: true,
-        shiftActive: false,
-        hypActive: false,
-      );
+          stoMode: true, shiftActive: false, hypActive: false);
     }
 
     if (id == 'A' || id == 'B' || id == 'X' || id == 'Y') {
@@ -98,10 +86,7 @@ class CalculatorController extends ChangeNotifier {
         final val = double.tryParse(prev.result ?? '');
         if (val == null) {
           return prev.copyWith(
-            stoMode: false,
-            shiftActive: false,
-            hypActive: false,
-          );
+              stoMode: false, shiftActive: false, hypActive: false);
         }
         final mem = switch (id) {
           'A' => prev.memory.copyWith(a: val),
@@ -111,14 +96,9 @@ class CalculatorController extends ChangeNotifier {
           _ => prev.memory,
         };
         return prev.copyWith(
-          memory: mem,
-          stoMode: false,
-          shiftActive: false,
-          hypActive: false,
-        );
+            memory: mem, stoMode: false, shiftActive: false, hypActive: false);
       } else {
-        final (expr, cur) =
-            insertConstant(prev.expression, prev.cursor, id);
+        final (expr, cur) = insertConstant(prev.expression, prev.cursor, id);
         final res =
             evaluate(expr, prev.angleMode, prev.lastResult, prev.memory);
         return prev.copyWith(
@@ -143,24 +123,20 @@ class CalculatorController extends ChangeNotifier {
           hypActive: false,
           stoMode: false,
         );
-      } else {
-        final fracStr = toFraction(prev.result ?? '');
-        if (fracStr == null) {
-          return prev.copyWith(
-            shiftActive: false,
-            hypActive: false,
-            stoMode: false,
-          );
-        }
-        return prev.copyWith(
-          lastResult: prev.result,
-          result: fracStr,
-          resultMode: 'fraction',
-          shiftActive: false,
-          hypActive: false,
-          stoMode: false,
-        );
       }
+      final fracStr = toFraction(prev.result ?? '');
+      if (fracStr == null) {
+        return prev.copyWith(
+            shiftActive: false, hypActive: false, stoMode: false);
+      }
+      return prev.copyWith(
+        lastResult: prev.result,
+        result: fracStr,
+        resultMode: 'fraction',
+        shiftActive: false,
+        hypActive: false,
+        stoMode: false,
+      );
     }
 
     if (id == 'MixedFrac') {
@@ -185,30 +161,22 @@ class CalculatorController extends ChangeNotifier {
         );
       }
       return prev.copyWith(
-        shiftActive: false,
-        hypActive: false,
-        stoMode: false,
-      );
+          shiftActive: false, hypActive: false, stoMode: false);
     }
 
     if (id == 'LEFT') {
-      final cur = moveCursorLeft(prev.expression, prev.cursor);
-      return prev.copyWith(cursor: cur);
+      return prev.copyWith(cursor: moveCursorLeft(prev.expression, prev.cursor));
     }
-
     if (id == 'RIGHT') {
-      final cur = moveCursorRight(prev.expression, prev.cursor);
-      return prev.copyWith(cursor: cur);
+      return prev.copyWith(
+          cursor: moveCursorRight(prev.expression, prev.cursor));
     }
-
     if (id == 'UP') {
-      final cur = moveCursorUp(prev.expression, prev.cursor);
-      return prev.copyWith(cursor: cur);
+      return prev.copyWith(cursor: moveCursorUp(prev.expression, prev.cursor));
     }
-
     if (id == 'DOWN') {
-      final cur = moveCursorDown(prev.expression, prev.cursor);
-      return prev.copyWith(cursor: cur);
+      return prev.copyWith(
+          cursor: moveCursorDown(prev.expression, prev.cursor));
     }
 
     if (id == 'DEL') {
@@ -244,10 +212,7 @@ class CalculatorController extends ChangeNotifier {
           evaluate(prev.expression, prev.angleMode, prev.lastResult, prev.memory);
       if (res == null) {
         return prev.copyWith(
-          shiftActive: false,
-          hypActive: false,
-          stoMode: false,
-        );
+            shiftActive: false, hypActive: false, stoMode: false);
       }
       _persistHistory(prev.expression, res, prev.history);
       return prev.copyWith(
@@ -260,8 +225,6 @@ class CalculatorController extends ChangeNotifier {
       );
     }
 
-    // Fraction button on a visible result converts decimal ↔ fraction,
-    // matching Casio a b/c key behavior.
     if (id == 'fraction' && prev.result != null) {
       if (prev.resultMode == 'fraction') {
         return prev.copyWith(
@@ -285,19 +248,13 @@ class CalculatorController extends ChangeNotifier {
         );
       }
       return prev.copyWith(
-        shiftActive: false,
-        hypActive: false,
-        stoMode: false,
-      );
+          shiftActive: false, hypActive: false, stoMode: false);
     }
 
     final (expr, cur) = _applyInsert(prev, id);
     if (expr == null) {
       return prev.copyWith(
-        shiftActive: false,
-        hypActive: false,
-        stoMode: false,
-      );
+          shiftActive: false, hypActive: false, stoMode: false);
     }
     final res =
         evaluate(expr, prev.angleMode, prev.lastResult, prev.memory);
@@ -327,169 +284,83 @@ class CalculatorController extends ChangeNotifier {
       case '7':
       case '8':
       case '9':
-        final (expr, cur) = insertDigit(e, c, id);
-        return (expr, cur);
-
+        return insertDigit(e, c, id);
       case '.':
-        final (expr, cur) = insertDecimalPoint(e, c);
-        return (expr, cur);
-
+        return insertDecimalPoint(e, c);
       case 'plus':
-        final (expr, cur) = insertOperator(e, c, '+');
-        return (expr, cur);
-
+        return insertOperator(e, c, '+');
       case 'minus':
-        final (expr, cur) = insertOperator(e, c, '-');
-        return (expr, cur);
-
+        return insertOperator(e, c, '-');
       case 'multiply':
-        final (expr, cur) = insertOperator(e, c, '×');
-        return (expr, cur);
-
+        return insertOperator(e, c, '×');
       case 'divide':
-        final (expr, cur) = insertOperator(e, c, '÷');
-        return (expr, cur);
-
+        return insertOperator(e, c, '÷');
       case 'fraction':
-        final (expr, cur) = insertFraction(e, c);
-        return (expr, cur);
-
+        return insertFraction(e, c);
       case 'exponent':
-        final (expr, cur) = insertExponent(e, c);
-        return (expr, cur);
-
+        return insertExponent(e, c);
       case 'sqrt':
-        final (expr, cur) = insertRadical(e, c, false);
-        return (expr, cur);
-
+        return insertRadical(e, c, false);
       case 'cbrt':
-        final (expr, cur) = insertRadical(e, c, true);
-        return (expr, cur);
-
+        return insertRadical(e, c, true);
       case 'square':
-        final (expr, cur) = insertSquare(e, c);
-        return (expr, cur);
-
+        return insertSquare(e, c);
       case 'cube':
-        final (expr, cur) = insertCube(e, c);
-        return (expr, cur);
-
+        return insertCube(e, c);
       case 'nthRoot':
-        final (expr, cur) = insertNthRadical(e, c);
-        return (expr, cur);
-
+        return insertNthRadical(e, c);
       case 'mix':
-        final (expr, cur) = insertMixed(e, c);
-        return (expr, cur);
-
+        return insertMixed(e, c);
       case 'factorial':
-        final (expr, cur) = insertFactorial(e, c);
-        return (expr, cur);
-
+        return insertFactorial(e, c);
       case 'ncr':
-        final (expr, cur) = insertNcr(e, c);
-        return (expr, cur);
-
+        return insertNcr(e, c);
       case 'npr':
-        final (expr, cur) = insertNpr(e, c);
-        return (expr, cur);
-
+        return insertNpr(e, c);
       case 'paren_open':
-        final (expr, cur) = insertParen(e, c, 'open');
-        return (expr, cur);
-
+        return insertParen(e, c, 'open');
       case 'paren_close':
-        final (expr, cur) = insertParen(e, c, 'close');
-        return (expr, cur);
-
+        return insertParen(e, c, 'close');
       case 'pi':
-        final (expr, cur) = insertConstant(e, c, 'pi');
-        return (expr, cur);
-
+        return insertConstant(e, c, 'pi');
       case 'e_const':
-        final (expr, cur) = insertConstant(e, c, 'e');
-        return (expr, cur);
-
+        return insertConstant(e, c, 'e');
       case 'Ans':
-        final (expr, cur) = insertConstant(e, c, 'Ans');
-        return (expr, cur);
-
-      case 'reciprocal':
-        final (expr, cur) = insertReciprocal(e, c);
-        return (expr, cur);
-
+        return insertConstant(e, c, 'Ans');
       case 'EXP':
-        final (expr, cur) = insertExp(e, c);
-        return (expr, cur);
-
+        return insertExp(e, c);
       case 'abs':
-        final (expr, cur) = insertFunction(e, c, FunctionName.abs);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.abs);
       case 'sin':
-        final (expr, cur) = insertFunction(e, c, FunctionName.sin);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.sin);
       case 'cos':
-        final (expr, cur) = insertFunction(e, c, FunctionName.cos);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.cos);
       case 'tan':
-        final (expr, cur) = insertFunction(e, c, FunctionName.tan);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.tan);
       case 'asin':
-        final (expr, cur) = insertFunction(e, c, FunctionName.asin);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.asin);
       case 'acos':
-        final (expr, cur) = insertFunction(e, c, FunctionName.acos);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.acos);
       case 'atan':
-        final (expr, cur) = insertFunction(e, c, FunctionName.atan);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.atan);
       case 'sinh':
-        final (expr, cur) = insertFunction(e, c, FunctionName.sinh);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.sinh);
       case 'cosh':
-        final (expr, cur) = insertFunction(e, c, FunctionName.cosh);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.cosh);
       case 'tanh':
-        final (expr, cur) = insertFunction(e, c, FunctionName.tanh);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.tanh);
       case 'asinh':
-        final (expr, cur) = insertFunction(e, c, FunctionName.asinh);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.asinh);
       case 'acosh':
-        final (expr, cur) = insertFunction(e, c, FunctionName.acosh);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.acosh);
       case 'atanh':
-        final (expr, cur) = insertFunction(e, c, FunctionName.atanh);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.atanh);
       case 'log':
-        final (expr, cur) = insertFunction(e, c, FunctionName.log);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.log);
       case 'ln':
-        final (expr, cur) = insertFunction(e, c, FunctionName.ln);
-        return (expr, cur);
-
-      case 'pow10':
-        final (expr, cur) = insertFunction(e, c, FunctionName.pow10);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.ln);
       case 'exp':
-        final (expr, cur) = insertFunction(e, c, FunctionName.exp);
-        return (expr, cur);
-
+        return insertFunction(e, c, FunctionName.exp);
       default:
         return (null, null);
     }
@@ -498,8 +369,10 @@ class CalculatorController extends ChangeNotifier {
   void _persistHistory(
       List<ASTNode> expression, String result, List<HistoryEntry> current) {
     addEntry(current, expression, result).then((updated) {
-      _state = _state.copyWith(history: updated);
-      notifyListeners();
+      state = state.copyWith(history: updated);
     });
   }
 }
+
+final calculatorProvider =
+    NotifierProvider<CalculatorNotifier, CalculatorState>(CalculatorNotifier.new);
