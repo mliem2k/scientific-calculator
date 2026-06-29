@@ -30,7 +30,7 @@ void main() {
     });
 
     test('numerator end → denominator start', () {
-      final cur = c(1, [CursorSegment(0, 'numerator')]);
+      final cur = c(1, [const CursorSegment(0, 'numerator')]);
       final result = moveCursorRight(fraction, cur);
       expect(result.path.length, 1);
       expect(result.path[0].nodeIndex, 0);
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('denominator end → exits fraction to right', () {
-      final cur = c(1, [CursorSegment(0, 'denominator')]);
+      final cur = c(1, [const CursorSegment(0, 'denominator')]);
       final result = moveCursorRight(fraction, cur);
       expect(result.insertAt, 1);
       expect(result.path, isEmpty);
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('denominator start → numerator end', () {
-      final cur = c(0, [CursorSegment(0, 'denominator')]);
+      final cur = c(0, [const CursorSegment(0, 'denominator')]);
       final result = moveCursorLeft(fraction, cur);
       expect(result.path.length, 1);
       expect(result.path[0].nodeIndex, 0);
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('numerator start → exits to before fraction', () {
-      final cur = c(0, [CursorSegment(0, 'numerator')]);
+      final cur = c(0, [const CursorSegment(0, 'numerator')]);
       final result = moveCursorLeft(fraction, cur);
       expect(result.insertAt, 0);
       expect(result.path, isEmpty);
@@ -84,7 +84,7 @@ void main() {
 
   group('moveCursorUp', () {
     test('denominator → numerator', () {
-      final cur = c(0, [CursorSegment(0, 'denominator')]);
+      final cur = c(0, [const CursorSegment(0, 'denominator')]);
       final result = moveCursorUp(fraction, cur);
       expect(result.path[result.path.length - 1].slot, 'numerator');
     });
@@ -96,7 +96,7 @@ void main() {
     });
 
     test('does nothing in numerator already', () {
-      final cur = c(0, [CursorSegment(0, 'numerator')]);
+      final cur = c(0, [const CursorSegment(0, 'numerator')]);
       final result = moveCursorUp(fraction, cur);
       expect(result.path.length, 1);
       expect(result.path[0].slot, 'numerator');
@@ -106,7 +106,7 @@ void main() {
 
   group('moveCursorDown', () {
     test('numerator → denominator', () {
-      final cur = c(0, [CursorSegment(0, 'numerator')]);
+      final cur = c(0, [const CursorSegment(0, 'numerator')]);
       final result = moveCursorDown(fraction, cur);
       expect(result.path[result.path.length - 1].slot, 'denominator');
     });

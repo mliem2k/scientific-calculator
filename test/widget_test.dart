@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:scientific_calculator/controllers/calculator_controller.dart';
-import 'package:scientific_calculator/controllers/settings_controller.dart';
 import 'package:scientific_calculator/core/ast/types.dart';
 import 'package:scientific_calculator/theme/themes.dart';
 import 'package:scientific_calculator/widgets/ast/ast_renderer.dart';
 import 'package:scientific_calculator/widgets/button_grid.dart';
 import 'package:scientific_calculator/widgets/calc_display.dart';
 
-Widget _wrapButtonGrid() => MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CalculatorController()),
-        ChangeNotifierProvider(create: (_) => SettingsController()),
-      ],
+Widget _wrapButtonGrid() => ProviderScope(
       child: MaterialApp(
         theme: darkTheme,
         home: Scaffold(
@@ -25,11 +20,7 @@ Widget _wrapButtonGrid() => MultiProvider(
       ),
     );
 
-Widget _wrapCalcDisplay() => MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CalculatorController()),
-        ChangeNotifierProvider(create: (_) => SettingsController()),
-      ],
+Widget _wrapCalcDisplay() => ProviderScope(
       child: MaterialApp(
         theme: darkTheme,
         home: Scaffold(
@@ -96,12 +87,10 @@ void main() {
     });
 
     testWidgets('DEG badge tap toggles angle mode to RAD', (tester) async {
-      final controller = CalculatorController();
-      await tester.pumpWidget(MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: controller),
-          ChangeNotifierProvider(create: (_) => SettingsController()),
-        ],
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(UncontrolledProviderScope(
+        container: container,
         child: MaterialApp(
           theme: darkTheme,
           home: Scaffold(
@@ -110,10 +99,10 @@ void main() {
         ),
       ));
       await tester.pump();
-      expect(controller.state.angleMode, AngleMode.deg);
+      expect(container.read(calculatorProvider).angleMode, AngleMode.deg);
       await tester.tap(find.text('DEG'));
       await tester.pump();
-      expect(controller.state.angleMode, AngleMode.rad);
+      expect(container.read(calculatorProvider).angleMode, AngleMode.rad);
     });
 
     testWidgets('history icon is present', (tester) async {
@@ -153,13 +142,11 @@ void main() {
 
   group('long-press drag cursor', () {
     testWidgets('long-press on expression moves cursor from end', (tester) async {
-      final controller = CalculatorController();
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
       await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: controller),
-            ChangeNotifierProvider(create: (_) => SettingsController()),
-          ],
+        UncontrolledProviderScope(
+          container: container,
           child: MaterialApp(
             theme: darkTheme,
             home: Scaffold(
@@ -174,14 +161,14 @@ void main() {
       );
 
       // Build a 3-node expression: "1 + 2"
-      controller.handleButton('1');
-      controller.handleButton('plus');
-      controller.handleButton('2');
+      container.read(calculatorProvider.notifier).handleButton('1');
+      container.read(calculatorProvider.notifier).handleButton('plus');
+      container.read(calculatorProvider.notifier).handleButton('2');
       await tester.pump();
 
       // Cursor starts at end of expression
-      expect(controller.state.cursor.path, isEmpty);
-      expect(controller.state.cursor.insertAt, 3);
+      expect(container.read(calculatorProvider).cursor.path, isEmpty);
+      expect(container.read(calculatorProvider).cursor.insertAt, 3);
 
       // Long-press the far-left edge of the expression scroll view
       final scrollView = find.byType(SingleChildScrollView).first;
@@ -195,8 +182,8 @@ void main() {
       await tester.pump();
 
       // Cursor moved earlier in the expression
-      expect(controller.state.cursor.path, isEmpty);
-      expect(controller.state.cursor.insertAt, lessThan(3));
+      expect(container.read(calculatorProvider).cursor.path, isEmpty);
+      expect(container.read(calculatorProvider).cursor.insertAt, lessThan(3));
     });
   });
 
@@ -213,11 +200,7 @@ void main() {
 
     testWidgets('tapping SHIFT fires SHIFT action', (tester) async {
       final fired = <String>[];
-      await tester.pumpWidget(MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => CalculatorController()),
-          ChangeNotifierProvider(create: (_) => SettingsController()),
-        ],
+      await tester.pumpWidget(ProviderScope(
         child: MaterialApp(
           theme: darkTheme,
           home: Scaffold(
@@ -233,11 +216,7 @@ void main() {
 
     testWidgets('tapping π fires pi action', (tester) async {
       final fired = <String>[];
-      await tester.pumpWidget(MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => CalculatorController()),
-          ChangeNotifierProvider(create: (_) => SettingsController()),
-        ],
+      await tester.pumpWidget(ProviderScope(
         child: MaterialApp(
           theme: darkTheme,
           home: Scaffold(
@@ -274,19 +253,16 @@ void main() {
   });
 
   group('shift action mappings', () {
-    Widget buildTrackedGrid(CalculatorController controller, List<String> fired) {
-      return MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: controller),
-          ChangeNotifierProvider(create: (_) => SettingsController()),
-        ],
+    Widget buildTrackedGrid(ProviderContainer container, List<String> fired) {
+      return UncontrolledProviderScope(
+        container: container,
         child: MaterialApp(
           theme: darkTheme,
           home: Scaffold(
             body: ButtonGrid(
               onButton: (id) {
                 fired.add(id);
-                controller.handleButton(id);
+                container.read(calculatorProvider.notifier).handleButton(id);
               },
               onPaste: () async {},
             ),
@@ -296,13 +272,14 @@ void main() {
     }
 
     testWidgets('SHIFT + e fires exp (eˣ)', (tester) async {
-      final controller = CalculatorController();
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
       final fired = <String>[];
-      await tester.pumpWidget(buildTrackedGrid(controller, fired));
+      await tester.pumpWidget(buildTrackedGrid(container, fired));
       await tester.pump();
       await tester.tap(find.text('SHIFT'));
       await tester.pump();
-      expect(controller.state.shiftActive, isTrue);
+      expect(container.read(calculatorProvider).shiftActive, isTrue);
       // When shiftActive, 'e' button shows 'eˣ' as its primary label
       await tester.tap(find.text('eˣ'));
       await tester.pump();
@@ -310,13 +287,14 @@ void main() {
     });
 
     testWidgets('SHIFT + . fires EXP', (tester) async {
-      final controller = CalculatorController();
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
       final fired = <String>[];
-      await tester.pumpWidget(buildTrackedGrid(controller, fired));
+      await tester.pumpWidget(buildTrackedGrid(container, fired));
       await tester.pump();
       await tester.tap(find.text('SHIFT'));
       await tester.pump();
-      expect(controller.state.shiftActive, isTrue);
+      expect(container.read(calculatorProvider).shiftActive, isTrue);
       // When shiftActive, '.' button shows 'EXP' as its primary label
       await tester.tap(find.text('EXP'));
       await tester.pump();
@@ -324,4 +302,3 @@ void main() {
     });
   });
 }
-

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/settings_controller.dart';
 import '../core/ast/types.dart';
@@ -8,14 +8,14 @@ import '../theme/calc_theme.dart';
 import '../theme/themes.dart';
 import '../widgets/update_dialog.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _checking = false;
 
   Future<void> _checkForUpdate() async {
@@ -48,7 +48,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final ct = Theme.of(context).extension<CalcTheme>()!;
-    final settings = context.watch<SettingsController>();
+    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
 
     return Scaffold(
       backgroundColor: ct.background,
@@ -61,7 +62,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           _SectionHeader(label: 'APPEARANCE', ct: ct),
-          _ThemePickerGrid(settings: settings, ct: ct),
+          _ThemePickerGrid(
+            settings: settings,
+            ct: ct,
+            onSetTheme: notifier.setTheme,
+          ),
           _SectionHeader(label: 'CALCULATOR', ct: ct),
           ListTile(
             tileColor: ct.buttonBg,
@@ -70,36 +75,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Default angle mode'),
             trailing: SegmentedButton<AngleMode>(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return ct.shiftActiveColor;
-                  }
-                  return ct.buttonBg;
-                }),
-                foregroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return ct.eqText;
-                  }
-                  return ct.expressionText;
-                }),
+                backgroundColor: WidgetStateProperty.resolveWith((states) =>
+                    states.contains(WidgetState.selected)
+                        ? ct.shiftActiveColor
+                        : ct.buttonBg),
+                foregroundColor: WidgetStateProperty.resolveWith((states) =>
+                    states.contains(WidgetState.selected)
+                        ? ct.eqText
+                        : ct.expressionText),
                 side: WidgetStateProperty.all(
-                  BorderSide(color: ct.buttonBorder),
-                ),
+                    BorderSide(color: ct.buttonBorder)),
               ),
               segments: const [
                 ButtonSegment<AngleMode>(
-                  value: AngleMode.deg,
-                  label: Text('DEG'),
-                ),
+                    value: AngleMode.deg, label: Text('DEG')),
                 ButtonSegment<AngleMode>(
-                  value: AngleMode.rad,
-                  label: Text('RAD'),
-                ),
+                    value: AngleMode.rad, label: Text('RAD')),
               ],
               selected: {settings.defaultAngleMode},
-              onSelectionChanged: (selection) {
-                settings.setDefaultAngleMode(selection.first);
-              },
+              onSelectionChanged: (s) =>
+                  notifier.setDefaultAngleMode(s.first),
             ),
           ),
           ListTile(
@@ -119,40 +114,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 DropdownMenuItem(value: 8, child: Text('8 dec')),
                 DropdownMenuItem(value: 10, child: Text('10 dec')),
               ],
-              onChanged: (value) {
-                if (value != null) settings.setResultPrecision(value);
+              onChanged: (v) {
+                if (v != null) notifier.setResultPrecision(v);
               },
             ),
           ),
           _SectionHeader(label: 'DISPLAY', ct: ct),
           SwitchListTile(
             tileColor: ct.buttonBg,
-            title: Text(
-              'Show shift labels',
-              style: TextStyle(color: ct.expressionText),
-            ),
+            title: Text('Show shift labels',
+                style: TextStyle(color: ct.expressionText)),
             subtitle: Text(
               'Display secondary function labels on buttons',
               style: TextStyle(color: ct.resultText),
             ),
             activeThumbColor: ct.shiftActiveColor,
             value: settings.showShiftLabels,
-            onChanged: settings.setShowShiftLabels,
+            onChanged: notifier.setShowShiftLabels,
           ),
           _SectionHeader(label: 'BEHAVIOR', ct: ct),
           SwitchListTile(
             tileColor: ct.buttonBg,
-            title: Text(
-              'Haptic feedback',
-              style: TextStyle(color: ct.expressionText),
-            ),
-            subtitle: Text(
-              'Vibrate on button press',
-              style: TextStyle(color: ct.resultText),
-            ),
+            title: Text('Haptic feedback',
+                style: TextStyle(color: ct.expressionText)),
+            subtitle: Text('Vibrate on button press',
+                style: TextStyle(color: ct.resultText)),
             activeThumbColor: ct.shiftActiveColor,
             value: settings.hapticFeedback,
-            onChanged: settings.setHapticFeedback,
+            onChanged: notifier.setHapticFeedback,
           ),
           _SectionHeader(label: 'ABOUT', ct: ct),
           Padding(
@@ -161,12 +150,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/icon.png',
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset('assets/icon.png',
+                      width: 56, height: 56, fit: BoxFit.cover),
                 ),
                 const SizedBox(width: 14),
                 Column(
@@ -175,16 +160,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Text(
                       'Scientific Calculator',
                       style: TextStyle(
-                        color: ct.expressionText,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                          color: ct.expressionText,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      _buildVersionString(),
-                      style: TextStyle(color: ct.secondaryLabel, fontSize: 13),
-                    ),
+                    Text(_buildVersionString(),
+                        style:
+                            TextStyle(color: ct.secondaryLabel, fontSize: 13)),
                   ],
                 ),
               ],
@@ -196,19 +179,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             iconColor: ct.expressionText,
             leading: const Icon(Icons.system_update_outlined),
             title: const Text('Check for updates'),
-            subtitle: Text(
-              'Compare with latest GitHub release',
-              style: TextStyle(color: ct.resultText),
-            ),
+            subtitle: Text('Compare with latest GitHub release',
+                style: TextStyle(color: ct.resultText)),
             trailing: _checking
                 ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: ct.shiftActiveColor,
-                    ),
-                  )
+                        strokeWidth: 2, color: ct.shiftActiveColor))
                 : null,
             onTap: _checking ? null : _checkForUpdate,
           ),
@@ -218,11 +196,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             iconColor: ct.expressionText,
             leading: const Icon(Icons.code_outlined),
             title: const Text('Source code'),
-            subtitle: Text(
-              'github.com/mliem2k/scientific-calculator',
-              style: TextStyle(color: ct.resultText),
-            ),
-            trailing: Icon(Icons.open_in_new, size: 16, color: ct.secondaryLabel),
+            subtitle: Text('github.com/mliem2k/scientific-calculator',
+                style: TextStyle(color: ct.resultText)),
+            trailing:
+                Icon(Icons.open_in_new, size: 16, color: ct.secondaryLabel),
             onTap: () => launchUrl(
               Uri.parse('https://github.com/mliem2k/scientific-calculator'),
               mode: LaunchMode.externalApplication,
@@ -271,36 +248,29 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _ThemePickerGrid extends StatelessWidget {
-  const _ThemePickerGrid({required this.settings, required this.ct});
+  const _ThemePickerGrid({
+    required this.settings,
+    required this.ct,
+    required this.onSetTheme,
+  });
 
-  final SettingsController settings;
+  final SettingsState settings;
   final CalcTheme ct;
+  final void Function(CalcThemeId) onSetTheme;
 
-  CalcTheme _themeForPreview(CalcThemeId id) {
-    switch (id) {
-      case CalcThemeId.amoled:
-        return amoledCalcTheme;
-      case CalcThemeId.dark:
-        return darkCalcTheme;
-      case CalcThemeId.light:
-        return lightCalcTheme;
-      case CalcThemeId.retro:
-        return retroCalcTheme;
-    }
-  }
+  CalcTheme _themeForPreview(CalcThemeId id) => switch (id) {
+        CalcThemeId.amoled => amoledCalcTheme,
+        CalcThemeId.dark => darkCalcTheme,
+        CalcThemeId.light => lightCalcTheme,
+        CalcThemeId.retro => retroCalcTheme,
+      };
 
-  String _nameForId(CalcThemeId id) {
-    switch (id) {
-      case CalcThemeId.amoled:
-        return 'AMOLED';
-      case CalcThemeId.dark:
-        return 'Dark';
-      case CalcThemeId.light:
-        return 'Light';
-      case CalcThemeId.retro:
-        return 'Retro';
-    }
-  }
+  String _nameForId(CalcThemeId id) => switch (id) {
+        CalcThemeId.amoled => 'AMOLED',
+        CalcThemeId.dark => 'Dark',
+        CalcThemeId.light => 'Light',
+        CalcThemeId.retro => 'Retro',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -315,13 +285,12 @@ class _ThemePickerGrid extends StatelessWidget {
         childAspectRatio: 2.2,
         children: CalcThemeId.values.map((id) {
           final preview = _themeForPreview(id);
-          final isActive = settings.themeId == id;
           return _ThemeCard(
             themeId: id,
             name: _nameForId(id),
             preview: preview,
-            isActive: isActive,
-            onTap: () => settings.setTheme(id),
+            isActive: settings.themeId == id,
+            onTap: () => onSetTheme(id),
           );
         }).toList(),
       ),
@@ -372,7 +341,9 @@ class _ThemeCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        _SwatchBox(color: preview.buttonBg, border: preview.buttonBorder),
+                        _SwatchBox(
+                            color: preview.buttonBg,
+                            border: preview.buttonBorder),
                         const SizedBox(width: 4),
                         _SwatchBox(color: preview.opText),
                         const SizedBox(width: 4),
@@ -386,11 +357,8 @@ class _ThemeCard extends StatelessWidget {
                 Positioned(
                   top: 6,
                   right: 6,
-                  child: Icon(
-                    Icons.check_circle,
-                    size: 18,
-                    color: preview.shiftActiveColor,
-                  ),
+                  child: Icon(Icons.check_circle,
+                      size: 18, color: preview.shiftActiveColor),
                 ),
             ],
           ),
@@ -414,9 +382,8 @@ class _SwatchBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(3),
-        border: border != null
-            ? Border.all(color: border!, width: 1)
-            : null,
+        border:
+            border != null ? Border.all(color: border!, width: 1) : null,
       ),
     );
   }

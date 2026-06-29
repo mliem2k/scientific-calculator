@@ -191,7 +191,7 @@ void main() {
 
     test('close: exits to parent level after paren node', () {
       final init = [ParenNode([])];
-      final inner = Cursor([CursorSegment(0, 'children')], 0);
+      const inner = Cursor([CursorSegment(0, 'children')], 0);
       final (_, cur) = insertParen(init, inner, 'close');
       expect(cur.insertAt, 1);
       expect(cur.path, isEmpty);
@@ -225,7 +225,7 @@ void main() {
 
     test('exits to parent when at position 0 in a slot', () {
       final init = [FractionNode([], [])];
-      final inner = Cursor([CursorSegment(0, 'numerator')], 0);
+      const inner = Cursor([CursorSegment(0, 'numerator')], 0);
       final (_, cur) = deleteCurrent(init, inner);
       expect(cur.insertAt, 0);
       expect(cur.path, isEmpty);

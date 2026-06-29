@@ -270,7 +270,7 @@ List<ASTNode> _slotOf(ASTNode node, String slot) {
 }
 
 (List<ASTNode>, Cursor) clearAll() {
-  return ([], Cursor(const [], 0));
+  return ([], const Cursor([], 0));
 }
 
 (List<ASTNode>, Cursor) insertCube(List<ASTNode> root, Cursor cursor) {
