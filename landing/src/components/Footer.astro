@@ -2,13 +2,35 @@
 ---
 <footer class="border-t border-[#18181b] bg-black px-6 py-10 text-center">
   <div class="mb-4">
-    <a
-      href="https://github.com/mliem2k/scientific-calculator/releases"
-      class="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#e4e4e7]"
+    <button
+      id="dl-footer"
+      type="button"
+      class="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#e4e4e7] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer border-none"
     >
       Download APK — Free
-    </a>
+    </button>
   </div>
+
+<script>
+  const btn = document.getElementById('dl-footer') as HTMLButtonElement;
+  btn?.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Fetching...';
+    try {
+      const res = await fetch('https://api.github.com/repos/mliem2k/scientific-calculator/releases');
+      const releases: { prerelease: boolean; assets: { name: string; browser_download_url: string }[] }[] = await res.json();
+      const nightly = releases.find(r => r.prerelease);
+      const apk = nightly?.assets?.find(a => a.name.endsWith('.apk'));
+      if (!apk) throw new Error('APK not found');
+      window.location.href = apk.browser_download_url;
+      btn.textContent = 'Download APK — Free';
+    } catch {
+      btn.textContent = 'Download failed';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
   <p class="text-xs text-[#52525b]">
     Scientific Calculator &nbsp;·&nbsp;
     <a
