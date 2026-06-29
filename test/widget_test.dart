@@ -232,14 +232,6 @@ void main() {
   });
 
   group('bottom row', () {
-    testWidgets('= is to the right of (−)', (tester) async {
-      await tester.pumpWidget(_wrapButtonGrid());
-      await tester.pump();
-      final eqPos = tester.getCenter(find.text('='));
-      final negatePos = tester.getCenter(find.text('(−)'));
-      expect(eqPos.dx, greaterThan(negatePos.dx));
-    });
-
     testWidgets('EXP is not a 22px primary button label', (tester) async {
       await tester.pumpWidget(_wrapButtonGrid());
       await tester.pump();

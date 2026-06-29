@@ -14,8 +14,10 @@ class CalculatorNotifier extends Notifier<CalculatorState> {
   }
 
   Future<void> _initHistory() async {
-    final h = await loadHistory();
-    state = state.copyWith(history: h);
+    try {
+      final h = await loadHistory();
+      state = state.copyWith(history: h);
+    } catch (_) {}
   }
 
   void handleButton(String id) {
@@ -370,7 +372,7 @@ class CalculatorNotifier extends Notifier<CalculatorState> {
       List<ASTNode> expression, String result, List<HistoryEntry> current) {
     addEntry(current, expression, result).then((updated) {
       state = state.copyWith(history: updated);
-    });
+    }).ignore();
   }
 }
 

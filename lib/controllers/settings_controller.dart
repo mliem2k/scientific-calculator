@@ -36,47 +36,48 @@ class SettingsState {
 }
 
 class SettingsNotifier extends Notifier<SettingsState> {
-  late SharedPreferences _prefs;
+  SharedPreferences? _prefs;
 
   @override
   SettingsState build() => const SettingsState();
 
   Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
+    _prefs = prefs;
     state = SettingsState(
       themeId:
-          CalcThemeId.values.byName(_prefs.getString('theme') ?? 'amoled'),
+          CalcThemeId.values.byName(prefs.getString('theme') ?? 'amoled'),
       defaultAngleMode:
-          AngleMode.values.byName(_prefs.getString('angleMode') ?? 'deg'),
-      resultPrecision: _prefs.getInt('resultPrecision') ?? 0,
-      showShiftLabels: _prefs.getBool('showShiftLabels') ?? true,
-      hapticFeedback: _prefs.getBool('hapticFeedback') ?? true,
+          AngleMode.values.byName(prefs.getString('angleMode') ?? 'deg'),
+      resultPrecision: prefs.getInt('resultPrecision') ?? 0,
+      showShiftLabels: prefs.getBool('showShiftLabels') ?? true,
+      hapticFeedback: prefs.getBool('hapticFeedback') ?? true,
     );
   }
 
   void setTheme(CalcThemeId id) {
     state = state.copyWith(themeId: id);
-    _prefs.setString('theme', id.name);
+    _prefs?.setString('theme', id.name);
   }
 
   void setDefaultAngleMode(AngleMode mode) {
     state = state.copyWith(defaultAngleMode: mode);
-    _prefs.setString('angleMode', mode.name);
+    _prefs?.setString('angleMode', mode.name);
   }
 
   void setResultPrecision(int p) {
     state = state.copyWith(resultPrecision: p);
-    _prefs.setInt('resultPrecision', p);
+    _prefs?.setInt('resultPrecision', p);
   }
 
   void setShowShiftLabels(bool v) {
     state = state.copyWith(showShiftLabels: v);
-    _prefs.setBool('showShiftLabels', v);
+    _prefs?.setBool('showShiftLabels', v);
   }
 
   void setHapticFeedback(bool v) {
     state = state.copyWith(hapticFeedback: v);
-    _prefs.setBool('hapticFeedback', v);
+    _prefs?.setBool('hapticFeedback', v);
   }
 }
 
