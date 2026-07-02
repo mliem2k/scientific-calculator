@@ -95,7 +95,7 @@ class Cursor {
   const Cursor(this.path, this.insertAt);
 }
 
-final initialCursor = const Cursor([], 0);
+const initialCursor = Cursor([], 0);
 
 class MemorySlots {
   final double? a;

@@ -20,16 +20,18 @@ import appScreenshot from '../assets/screenshots/app-screenshot.png';
   </head>
   <body class="bg-black text-white antialiased">
     <Nav />
-    <Hero heroImageSrc={appScreenshot.src} />
-    <Features />
-    <PhoneGallery
-      shots={[
-        { src: appScreenshot.src, alt: "Calculator main screen", label: "AMOLED" },
-        { src: appScreenshot.src, alt: "Scientific functions", label: "Scientific" },
-        { src: appScreenshot.src, alt: "Tap-to-edit expression", label: "Tap-to-edit" },
-        { src: appScreenshot.src, alt: "History panel", label: "History" },
-      ]}
-    />
+    <main>
+      <Hero heroImageSrc={appScreenshot.src} />
+      <Features />
+      <PhoneGallery
+        shots={[
+          { src: appScreenshot.src, alt: "Calculator main screen", label: "AMOLED" },
+          { src: appScreenshot.src, alt: "Scientific functions", label: "Scientific" },
+          { src: appScreenshot.src, alt: "Tap-to-edit expression", label: "Tap-to-edit" },
+          { src: appScreenshot.src, alt: "History panel", label: "History" },
+        ]}
+      />
+    </main>
     <Footer />
   </body>
 </html>

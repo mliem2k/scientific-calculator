@@ -188,7 +188,7 @@ String? toFraction(String decimalStr) {
   final value = double.tryParse(decimalStr);
   if (value == null || !value.isFinite) return null;
   if (value == value.truncateToDouble()) return null;
-  final scale = 1000000;
+  const scale = 1000000;
   int num = (value * scale).round();
   int den = scale;
   final g = _gcd(num.abs(), den);

@@ -203,7 +203,7 @@ class _FractionWidget extends StatelessWidget {
           ? Text(
               '□',
               style: TextStyle(
-                color: ct.expressionText.withAlpha(80),
+                color: ct.expressionText.withValues(alpha: 80 / 255),
                 fontSize: childSize,
               ),
             )
