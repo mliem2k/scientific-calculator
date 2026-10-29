@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ASTNode, Cursor, CursorSegment } from '@/lib/ast/types'
 import { ASTRenderer } from '../ast/ASTRenderer'
 
@@ -31,10 +31,33 @@ export function Display({
   const scrollRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ x: number; y: number } | null>(null)
   const dragged = useRef(false)
+  const innerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+  const [boxHeight, setBoxHeight] = useState(0)
   const [copied, setCopied] = useState(false)
   const empty = expression.length === 0 && cursor.path.length === 0 && cursor.insertAt === 0
   const hasResult = result !== null
   const isRad = angleMode === 'RAD'
+
+  // Track the room the expression has, which changes with the window and the result line.
+  useEffect(() => {
+    const box = scrollRef.current
+    if (!box) return
+    const observer = new ResizeObserver(() => setBoxHeight(box.clientHeight))
+    observer.observe(box)
+    return () => observer.disconnect()
+  }, [])
+
+  // Shrink the type until stacked fractions fit the display height. Height is linear in
+  // font size (everything inside is sized in em), so one measurement gives the new scale.
+  useLayoutEffect(() => {
+    const inner = innerRef.current
+    if (!inner || boxHeight === 0) return
+    const natural = inner.offsetHeight / scale
+    if (natural <= 0) return
+    const next = Math.max(0.3, Math.min(1, boxHeight / natural))
+    if (Math.abs(next - scale) > 0.01) setScale(next)
+  }, [expression, cursor, boxHeight, scale])
 
   // Keep the caret visible when the expression is wider than the display.
   useEffect(() => {
@@ -100,8 +123,6 @@ export function Display({
         </button>
       </div>
 
-      <div className="min-h-0 flex-1" />
-
       <div
         ref={scrollRef}
         onPointerDown={onPointerDown}
@@ -111,9 +132,10 @@ export function Display({
         onPointerCancel={endDrag}
         onPointerLeave={endDrag}
         aria-label="Expression. Drag to move the cursor"
-        className="flex min-h-0 touch-none overflow-x-auto overflow-y-auto text-[2.75rem] font-light leading-none text-ink [scrollbar-width:none]"
+        style={{ fontSize: `${2.75 * scale}rem` }}
+        className="flex min-h-0 flex-1 touch-none items-end overflow-x-auto overflow-y-hidden font-light leading-none text-ink [scrollbar-width:none]"
       >
-        <div className="ml-auto flex w-max items-center whitespace-nowrap py-2">
+        <div ref={innerRef} className="ml-auto flex w-max items-center whitespace-nowrap py-[0.1em]">
           {empty
             ? <span className="text-dim">0</span>
             : <ASTRenderer nodes={expression} cursor={cursor} path={[]} onCursorJump={onCursorJump} />
@@ -121,13 +143,13 @@ export function Display({
         </div>
       </div>
 
-      <div className="flex h-12 items-center justify-end">
+      <div className="flex h-9 items-center justify-end">
         {hasResult && (
           <button
             data-testid="result"
             onClick={handleCopy}
             aria-label={`Result ${result}, tap to copy`}
-            className="max-w-full overflow-x-auto whitespace-nowrap select-none text-[1.875rem] font-light active:opacity-60"
+            className="max-w-full overflow-x-auto whitespace-nowrap select-none text-[1.5rem] font-light active:opacity-60"
           >
             <span className={copied ? 'text-accent' : 'text-dim'}>{copied ? 'Copied' : result}</span>
           </button>

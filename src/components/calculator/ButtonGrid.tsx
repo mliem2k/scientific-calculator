@@ -168,7 +168,7 @@ export function ButtonGrid({ shiftActive, hypActive, stoMode, onButton, onPaste 
 
   return (
     <div className="flex min-h-0 shrink-0 flex-col gap-2.5 px-4 pb-2">
-      <div role="group" aria-label="Scientific functions" className="grid grid-cols-5 gap-x-2 gap-y-1.5 [grid-auto-rows:clamp(2rem,4.8dvh,2.75rem)]">
+      <div role="group" aria-label="Scientific functions" className="grid grid-cols-5 gap-x-2 gap-y-1.5 [grid-auto-rows:clamp(2rem,4.4dvh,2.75rem)]">
         {SCI.flat().map((b) => renderKey(b, 'sci'))}
       </div>
       <div role="group" aria-label="Number pad" className="pad-frame">

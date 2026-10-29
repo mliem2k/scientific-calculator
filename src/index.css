@@ -59,4 +59,4 @@ button { -webkit-tap-highlight-color: transparent; font: inherit; }
 }
 
 /* Fixed-height pad block: as tall as five round keys at full width, capped for short phones. */
-.pad-frame { height: min(calc((100vw - 2rem - 30px) / 4 * 5 + 40px), 54dvh); }
+.pad-frame { height: min(calc((100vw - 2rem - 30px) / 4 * 5 + 40px), 50dvh); }
