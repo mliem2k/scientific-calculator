@@ -29,7 +29,10 @@ body {
 }
 button { -webkit-tap-highlight-color: transparent; font: inherit; }
 
-:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+/* In the base layer so utilities such as outline-none can override it. */
+@layer base {
+  :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+}
 
 /* Keys press by brightness so one rule serves every theme. */
 .key { transition: filter 120ms ease-out; }

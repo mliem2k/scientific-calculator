@@ -16,7 +16,10 @@ export function UpdateDialog({ info, failed, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
-    ref.current?.showModal()
+    const dialog = ref.current
+    dialog?.showModal()
+    // showModal focuses the first button and draws a ring; park focus on the dialog instead.
+    dialog?.focus()
   }, [])
 
   // The system browser downloads the APK and hands it to the package installer.
@@ -27,7 +30,8 @@ export function UpdateDialog({ info, failed, onClose }: Props) {
       ref={ref}
       onClose={onClose}
       aria-labelledby="update-title"
-      className="m-auto w-[min(22rem,calc(100vw-2rem))] rounded-3xl bg-surface p-6 text-ink backdrop:bg-black/60"
+      tabIndex={-1}
+      className="m-auto w-[min(22rem,calc(100vw-2rem))] rounded-3xl bg-surface p-6 text-ink outline-none focus-visible:outline-none backdrop:bg-black/60"
     >
       <h2 id="update-title" className="text-lg font-semibold">{info ? 'Update available' : failed ? 'Check failed' : 'Up to date'}</h2>
       <p className="mt-2 text-dim">
