@@ -67,7 +67,7 @@ const CalcTheme retroCalcTheme = CalcTheme(
   eqBg: Color(0xFF00CC33),
   eqText: Color(0xFF000000),
   delText: Color(0xFFFF3300),
-  secondaryLabel: Color(0xFF006600),
+  secondaryLabel: Color(0xFF00A020),
   expressionText: Color(0xFF00FF41),
   resultText: Color(0xFF00CC33),
   shiftActiveColor: Color(0xFFFFFF00),

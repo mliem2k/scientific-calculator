@@ -118,6 +118,8 @@ class ButtonGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final shiftActive =
         ref.watch(calculatorProvider.select((s) => s.shiftActive));
+    final showShiftLabels =
+        ref.watch(settingsProvider.select((s) => s.showShiftLabels));
 
     void handleTap(BuildContext ctx, _BtnDef btn, bool shift) {
       if (ref.read(settingsProvider).hapticFeedback) {
@@ -151,6 +153,7 @@ class ButtonGrid extends ConsumerWidget {
                           child: _CalcButton(
                             btn: btn,
                             shiftActive: shiftActive,
+                            showShiftLabels: showShiftLabels,
                             onTap: handleTap,
                           ),
                         ),
@@ -169,11 +172,13 @@ class _CalcButton extends StatefulWidget {
   const _CalcButton({
     required this.btn,
     required this.shiftActive,
+    required this.showShiftLabels,
     required this.onTap,
   });
 
   final _BtnDef btn;
   final bool shiftActive;
+  final bool showShiftLabels;
   final void Function(BuildContext, _BtnDef, bool) onTap;
 
   @override
@@ -211,7 +216,12 @@ class _CalcButtonState extends State<_CalcButton> {
       };
     }
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: _semanticLabel(btn, shiftActive),
+      excludeSemantics: true,
+      onTap: () => widget.onTap(context, btn, shiftActive),
+      child: GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -226,41 +236,87 @@ class _CalcButtonState extends State<_CalcButton> {
         ),
         child: Stack(
           children: [
-            if (!shiftActive && btn.shiftLabel != null)
+            if (showShiftLabels && !shiftActive && btn.shiftLabel != null)
               Positioned(
                 top: 2,
                 left: 4,
-                child: btn.id == 'fraction'
-                    ? _FractionIcon(
-                        size: 13, color: ct.secondaryLabel, mixed: true)
-                    : Text(
-                        btn.shiftLabel!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: ct.secondaryLabel,
+                right: 4,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: btn.id == 'fraction'
+                      ? _FractionIcon(
+                          size: 13, color: ct.secondaryLabel, mixed: true)
+                      : FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            btn.shiftLabel!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: ct.secondaryLabel,
+                            ),
+                          ),
                         ),
-                      ),
+                ),
               ),
             Center(
               child: btn.id == 'fraction'
                   ? _FractionIcon(
                       size: 22, color: labelColor, mixed: shiftActive)
-                  : Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: labelColor,
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: labelColor,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
                     ),
             ),
           ],
         ),
       ),
+      ),
     );
   }
+}
+
+String _semanticLabel(_BtnDef btn, bool shiftActive) {
+  final id = btn.id;
+  return switch (id) {
+    'SHIFT' => 'Shift',
+    'HYP' => 'Hyperbolic',
+    'pi' => 'Pi',
+    'e_const' => shiftActive ? 'e to the x' : 'e',
+    'Ans' => 'Previous answer',
+    'Sto' => shiftActive ? 'Paste code' : 'Store',
+    'exponent' => shiftActive ? 'Nth root' : 'Power',
+    'abs' => 'Absolute value',
+    'fraction' => shiftActive ? 'Mixed fraction' : 'Fraction',
+    'sqrt' => shiftActive ? 'Cube root' : 'Square root',
+    'log' => shiftActive ? 'Mixed fraction toggle' : 'Log',
+    'ln' => shiftActive ? 'Decimal fraction toggle' : 'Natural log',
+    'factorial' => shiftActive ? 'Variable A' : 'Factorial',
+    'cube' => shiftActive ? 'Variable B' : 'Cube',
+    'square' => shiftActive ? 'Variable X' : 'Square',
+    'paren_open' => 'Open parenthesis',
+    'paren_close' => shiftActive ? 'Variable Y' : 'Close parenthesis',
+    'DEL' => 'Delete',
+    'AC' => 'All clear',
+    'multiply' => shiftActive ? 'Permutation' : 'Multiply',
+    'divide' => shiftActive ? 'Combination' : 'Divide',
+    'plus' => 'Plus',
+    'minus' => 'Minus',
+    '.' => shiftActive ? 'Exponent' : 'Decimal point',
+    '=' => shiftActive ? 'Fraction decimal toggle' : 'Equals',
+    _ => _displayLabel(btn, shiftActive),
+  };
 }
 
 class _FractionIcon extends StatelessWidget {

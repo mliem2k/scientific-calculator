@@ -78,19 +78,16 @@ class CalcDisplay extends ConsumerWidget {
               ),
               const Spacer(),
               if (onHistory != null)
-                GestureDetector(
-                  onTap: onHistory,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(Icons.history,
-                        size: 20, color: ct.secondaryLabel),
-                  ),
+                IconButton(
+                  onPressed: onHistory,
+                  tooltip: 'History',
+                  icon: Icon(Icons.history, color: ct.secondaryLabel),
                 ),
               if (onSettings != null)
-                GestureDetector(
-                  onTap: onSettings,
-                  child: Icon(Icons.settings,
-                      size: 20, color: ct.secondaryLabel),
+                IconButton(
+                  onPressed: onSettings,
+                  tooltip: 'Settings',
+                  icon: Icon(Icons.settings, color: ct.secondaryLabel),
                 ),
             ],
           ),
@@ -98,15 +95,25 @@ class CalcDisplay extends ConsumerWidget {
           const _ExpressionArea(),
           const SizedBox(height: 4),
           if (result != null)
-            GestureDetector(
-              onTap: () => _copyResult(result),
-              child: Text(
-                result,
-                style: TextStyle(
-                    color: ct.resultText,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w500),
-                textAlign: TextAlign.right,
+            Semantics(
+              button: true,
+              label: 'Result $result, tap to copy',
+              excludeSemantics: true,
+              child: GestureDetector(
+                onTap: () => _copyResult(result),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      result,
+                      style: TextStyle(
+                          color: ct.resultText,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ),
               ),
             ),
         ],
@@ -123,19 +130,26 @@ class _DegRadBadge extends ConsumerWidget {
     final ct = Theme.of(context).extension<CalcTheme>()!;
     final angleMode =
         ref.watch(calculatorProvider.select((s) => s.angleMode));
-    return GestureDetector(
-      onTap: () =>
-          ref.read(calculatorProvider.notifier).handleButton('DEG_RAD'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-        child: Text(
-          angleMode == AngleMode.deg ? 'DEG' : 'RAD',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: angleMode == AngleMode.rad
-                ? const Color(0xFF4FC3F7)
-                : ct.secondaryLabel,
+    final isRad = angleMode == AngleMode.rad;
+    return Semantics(
+      button: true,
+      label: isRad ? 'Radians, tap for degrees' : 'Degrees, tap for radians',
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: () =>
+            ref.read(calculatorProvider.notifier).handleButton('DEG_RAD'),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          child: Center(
+            widthFactor: 1,
+            child: Text(
+              isRad ? 'RAD' : 'DEG',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isRad ? ct.opText : ct.secondaryLabel,
+              ),
+            ),
           ),
         ),
       ),
@@ -152,15 +166,20 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = bgColor ?? ct.statusBadgeColor;
+    final fg = ThemeData.estimateBrightnessForColor(bg) == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     return Container(
       margin: const EdgeInsets.only(left: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: bgColor ?? ct.statusBadgeColor,
-        borderRadius: BorderRadius.circular(3),
+        color: bg,
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(label,
-          style: const TextStyle(fontSize: 14, color: Colors.white)),
+          style: TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w600, color: fg)),
     );
   }
 }
@@ -216,7 +235,7 @@ class _ExpressionAreaState extends ConsumerState<_ExpressionArea> {
             alignment: Alignment.centerRight,
             child: Text('0',
                 style: TextStyle(
-                    color: ct.buttonBorder, fontSize: exprFontSize)),
+                    color: ct.secondaryLabel, fontSize: exprFontSize)),
           )
         : SingleChildScrollView(
             scrollDirection: Axis.horizontal,

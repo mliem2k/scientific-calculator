@@ -43,35 +43,45 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final display = CalcDisplay(
+              onSettings: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SettingsScreen(),
+                ),
+              ),
+              onHistory: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('History')),
+                    body: const HistoryPanel(),
+                  ),
+                ),
+              ),
+            );
+            final grid = ButtonGrid(
+              onButton: notifier.handleButton,
+              onPaste: notifier.handlePaste,
+            );
+
+            // Landscape: stacking would squeeze the keys below a usable
+            // height, so put the display beside the keypad instead.
+            if (constraints.maxWidth > constraints.maxHeight) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(flex: 2, child: display),
+                  Expanded(flex: 3, child: grid),
+                ],
+              );
+            }
+
             final displayH =
                 (constraints.maxHeight * 0.25).clamp(180.0, 240.0);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
-                  height: displayH,
-                  child: CalcDisplay(
-                    onSettings: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SettingsScreen(),
-                      ),
-                    ),
-                    onHistory: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => Scaffold(
-                          appBar: AppBar(title: const Text('History')),
-                          body: const HistoryPanel(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ButtonGrid(
-                    onButton: notifier.handleButton,
-                    onPaste: notifier.handlePaste,
-                  ),
-                ),
+                SizedBox(height: displayH, child: display),
+                Expanded(child: grid),
               ],
             );
           },

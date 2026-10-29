@@ -3,7 +3,7 @@ const features = [
   {
     icon: "𝑓(x)",
     title: "Textbook notation",
-    body: "Fractions, powers, roots, and trig display exactly as your textbook writes them — not as a/b.",
+    body: "Fractions, powers, roots, and trig display exactly as your textbook writes them, not as a/b.",
   },
   {
     icon: "◼",
@@ -18,9 +18,9 @@ const features = [
 ];
 ---
 <section class="border-t border-[#18181b] bg-[#040404] px-6 py-20">
-  <div class="mx-auto max-w-5xl grid grid-cols-1 gap-4 md:grid-cols-3">
+  <div class="mx-auto max-w-5xl grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-12">
     {features.map(f => (
-      <div class="rounded-2xl border border-[#18181b] bg-[#0a0a0a] p-6 transition-colors hover:border-[#27272a]">
+      <div class="border-t border-[#27272a] pt-6">
         <div class="mb-4 text-2xl font-mono text-[#818cf8]">{f.icon}</div>
         <h2 class="mb-2 text-base font-semibold text-white">{f.title}</h2>
         <p class="text-sm text-[#8c8c95] leading-relaxed">{f.body}</p>
