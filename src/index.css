@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Colours come from lib/themes.ts, applied as --c-* custom properties at runtime. */
+@theme inline {
+  --color-bg: var(--c-background);
+  --color-display: var(--c-display-bg);
+  --color-key: var(--c-button-bg);
+  --color-keyline: var(--c-button-border);
+  --color-digit: var(--c-digit-text);
+  --color-fn: var(--c-fn-text);
+  --color-op: var(--c-op-text);
+  --color-eq: var(--c-eq-bg);
+  --color-on-eq: var(--c-eq-text);
+  --color-del: var(--c-del-text);
+  --color-dim: var(--c-secondary-label);
+  --color-expr: var(--c-expression-text);
+  --color-result: var(--c-result-text);
+  --color-shift: var(--c-shift-active);
+  --color-badge: var(--c-status-badge);
+  --font-mono-display: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--c-background);
+  color: var(--c-expression-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overscroll-behavior: none;
+}
+button { -webkit-tap-highlight-color: transparent; }
+.font-mono-display { font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 2px solid var(--c-shift-active); outline-offset: -2px; }
+
+@keyframes cursor-blink { 50% { opacity: 0; } }
+.cursor-blink { animation: cursor-blink 1s step-end infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-blink { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* Landscape phones: too short to stack display above keypad. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 540px));

@@ -6,20 +6,20 @@ const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
 const build = Math.floor(date.getTime() / 1000);
 
 // Tag embeds the build number so the app can compare exactly, avoiding the
-// ~40s gap between _buildNumber (script start) and published_at (release create).
+// ~40s gap between the build number (script start) and published_at (release create).
 const tag = `nightly-${dateStr}-${build}`;
 
-const apk = 'build/app/outputs/flutter-apk/app-release.apk';
-const renamedApk = `build/app/outputs/flutter-apk/scientific-calculator-${tag}.apk`;
+const apk = 'android/app/build/outputs/apk/release/app-release.apk';
+const renamedApk = `android/app/build/outputs/apk/release/scientific-calculator-${tag}.apk`;
 const apkAsset = `${renamedApk}#scientific-calculator-${tag}.apk`;
 
-for (const tool of ['fvm', 'gh']) {
-  const found = await $`which ${tool}`.quiet().nothrow();
-  if (found.exitCode !== 0) { console.error(`${tool} not found`); process.exit(1); }
-}
+const found = await $`which gh`.quiet().nothrow();
+if (found.exitCode !== 0) { console.error('gh not found'); process.exit(1); }
 
 console.log(`Building nightly APK (build ${build})...`);
-await $`fvm flutter build apk --release --build-number=${build} --dart-define=BUILD_NUMBER=${build}`;
+await $`bunx vite build`.env({ ...process.env, VITE_BUILD_NUMBER: String(build) });
+await $`bunx cap sync android`;
+await $`./gradlew assembleRelease -PbuildNumber=${build}`.cwd('android');
 await $`cp ${apk} ${renamedApk}`;
 
 // Delete any existing same-day releases. Prefix is nightly-YYYYMMDD (no trailing
