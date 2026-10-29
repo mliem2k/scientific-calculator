@@ -7,6 +7,7 @@ import { ExponentNodeView } from './nodes/ExponentNode'
 import { RadicalNodeView } from './nodes/RadicalNode'
 import { FunctionNodeView } from './nodes/FunctionNode'
 import { CursorView } from './Cursor'
+import { cn } from '@/lib/utils'
 
 type JumpFn = (path: CursorSegment[], insertAt: number) => void
 
@@ -23,9 +24,20 @@ function pathsEqual(a: CursorSegment[], b: CursorSegment[]): boolean {
 
 export function ASTRenderer({ nodes, cursor, path, onCursorJump }: Props) {
   const isHere = pathsEqual(cursor.path, path)
+  const isSlot = path.length > 0
+
+  // Tapping empty space inside a slot (numerator, exponent, ...) puts the cursor at its end.
+  function enterSlot(e: React.MouseEvent) {
+    if (!isSlot) return
+    e.stopPropagation()
+    onCursorJump?.(path, nodes.length)
+  }
 
   return (
-    <span className="inline-flex items-center flex-wrap">
+    <span
+      className={cn('inline-flex items-center', isSlot && nodes.length === 0 && 'min-h-[0.9em] min-w-[0.7em] rounded-[2px] border border-dashed border-current/50 justify-center')}
+      onClick={enterSlot}
+    >
       {nodes.map((node, index) => (
         <span key={index} className="inline-flex items-center">
           {isHere && cursor.insertAt === index && <CursorView />}
@@ -40,7 +52,7 @@ export function ASTRenderer({ nodes, cursor, path, onCursorJump }: Props) {
 function NodeView({ node, cursor, path, nodeIndex, onCursorJump }: {
   node: ASTNode; cursor: Cursor; path: CursorSegment[]; nodeIndex: number; onCursorJump?: JumpFn
 }) {
-  const jump = () => onCursorJump?.(path, nodeIndex + 1)
+  const jump = (e: React.MouseEvent) => { e.stopPropagation(); onCursorJump?.(path, nodeIndex + 1) }
 
   switch (node.type) {
     case 'number':

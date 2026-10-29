@@ -12,6 +12,7 @@ const baseProps = {
   hypActive: false,
   angleMode: 'DEG' as const,
   onAngleToggle: vi.fn(),
+  onMove: vi.fn(),
   onHistory: vi.fn(),
   onSettings: vi.fn(),
   onCursorJump: vi.fn(),

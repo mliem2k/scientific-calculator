@@ -94,6 +94,21 @@ const TEXT: Record<Role, string> = {
   digit: 'text-digit', fn: 'text-fn', op: 'text-op', del: 'text-del', eq: 'text-on-eq',
 }
 
+// Textbook fraction key: an empty box over a bar over an empty box; the mixed form adds a whole part.
+function FractionIcon({ mixed, small }: { mixed: boolean; small?: boolean }) {
+  const box = small ? 'h-[5px] w-[7px]' : 'h-2 w-3'
+  return (
+    <span aria-hidden className="inline-flex items-center gap-[3px]">
+      {mixed && <span className={cn('rounded-[1px] border-[1.5px] border-current', small ? 'h-[9px] w-[7px]' : 'h-4 w-3')} />}
+      <span className="inline-flex flex-col items-center gap-[2px]">
+        <span className={cn('rounded-[1px] border-[1.5px] border-current', box)} />
+        <span className="h-[1.5px] w-full bg-current" />
+        <span className={cn('rounded-[1px] border-[1.5px] border-current', box)} />
+      </span>
+    </span>
+  )
+}
+
 interface Props {
   shiftActive: boolean
   onButton: (id: string) => void
@@ -133,10 +148,12 @@ export function ButtonGrid({ shiftActive, onButton, onPaste }: Props) {
               >
                 {showShiftLabels && !shiftActive && btn.shiftLabel && (
                   <span aria-hidden className="absolute left-1 right-1 top-0.5 truncate text-left text-xs font-medium text-dim">
-                    {btn.shiftLabel}
+                    {btn.id === 'fraction' ? <FractionIcon mixed small /> : btn.shiftLabel}
                   </span>
                 )}
-                <span aria-hidden className="block truncate px-0.5">{label}</span>
+                <span aria-hidden className="flex items-center justify-center truncate px-0.5">
+                  {btn.id === 'fraction' ? <FractionIcon mixed={shiftActive} /> : label}
+                </span>
               </button>
             )
           })}

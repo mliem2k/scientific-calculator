@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ASTNode, Cursor, CursorSegment } from '@/lib/ast/types'
 import { contrastText } from '@/lib/themes'
 import { ASTRenderer } from '../ast/ASTRenderer'
@@ -13,6 +13,7 @@ interface Props {
   hypActive: boolean
   angleMode: 'DEG' | 'RAD'
   onAngleToggle: () => void
+  onMove: (dir: 'LEFT' | 'RIGHT' | 'UP' | 'DOWN') => void
   onHistory: () => void
   onSettings: () => void
   onCursorJump: (path: CursorSegment[], insertAt: number) => void
@@ -34,12 +35,45 @@ function Badge({ label, bg }: { label: string; bg: string }) {
 export function Display({
   expression, cursor, result,
   shiftActive, stoMode, hypActive, angleMode,
-  onAngleToggle, onHistory, onSettings, onCursorJump,
+  onAngleToggle, onMove, onHistory, onSettings, onCursorJump,
 }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const drag = useRef<{ x: number; y: number } | null>(null)
+  const dragged = useRef(false)
   const [copied, setCopied] = useState(false)
   const empty = expression.length === 0 && cursor.path.length === 0 && cursor.insertAt === 0
   const hasResult = result !== null
   const isRad = angleMode === 'RAD'
+
+  // Keep the caret visible when the expression is wider than the display.
+  useEffect(() => {
+    scrollRef.current?.querySelector('.cursor-blink')?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+  }, [expression, cursor])
+
+  // Dragging across the expression steps the caret, so it can enter and leave fractions.
+  const STEP = 22
+  function onPointerDown(e: React.PointerEvent) {
+    drag.current = { x: e.clientX, y: e.clientY }
+    dragged.current = false
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    const d = drag.current
+    if (!d) return
+    const dx = e.clientX - d.x
+    const dy = e.clientY - d.y
+    if (Math.abs(dx) >= STEP && Math.abs(dx) >= Math.abs(dy)) {
+      dragged.current = true
+      onMove(dx > 0 ? 'RIGHT' : 'LEFT')
+      drag.current = { x: e.clientX, y: e.clientY }
+    } else if (Math.abs(dy) >= STEP) {
+      dragged.current = true
+      onMove(dy > 0 ? 'DOWN' : 'UP')
+      drag.current = { x: e.clientX, y: e.clientY }
+    }
+  }
+  function endDrag() {
+    drag.current = null
+  }
 
   function handleCopy() {
     if (!result) return
@@ -78,15 +112,25 @@ export function Display({
       <div className="flex-1" />
 
       <div
+        ref={scrollRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onClickCapture={(e) => { if (dragged.current) { e.stopPropagation(); dragged.current = false } }}
+        onPointerCancel={endDrag}
+        onPointerLeave={endDrag}
+        aria-label="Expression. Drag to move the cursor"
         className={cn(
-          'flex items-center justify-end overflow-x-auto font-mono-display font-bold text-expr',
+          'flex min-h-0 touch-none overflow-x-auto overflow-y-auto font-mono-display font-bold text-expr',
           hasResult ? 'text-[1.75rem]' : 'text-[2.5rem]',
         )}
       >
-        {empty
-          ? <span className="text-dim">0</span>
-          : <ASTRenderer nodes={expression} cursor={cursor} path={[]} onCursorJump={onCursorJump} />
-        }
+        <div className="ml-auto flex w-max items-center whitespace-nowrap py-1">
+          {empty
+            ? <span className="text-dim">0</span>
+            : <ASTRenderer nodes={expression} cursor={cursor} path={[]} onCursorJump={onCursorJump} />
+          }
+        </div>
       </div>
 
       {hasResult && (

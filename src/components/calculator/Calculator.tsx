@@ -49,7 +49,7 @@ export function Calculator() {
       className="flex h-dvh flex-col bg-bg short:flex-row"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)', paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="h-[25dvh] max-h-60 min-h-[11.25rem] shrink-0 short:h-auto short:max-h-none short:min-h-0 short:flex-[2]">
+      <div className="h-[30dvh] max-h-72 min-h-[12.5rem] shrink-0 short:h-auto short:max-h-none short:min-h-0 short:flex-[2]">
         <Display
           expression={state.expression}
           cursor={state.cursor}
@@ -59,6 +59,7 @@ export function Calculator() {
           hypActive={state.hypActive}
           angleMode={state.angleMode}
           onAngleToggle={() => handleButton('DEG_RAD')}
+          onMove={handleButton}
           onHistory={() => open('history')}
           onSettings={() => open('settings')}
           onCursorJump={handleCursorJump}
