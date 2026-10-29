@@ -13,7 +13,7 @@ interface BtnDef {
 
 const SCI: BtnDef[][] = [
   [
-    { id: 'SHIFT', label: '2nd', role: 'sci' },
+    { id: 'SHIFT', label: 'shift', role: 'sci' },
     { id: 'HYP', label: 'hyp', role: 'sci' },
     { id: 'pi', label: 'π', role: 'sci' },
     { id: 'e_const', label: 'e', shiftLabel: 'eˣ', role: 'sci' },
@@ -85,7 +85,7 @@ const HYP_LABEL: Record<string, string> = { sin: 'sinh', cos: 'cosh', tan: 'tanh
 
 // Plain names for screen readers; the shifted name differs where the key does.
 const SPOKEN: Record<string, [string, string?]> = {
-  SHIFT: ['Second function'], HYP: ['Hyperbolic'], pi: ['Pi'], e_const: ['e', 'e to the x'],
+  SHIFT: ['Shift'], HYP: ['Hyperbolic'], pi: ['Pi'], e_const: ['e', 'e to the x'],
   Ans: ['Previous answer'], Sto: ['Store', 'Paste code'], exponent: ['Power', 'Nth root'],
   abs: ['Absolute value'], fraction: ['Fraction', 'Mixed fraction'],
   sqrt: ['Square root', 'Cube root'], log: ['Log', 'Mixed fraction toggle'],

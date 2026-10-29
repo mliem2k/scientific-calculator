@@ -109,7 +109,7 @@ export function Display({
         </button>
         {hypActive && <Badge label="hyp" />}
         {stoMode && <Badge label="Sto" />}
-        {shiftActive && <Badge label="2nd" />}
+        {shiftActive && <Badge label="shift" />}
         <div className="flex-1" />
         <button aria-label="History" onClick={onHistory} className={ICON_BTN}>
           <svg viewBox="0 0 24 24" className="size-[22px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

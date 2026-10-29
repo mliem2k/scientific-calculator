@@ -41,7 +41,7 @@ describe('Display', () => {
 
   it('shows SHIFT and HYP badges when active', () => {
     render(<Display {...baseProps} shiftActive hypActive />)
-    expect(screen.getByText('2nd')).toBeInTheDocument()
+    expect(screen.getByText('shift')).toBeInTheDocument()
     expect(screen.getByText('hyp')).toBeInTheDocument()
   })
 
