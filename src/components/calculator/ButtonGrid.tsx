@@ -147,8 +147,8 @@ export function ButtonGrid({ shiftActive, hypActive, stoMode, onButton, onPaste 
     const name = spoken ? (shiftActive && spoken[1] ? spoken[1] : spoken[0]) : label
     const lit = (btn.id === 'SHIFT' && shiftActive) || (btn.id === 'HYP' && hypActive) || (btn.id === 'Sto' && stoMode)
     const text = size === 'pad'
-      ? (btn.id === 'fraction' ? 'text-[2.6rem]' : label.length > 2 ? 'text-[1.375rem]' : 'text-[2rem]')
-      : label.length > 7 ? 'text-[0.9375rem]' : 'text-[1.0625rem]'
+      ? (btn.id === 'fraction' ? 'text-[2.1rem]' : label.length > 2 ? 'text-[1.375rem]' : label.length > 1 ? 'text-[1.75rem]' : 'text-[2.25rem]')
+      : label.length > 7 ? 'text-[1rem]' : label.length > 5 ? 'text-[1.125rem]' : 'text-[1.25rem]'
     return (
       <button
         key={btn.id}
@@ -170,7 +170,7 @@ export function ButtonGrid({ shiftActive, hypActive, stoMode, onButton, onPaste 
 
   return (
     <div className="flex min-h-0 shrink-0 flex-col gap-2.5 px-4 pb-2">
-      <div role="group" aria-label="Scientific functions" className="grid grid-cols-4 gap-x-2 gap-y-1.5 [grid-auto-rows:clamp(1.875rem,3.9dvh,2.5rem)]">
+      <div role="group" aria-label="Scientific functions" className="grid grid-cols-4 gap-x-2 gap-y-1.5 [grid-auto-rows:clamp(2rem,4.2dvh,2.5rem)]">
         {SCI.flat().map((b) => renderKey(b, 'sci'))}
       </div>
       <div role="group" aria-label="Number pad" className="pad-frame">

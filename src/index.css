@@ -27,7 +27,10 @@ body {
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
 }
-button { -webkit-tap-highlight-color: transparent; font: inherit; }
+/* Base layer, so font utilities on buttons are not overridden by this reset. */
+@layer base {
+  button { -webkit-tap-highlight-color: transparent; font: inherit; }
+}
 
 /* In the base layer so utilities such as outline-none can override it. */
 @layer base {
