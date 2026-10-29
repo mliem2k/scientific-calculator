@@ -14,31 +14,33 @@ interface BtnDef {
 const SCI: BtnDef[][] = [
   [
     { id: 'SHIFT', label: 'shift', role: 'sci' },
-    { id: 'HYP', label: 'hyp', role: 'sci' },
+    { id: 'HYP', label: 'hyperbolic', role: 'sci' },
     { id: 'pi', label: 'π', role: 'sci' },
     { id: 'e_const', label: 'e', shiftLabel: 'eˣ', role: 'sci' },
-    { id: 'Ans', label: 'Answer', role: 'sci' },
   ],
   [
+    { id: 'Ans', label: 'Answer', role: 'sci' },
     { id: 'Sto', label: 'Store', shiftLabel: 'Paste', role: 'sci' },
     { id: 'exponent', label: 'xʸ', shiftLabel: 'ⁿ√', role: 'sci' },
+    { id: 'EXP', label: '×10ˣ', role: 'sci' },
+  ],
+  [
     { id: 'sin', label: 'sin', shiftLabel: 'sin⁻¹', role: 'sci' },
     { id: 'cos', label: 'cos', shiftLabel: 'cos⁻¹', role: 'sci' },
     { id: 'tan', label: 'tan', shiftLabel: 'tan⁻¹', role: 'sci' },
+    { id: 'abs', label: '|x|', role: 'sci' },
   ],
   [
-    { id: 'abs', label: '|x|', role: 'sci' },
-    { id: 'factorial', label: 'x!', shiftLabel: 'A', role: 'sci' },
-    { id: 'sqrt', label: '√', shiftLabel: '³√', role: 'sci' },
     { id: 'log', label: 'log', shiftLabel: 'a b/c', role: 'sci' },
     { id: 'ln', label: 'ln', shiftLabel: 'F⇄D', role: 'sci' },
+    { id: 'sqrt', label: '√', shiftLabel: '³√', role: 'sci' },
+    { id: 'factorial', label: 'x!', shiftLabel: 'A', role: 'sci' },
   ],
   [
     { id: 'square', label: 'x²', shiftLabel: 'X', role: 'sci' },
     { id: 'cube', label: 'x³', shiftLabel: 'B', role: 'sci' },
     { id: 'paren_open', label: '(', role: 'sci' },
     { id: 'paren_close', label: ')', shiftLabel: 'Y', role: 'sci' },
-    { id: 'EXP', label: '×10ˣ', role: 'sci' },
   ],
 ]
 
@@ -146,7 +148,7 @@ export function ButtonGrid({ shiftActive, hypActive, stoMode, onButton, onPaste 
     const lit = (btn.id === 'SHIFT' && shiftActive) || (btn.id === 'HYP' && hypActive) || (btn.id === 'Sto' && stoMode)
     const text = size === 'pad'
       ? (btn.id === 'fraction' ? 'text-[2.6rem]' : label.length > 2 ? 'text-[1.375rem]' : 'text-[2rem]')
-      : 'text-[1.0625rem]'
+      : label.length > 7 ? 'text-[0.9375rem]' : 'text-[1.0625rem]'
     return (
       <button
         key={btn.id}
@@ -168,7 +170,7 @@ export function ButtonGrid({ shiftActive, hypActive, stoMode, onButton, onPaste 
 
   return (
     <div className="flex min-h-0 shrink-0 flex-col gap-2.5 px-4 pb-2">
-      <div role="group" aria-label="Scientific functions" className="grid grid-cols-5 gap-x-2 gap-y-1.5 [grid-auto-rows:clamp(2rem,4.4dvh,2.75rem)]">
+      <div role="group" aria-label="Scientific functions" className="grid grid-cols-4 gap-x-2 gap-y-1.5 [grid-auto-rows:clamp(1.875rem,3.9dvh,2.5rem)]">
         {SCI.flat().map((b) => renderKey(b, 'sci'))}
       </div>
       <div role="group" aria-label="Number pad" className="pad-frame">

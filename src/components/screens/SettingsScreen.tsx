@@ -3,6 +3,7 @@ import { updateSettings, useSettings } from '@/lib/settings'
 import { THEMES, THEME_IDS, applyTheme } from '@/lib/themes'
 import { buildVersionString, checkForUpdate, UpdateInfo } from '@/lib/updater'
 import { cn } from '@/lib/utils'
+import { useBackHandler } from '@/hooks/useBackHandler'
 import { ScreenShell } from './ScreenShell'
 import { UpdateDialog } from './UpdateDialog'
 
@@ -38,6 +39,8 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const settings = useSettings()
   const [checking, setChecking] = useState(false)
   const [dialog, setDialog] = useState<{ info: UpdateInfo | null; failed?: boolean } | null>(null)
+
+  useBackHandler(() => setDialog(null), dialog !== null)
 
   async function handleCheck() {
     setChecking(true)

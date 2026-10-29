@@ -9,7 +9,7 @@ import {
 } from '@/lib/ast/builder'
 import { moveCursorLeft, moveCursorRight, moveCursorUp, moveCursorDown } from '@/lib/ast/cursor'
 import { evaluate, toFraction, toMixed, fromMixed } from '@/lib/evaluator'
-import { loadHistory, addEntry } from '@/lib/history'
+import { loadHistory, addEntry, clearHistory } from '@/lib/history'
 import { getSettings } from '@/lib/settings'
 
 type State = CalculatorState & { lastResult: string | null }
@@ -174,5 +174,9 @@ export function useCalculator() {
     }))
   }, [])
 
-  return { state, handleButton, handleCursorJump, handlePaste, handleRestore }
+  const handleClearHistory = useCallback(() => {
+    setState(prev => ({ ...prev, history: clearHistory() }))
+  }, [])
+
+  return { state, handleButton, handleCursorJump, handlePaste, handleRestore, handleClearHistory }
 }

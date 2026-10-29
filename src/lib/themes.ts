@@ -1,3 +1,5 @@
+import { StatusBar, Style } from '@capacitor/status-bar'
+
 export type ThemeId = 'dark' | 'amoled' | 'light'
 
 export interface CalcTheme {
@@ -27,7 +29,7 @@ export const THEMES: Record<ThemeId, { name: string; colors: CalcTheme }> = {
     colors: {
       background: '#000000', surface: '#1c1c1e', line: '#38383a', text: '#ffffff', dim: '#8e8e93',
       digitBg: '#333333', digitText: '#ffffff', sciBg: '#1c1c1e', sciText: '#ffffff',
-      utilBg: '#a5a5a5', utilText: '#000000', opBg: '#ff9f0a', opText: '#ffffff',
+      utilBg: '#a5a5a5', utilText: '#000000', opBg: '#ff9f0a', opText: '#000000',
       accent: '#ff9f0a', press: '1.35',
     },
   },
@@ -62,4 +64,7 @@ export function applyTheme(id: ThemeId): void {
   for (const [key, value] of Object.entries(colors)) root.style.setProperty(cssVar(key), value)
   root.style.colorScheme = id === 'light' ? 'light' : 'dark'
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors.background)
+  // Light status bar icons on dark themes and the reverse; the plugin is native only.
+  StatusBar.setStyle({ style: id === 'light' ? Style.Light : Style.Dark }).catch(() => {})
+  StatusBar.setBackgroundColor({ color: colors.background }).catch(() => {})
 }

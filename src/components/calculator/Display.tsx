@@ -107,7 +107,7 @@ export function Display({
         >
           {isRad ? 'Rad' : 'Deg'}
         </button>
-        {hypActive && <Badge label="hyp" />}
+        {hypActive && <Badge label="hyperbolic" />}
         {stoMode && <Badge label="Store" />}
         {shiftActive && <Badge label="shift" />}
         <div className="flex-1" />

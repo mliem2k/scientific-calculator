@@ -42,7 +42,7 @@ describe('Display', () => {
   it('shows SHIFT and HYP badges when active', () => {
     render(<Display {...baseProps} shiftActive hypActive />)
     expect(screen.getByText('shift')).toBeInTheDocument()
-    expect(screen.getByText('hyp')).toBeInTheDocument()
+    expect(screen.getByText('hyperbolic')).toBeInTheDocument()
   })
 
   it('calls onHistory and onSettings from the header buttons', () => {

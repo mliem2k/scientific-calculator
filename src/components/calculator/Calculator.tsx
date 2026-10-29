@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useCalculator } from '@/hooks/useCalculator'
 import { useKeyboard } from '@/hooks/useKeyboard'
+import { useBackHandler } from '@/hooks/useBackHandler'
 import { checkForUpdate, UpdateInfo } from '@/lib/updater'
 import { Display } from './Display'
 import { ButtonGrid } from './ButtonGrid'
@@ -11,7 +12,7 @@ import { UpdateDialog } from '../screens/UpdateDialog'
 type View = 'calc' | 'history' | 'settings'
 
 export function Calculator() {
-  const { state, handleButton, handleCursorJump, handlePaste, handleRestore } = useCalculator()
+  const { state, handleButton, handleCursorJump, handlePaste, handleRestore, handleClearHistory } = useCalculator()
   const [view, setView] = useState<View>('calc')
   const [update, setUpdate] = useState<UpdateInfo | null>(null)
 
@@ -21,17 +22,11 @@ export function Calculator() {
     checkForUpdate().then(setUpdate).catch(() => { /* offline: try again next launch */ })
   }, [])
 
-  // Sub screens push a history entry so the Android back button returns to the calculator.
-  const open = useCallback((next: View) => {
-    history.pushState({ view: next }, '')
-    setView(next)
-  }, [])
-  useEffect(() => {
-    const onPop = () => setView('calc')
-    window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
-  }, [])
-  const close = useCallback(() => history.back(), [])
+  const open = useCallback((next: View) => setView(next), [])
+  const close = useCallback(() => setView('calc'), [])
+
+  useBackHandler(close, view !== 'calc')
+  useBackHandler(() => setUpdate(null), update !== null && view === 'calc')
 
   if (view === 'settings') return <SettingsScreen onBack={close} />
   if (view === 'history') {
@@ -39,6 +34,7 @@ export function Calculator() {
       <HistoryScreen
         history={state.history}
         onBack={close}
+        onClear={handleClearHistory}
         onRestore={(entry) => { handleRestore(entry); close() }}
       />
     )
