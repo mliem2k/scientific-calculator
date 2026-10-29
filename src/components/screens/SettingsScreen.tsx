@@ -38,13 +38,16 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint: strin
 export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const settings = useSettings()
   const [checking, setChecking] = useState(false)
-  const [dialog, setDialog] = useState<{ info: UpdateInfo | null } | null>(null)
+  const [dialog, setDialog] = useState<{ info: UpdateInfo | null; failed?: boolean } | null>(null)
 
   async function handleCheck() {
     setChecking(true)
-    const info = await checkForUpdate()
+    try {
+      setDialog({ info: await checkForUpdate() })
+    } catch {
+      setDialog({ info: null, failed: true })
+    }
     setChecking(false)
-    setDialog({ info })
   }
 
   return (
@@ -142,7 +145,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
       </Section>
       <div className="h-6" />
 
-      {dialog && <UpdateDialog info={dialog.info} onClose={() => setDialog(null)} />}
+      {dialog && <UpdateDialog info={dialog.info} failed={dialog.failed} onClose={() => setDialog(null)} />}
     </ScreenShell>
   )
 }

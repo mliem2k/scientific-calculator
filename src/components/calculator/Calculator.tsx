@@ -18,7 +18,7 @@ export function Calculator() {
   useKeyboard(handleButton, view === 'calc')
 
   useEffect(() => {
-    checkForUpdate().then(setUpdate)
+    checkForUpdate().then(setUpdate).catch(() => { /* offline: try again next launch */ })
   }, [])
 
   // Sub screens push a history entry so the Android back button returns to the calculator.

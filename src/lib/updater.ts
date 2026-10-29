@@ -23,30 +23,31 @@ function buildFromTag(tag: string): number | null {
 
 // Scan a batch of releases and take the highest build number: a single "latest"
 // call can return a stale item through CDN caching or a same-day re-release.
+// Resolves to null when up to date and rejects when GitHub cannot be reached, so the
+// settings screen can tell "up to date" from "check failed".
+// Do not add a Cache-Control request header: GitHub's CORS preflight rejects it and the
+// WebView then blocks the call. `cache: 'no-store'` bypasses the HTTP cache without one.
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   if (BUILD_NUMBER === 0) return null
-  try {
-    const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=10`, {
-      headers: { Accept: 'application/vnd.github+json', 'Cache-Control': 'no-cache' },
-      signal: AbortSignal.timeout(15000),
-    })
-    if (!res.ok) return null
-    const releases = (await res.json()) as GithubRelease[]
+  const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=10`, {
+    headers: { Accept: 'application/vnd.github+json' },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15000),
+  })
+  if (!res.ok) throw new Error(`GitHub returned ${res.status}`)
+  const releases = (await res.json()) as GithubRelease[]
 
-    let bestBuild = BUILD_NUMBER
-    let best: UpdateInfo | null = null
-    for (const r of releases) {
-      if (!r.tag_name || !r.html_url) continue
-      const build = buildFromTag(r.tag_name)
-      if (build === null || build <= bestBuild) continue
-      bestBuild = build
-      const apk = r.assets?.find((a) => a.name?.endsWith('.apk'))
-      best = { tagName: r.tag_name, releaseUrl: r.html_url, apkUrl: apk?.browser_download_url ?? null }
-    }
-    return best
-  } catch {
-    return null
+  let bestBuild = BUILD_NUMBER
+  let best: UpdateInfo | null = null
+  for (const r of releases) {
+    if (!r.tag_name || !r.html_url) continue
+    const build = buildFromTag(r.tag_name)
+    if (build === null || build <= bestBuild) continue
+    bestBuild = build
+    const apk = r.assets?.find((a) => a.name?.endsWith('.apk'))
+    best = { tagName: r.tag_name, releaseUrl: r.html_url, apkUrl: apk?.browser_download_url ?? null }
   }
+  return best
 }
 
 // nightly-20260616-1781592056 becomes "Nightly, Jun 16, 2026".
