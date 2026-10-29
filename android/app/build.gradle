@@ -7,8 +7,8 @@ android {
         applicationId "com.mliem.scientific_calculator"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (findProperty("buildNumber") ?: 1) as int
-        versionName findProperty("buildNumber")?.toString() ?: "1.0"
+        versionCode Integer.parseInt(findProperty("buildNumber") ?: "1")
+        versionName(findProperty("buildNumber") ?: "1.0")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
