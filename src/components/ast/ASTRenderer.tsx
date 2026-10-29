@@ -35,7 +35,7 @@ export function ASTRenderer({ nodes, cursor, path, onCursorJump }: Props) {
 
   return (
     <span
-      className={cn('inline-flex items-center', isSlot && nodes.length === 0 && 'min-h-[0.9em] min-w-[0.7em] rounded-[2px] border border-dashed border-current/50 justify-center')}
+      className={cn('inline-flex items-center', isSlot && nodes.length === 0 && 'min-h-[0.9em] min-w-[0.7em] rounded-[2px] border border-dashed border-dim justify-center')}
       onClick={enterSlot}
     >
       {nodes.map((node, index) => (

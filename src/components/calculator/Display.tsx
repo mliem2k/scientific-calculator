@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ASTNode, Cursor, CursorSegment } from '@/lib/ast/types'
-import { contrastText } from '@/lib/themes'
 import { ASTRenderer } from '../ast/ASTRenderer'
-import { cn } from '@/lib/utils'
 
 interface Props {
   expression: ASTNode[]
@@ -19,17 +17,10 @@ interface Props {
   onCursorJump: (path: CursorSegment[], insertAt: number) => void
 }
 
-const ICON_BTN = 'size-12 flex items-center justify-center text-dim hover:text-expr select-none rounded-full'
+const ICON_BTN = 'size-12 flex items-center justify-center text-dim active:text-ink select-none rounded-full'
 
-function Badge({ label, bg }: { label: string; bg: string }) {
-  return (
-    <span
-      className="ml-1 rounded px-1.5 py-0.5 text-sm font-semibold"
-      style={{ background: bg, color: contrastText(bg) }}
-    >
-      {label}
-    </span>
-  )
+function Badge({ label }: { label: string }) {
+  return <span className="ml-2 rounded-full bg-sci px-2.5 py-1 text-xs font-semibold text-on-sci">{label}</span>
 }
 
 export function Display({
@@ -40,10 +31,33 @@ export function Display({
   const scrollRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ x: number; y: number } | null>(null)
   const dragged = useRef(false)
+  const innerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+  const [boxHeight, setBoxHeight] = useState(0)
   const [copied, setCopied] = useState(false)
   const empty = expression.length === 0 && cursor.path.length === 0 && cursor.insertAt === 0
   const hasResult = result !== null
   const isRad = angleMode === 'RAD'
+
+  // Track the room the expression has, which changes with the window and the result line.
+  useEffect(() => {
+    const box = scrollRef.current
+    if (!box) return
+    const observer = new ResizeObserver(() => setBoxHeight(box.clientHeight))
+    observer.observe(box)
+    return () => observer.disconnect()
+  }, [])
+
+  // Shrink the type until stacked fractions fit the display height. Height is linear in
+  // font size (everything inside is sized in em), so one measurement gives the new scale.
+  useLayoutEffect(() => {
+    const inner = innerRef.current
+    if (!inner || boxHeight === 0) return
+    const natural = inner.offsetHeight / scale
+    if (natural <= 0) return
+    const next = Math.max(0.3, Math.min(1, boxHeight / natural))
+    if (Math.abs(next - scale) > 0.01) setScale(next)
+  }, [expression, cursor, boxHeight, scale])
 
   // Keep the caret visible when the expression is wider than the display.
   useEffect(() => {
@@ -84,32 +98,30 @@ export function Display({
   }
 
   return (
-    <div className="flex h-full flex-col bg-display px-3 pb-3 pt-1">
+    <div className="flex h-full flex-col px-5 pb-1 pt-1">
       <div className="flex items-center">
         <button
           onClick={onAngleToggle}
           aria-label={isRad ? 'Radians, switch to degrees' : 'Degrees, switch to radians'}
-          className={cn('min-h-12 min-w-12 select-none text-[15px] font-bold', isRad ? 'text-op' : 'text-dim')}
+          className="min-h-12 min-w-12 select-none text-left text-[0.9375rem] font-semibold tracking-wide text-dim active:text-ink"
         >
-          {angleMode}
+          {isRad ? 'Rad' : 'Deg'}
         </button>
-        {shiftActive && <Badge label="SHIFT" bg="var(--c-shift-active)" />}
-        {hypActive && <Badge label="HYP" bg="var(--c-status-badge)" />}
-        {stoMode && <Badge label="STO" bg="var(--c-status-badge)" />}
+        {hypActive && <Badge label="hyperbolic" />}
+        {stoMode && <Badge label="Store" />}
+        {shiftActive && <Badge label="shift" />}
         <div className="flex-1" />
         <button aria-label="History" onClick={onHistory} className={ICON_BTN}>
-          <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <svg viewBox="0 0 24 24" className="size-[22px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l3 2" />
           </svg>
         </button>
         <button aria-label="Settings" onClick={onSettings} className={ICON_BTN}>
-          <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+          <svg viewBox="0 0 24 24" className="size-[22px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
             <path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" />
           </svg>
         </button>
       </div>
-
-      <div className="flex-1" />
 
       <div
         ref={scrollRef}
@@ -120,12 +132,10 @@ export function Display({
         onPointerCancel={endDrag}
         onPointerLeave={endDrag}
         aria-label="Expression. Drag to move the cursor"
-        className={cn(
-          'flex min-h-0 touch-none overflow-x-auto overflow-y-auto font-mono-display font-bold text-expr',
-          hasResult ? 'text-[1.75rem]' : 'text-[2.5rem]',
-        )}
+        style={{ fontSize: `${2.75 * scale}rem` }}
+        className="flex min-h-0 flex-1 touch-none items-end overflow-x-auto overflow-y-hidden font-light leading-none text-ink [scrollbar-width:none]"
       >
-        <div className="ml-auto flex w-max items-center whitespace-nowrap py-1">
+        <div ref={innerRef} className="ml-auto flex w-max items-center whitespace-nowrap py-[0.1em]">
           {empty
             ? <span className="text-dim">0</span>
             : <ASTRenderer nodes={expression} cursor={cursor} path={[]} onCursorJump={onCursorJump} />
@@ -133,16 +143,18 @@ export function Display({
         </div>
       </div>
 
-      {hasResult && (
-        <button
-          data-testid="result"
-          onClick={handleCopy}
-          aria-label={`Result ${result}, tap to copy`}
-          className="mt-1 max-w-full self-end overflow-x-auto whitespace-nowrap select-none font-mono-display text-[2.125rem] font-medium active:opacity-60"
-        >
-          <span className={copied ? 'text-shift' : 'text-result'}>{copied ? 'Copied' : result}</span>
-        </button>
-      )}
+      <div className="flex h-9 items-center justify-end">
+        {hasResult && (
+          <button
+            data-testid="result"
+            onClick={handleCopy}
+            aria-label={`Result ${result}, tap to copy`}
+            className="max-w-full overflow-x-auto whitespace-nowrap select-none text-[1.5rem] font-light active:opacity-60"
+          >
+            <span className={copied ? 'text-accent' : 'text-dim'}>{copied ? 'Copied' : result}</span>
+          </button>
+        )}
+      </div>
     </div>
   )
 }

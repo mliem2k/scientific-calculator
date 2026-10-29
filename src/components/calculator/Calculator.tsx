@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useCalculator } from '@/hooks/useCalculator'
 import { useKeyboard } from '@/hooks/useKeyboard'
+import { useBackHandler } from '@/hooks/useBackHandler'
 import { checkForUpdate, UpdateInfo } from '@/lib/updater'
 import { Display } from './Display'
 import { ButtonGrid } from './ButtonGrid'
@@ -11,7 +12,7 @@ import { UpdateDialog } from '../screens/UpdateDialog'
 type View = 'calc' | 'history' | 'settings'
 
 export function Calculator() {
-  const { state, handleButton, handleCursorJump, handlePaste, handleRestore } = useCalculator()
+  const { state, handleButton, handleCursorJump, handlePaste, handleRestore, handleClearHistory } = useCalculator()
   const [view, setView] = useState<View>('calc')
   const [update, setUpdate] = useState<UpdateInfo | null>(null)
 
@@ -21,17 +22,11 @@ export function Calculator() {
     checkForUpdate().then(setUpdate).catch(() => { /* offline: try again next launch */ })
   }, [])
 
-  // Sub screens push a history entry so the Android back button returns to the calculator.
-  const open = useCallback((next: View) => {
-    history.pushState({ view: next }, '')
-    setView(next)
-  }, [])
-  useEffect(() => {
-    const onPop = () => setView('calc')
-    window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
-  }, [])
-  const close = useCallback(() => history.back(), [])
+  const open = useCallback((next: View) => setView(next), [])
+  const close = useCallback(() => setView('calc'), [])
+
+  useBackHandler(close, view !== 'calc')
+  useBackHandler(() => setUpdate(null), update !== null && view === 'calc')
 
   if (view === 'settings') return <SettingsScreen onBack={close} />
   if (view === 'history') {
@@ -39,6 +34,7 @@ export function Calculator() {
       <HistoryScreen
         history={state.history}
         onBack={close}
+        onClear={handleClearHistory}
         onRestore={(entry) => { handleRestore(entry); close() }}
       />
     )
@@ -46,10 +42,10 @@ export function Calculator() {
 
   return (
     <div
-      className="flex h-dvh flex-col bg-bg short:flex-row"
+      className="flex h-dvh flex-col bg-bg"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)', paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="h-[30dvh] max-h-72 min-h-[12.5rem] shrink-0 short:h-auto short:max-h-none short:min-h-0 short:flex-[2]">
+      <div className="min-h-[8rem] flex-1">
         <Display
           expression={state.expression}
           cursor={state.cursor}
@@ -65,9 +61,13 @@ export function Calculator() {
           onCursorJump={handleCursorJump}
         />
       </div>
-      <div className="min-h-0 flex-1 short:flex-[3]">
-        <ButtonGrid shiftActive={state.shiftActive} onButton={handleButton} onPaste={handlePaste} />
-      </div>
+      <ButtonGrid
+        shiftActive={state.shiftActive}
+        hypActive={state.hypActive}
+        stoMode={state.stoMode}
+        onButton={handleButton}
+        onPaste={handlePaste}
+      />
       {update && <UpdateDialog info={update} onClose={() => setUpdate(null)} />}
     </div>
   )

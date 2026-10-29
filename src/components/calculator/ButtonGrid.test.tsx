@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ButtonGrid } from './ButtonGrid'
 
-const props = { shiftActive: false, onButton: vi.fn(), onPaste: vi.fn() }
+const props = { shiftActive: false, hypActive: false, stoMode: false, onButton: vi.fn(), onPaste: vi.fn() }
 
 describe('ButtonGrid', () => {
   it('renders = button', () => {
@@ -17,16 +17,30 @@ describe('ButtonGrid', () => {
     expect(onButton).toHaveBeenCalledWith('7')
   })
 
-  it('shows sin( label when shift inactive', () => {
+  it('shows sin label when shift inactive', () => {
     render(<ButtonGrid {...props} />)
-    expect(screen.getByText('sin(')).toBeInTheDocument()
+    expect(screen.getByText('sin')).toBeInTheDocument()
   })
 
-  it('shows asin action when shift active and sin( pressed', () => {
+  it('shows asin action when shift active and sin pressed', () => {
     const onButton = vi.fn()
     render(<ButtonGrid {...props} shiftActive onButton={onButton} />)
-    fireEvent.click(screen.getByText('sin⁻¹('))
+    fireEvent.click(screen.getByText('sin⁻¹'))
     expect(onButton).toHaveBeenCalledWith('asin')
+  })
+
+  it('hyp turns sin into sinh', () => {
+    const onButton = vi.fn()
+    render(<ButtonGrid {...props} hypActive onButton={onButton} />)
+    fireEvent.click(screen.getByText('sinh'))
+    expect(onButton).toHaveBeenCalledWith('sinh')
+  })
+
+  it('×10ˣ key inserts a power of ten', () => {
+    const onButton = vi.fn()
+    render(<ButtonGrid {...props} onButton={onButton} />)
+    fireEvent.click(screen.getByText('×10ˣ'))
+    expect(onButton).toHaveBeenCalledWith('EXP')
   })
 
   it('renders AC button', () => {
