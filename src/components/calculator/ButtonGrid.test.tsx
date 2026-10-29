@@ -36,6 +36,13 @@ describe('ButtonGrid', () => {
     expect(onButton).toHaveBeenCalledWith('sinh')
   })
 
+  it('×10ˣ key inserts a power of ten', () => {
+    const onButton = vi.fn()
+    render(<ButtonGrid {...props} onButton={onButton} />)
+    fireEvent.click(screen.getByText('×10ˣ'))
+    expect(onButton).toHaveBeenCalledWith('EXP')
+  })
+
   it('renders AC button', () => {
     render(<ButtonGrid {...props} />)
     expect(screen.getByText('AC')).toBeInTheDocument()

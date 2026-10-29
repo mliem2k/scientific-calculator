@@ -38,7 +38,7 @@ const SCI: BtnDef[][] = [
     { id: 'cube', label: 'x³', shiftLabel: 'B', role: 'sci' },
     { id: 'paren_open', label: '(', role: 'sci' },
     { id: 'paren_close', label: ')', shiftLabel: 'Y', role: 'sci' },
-    { id: 'EXP', label: 'EXP', role: 'sci' },
+    { id: 'EXP', label: '×10ˣ', role: 'sci' },
   ],
 ]
 
@@ -93,7 +93,7 @@ const SPOKEN: Record<string, [string, string?]> = {
   cube: ['Cube', 'Variable B'], square: ['Square', 'Variable X'],
   paren_open: ['Open parenthesis'], paren_close: ['Close parenthesis', 'Variable Y'],
   DEL: ['Delete'], AC: ['All clear'], multiply: ['Multiply', 'Permutation'],
-  divide: ['Divide', 'Combination'], plus: ['Plus'], minus: ['Minus'], EXP: ['Exponent'],
+  divide: ['Divide', 'Combination'], plus: ['Plus'], minus: ['Minus'], EXP: ['Times ten to the power'],
   '.': ['Decimal point'], '=': ['Equals', 'Fraction decimal toggle'],
 }
 
