@@ -17,10 +17,10 @@ const SCI: BtnDef[][] = [
     { id: 'HYP', label: 'hyp', role: 'sci' },
     { id: 'pi', label: 'π', role: 'sci' },
     { id: 'e_const', label: 'e', shiftLabel: 'eˣ', role: 'sci' },
-    { id: 'Ans', label: 'Ans', role: 'sci' },
+    { id: 'Ans', label: 'Answer', role: 'sci' },
   ],
   [
-    { id: 'Sto', label: 'Sto', shiftLabel: 'Paste', role: 'sci' },
+    { id: 'Sto', label: 'Store', shiftLabel: 'Paste', role: 'sci' },
     { id: 'exponent', label: 'xʸ', shiftLabel: 'ⁿ√', role: 'sci' },
     { id: 'sin', label: 'sin', shiftLabel: 'sin⁻¹', role: 'sci' },
     { id: 'cos', label: 'cos', shiftLabel: 'cos⁻¹', role: 'sci' },

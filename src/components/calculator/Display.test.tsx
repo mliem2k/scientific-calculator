@@ -36,7 +36,7 @@ describe('Display', () => {
 
   it('shows STO indicator when stoMode true', () => {
     render(<Display {...baseProps} stoMode />)
-    expect(screen.getByText('Sto')).toBeInTheDocument()
+    expect(screen.getByText('Store')).toBeInTheDocument()
   })
 
   it('shows SHIFT and HYP badges when active', () => {

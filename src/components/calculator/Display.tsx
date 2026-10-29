@@ -108,7 +108,7 @@ export function Display({
           {isRad ? 'Rad' : 'Deg'}
         </button>
         {hypActive && <Badge label="hyp" />}
-        {stoMode && <Badge label="Sto" />}
+        {stoMode && <Badge label="Store" />}
         {shiftActive && <Badge label="shift" />}
         <div className="flex-1" />
         <button aria-label="History" onClick={onHistory} className={ICON_BTN}>
