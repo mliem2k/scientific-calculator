@@ -1,29 +1,29 @@
 import { useSyncExternalStore } from 'react'
-import type { ThemeId } from './themes'
+import { THEMES, type ThemeId } from './themes'
 
 export interface Settings {
   themeId: ThemeId
   defaultAngleMode: 'DEG' | 'RAD'
   /** Decimal places, 0 means automatic. */
   resultPrecision: number
-  showShiftLabels: boolean
   hapticFeedback: boolean
 }
 
 const KEY = 'calc_settings'
 
 const DEFAULTS: Settings = {
-  themeId: 'amoled',
+  themeId: 'dark',
   defaultAngleMode: 'DEG',
   resultPrecision: 0,
-  showShiftLabels: true,
   hapticFeedback: true,
 }
 
 function load(): Settings {
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Settings>) } : DEFAULTS
+    const saved = raw ? (JSON.parse(raw) as Partial<Settings>) : {}
+    // A theme id from an older version (for example retro) falls back to the default.
+    return { ...DEFAULTS, ...saved, themeId: saved.themeId && saved.themeId in THEMES ? saved.themeId : DEFAULTS.themeId }
   } catch {
     return DEFAULTS
   }

@@ -9,8 +9,8 @@ interface Props {
   onClose: () => void
 }
 
-const PRIMARY = 'min-h-12 rounded-lg bg-eq px-5 font-semibold text-on-eq'
-const SECONDARY = 'min-h-12 rounded-lg px-4 text-dim'
+const PRIMARY = 'min-h-12 rounded-full bg-op px-6 font-semibold text-on-op'
+const SECONDARY = 'min-h-12 rounded-full px-4 text-dim'
 
 export function UpdateDialog({ info, failed, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -27,10 +27,10 @@ export function UpdateDialog({ info, failed, onClose }: Props) {
       ref={ref}
       onClose={onClose}
       aria-labelledby="update-title"
-      className="m-auto w-[min(22rem,calc(100vw-2rem))] rounded-2xl bg-display p-6 text-expr backdrop:bg-black/60"
+      className="m-auto w-[min(22rem,calc(100vw-2rem))] rounded-3xl bg-surface p-6 text-ink backdrop:bg-black/60"
     >
       <h2 id="update-title" className="text-lg font-semibold">{info ? 'Update available' : failed ? 'Check failed' : 'Up to date'}</h2>
-      <p className="mt-2 text-result">
+      <p className="mt-2 text-dim">
         {info
           ? `${formatTag(info.tagName)} is ready to download.`
           : failed

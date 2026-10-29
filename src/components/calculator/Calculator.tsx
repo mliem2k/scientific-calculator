@@ -46,10 +46,10 @@ export function Calculator() {
 
   return (
     <div
-      className="flex h-dvh flex-col bg-bg short:flex-row"
+      className="flex h-dvh flex-col bg-bg"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)', paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="h-[30dvh] max-h-72 min-h-[12.5rem] shrink-0 short:h-auto short:max-h-none short:min-h-0 short:flex-[2]">
+      <div className="min-h-[8rem] flex-1 short:min-h-0 short:flex-none short:h-[44dvh]">
         <Display
           expression={state.expression}
           cursor={state.cursor}
@@ -65,9 +65,13 @@ export function Calculator() {
           onCursorJump={handleCursorJump}
         />
       </div>
-      <div className="min-h-0 flex-1 short:flex-[3]">
-        <ButtonGrid shiftActive={state.shiftActive} onButton={handleButton} onPaste={handlePaste} />
-      </div>
+      <ButtonGrid
+        shiftActive={state.shiftActive}
+        hypActive={state.hypActive}
+        stoMode={state.stoMode}
+        onButton={handleButton}
+        onPaste={handlePaste}
+      />
       {update && <UpdateDialog info={update} onClose={() => setUpdate(null)} />}
     </div>
   )

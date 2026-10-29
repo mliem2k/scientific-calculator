@@ -36,13 +36,13 @@ describe('Display', () => {
 
   it('shows STO indicator when stoMode true', () => {
     render(<Display {...baseProps} stoMode />)
-    expect(screen.getByText('STO')).toBeInTheDocument()
+    expect(screen.getByText('Sto')).toBeInTheDocument()
   })
 
   it('shows SHIFT and HYP badges when active', () => {
     render(<Display {...baseProps} shiftActive hypActive />)
-    expect(screen.getByText('SHIFT')).toBeInTheDocument()
-    expect(screen.getByText('HYP')).toBeInTheDocument()
+    expect(screen.getByText('2nd')).toBeInTheDocument()
+    expect(screen.getByText('hyp')).toBeInTheDocument()
   })
 
   it('calls onHistory and onSettings from the header buttons', () => {
@@ -58,7 +58,7 @@ describe('Display', () => {
   it('calls onAngleToggle when angle label clicked', () => {
     const onAngleToggle = vi.fn()
     render(<Display {...baseProps} onAngleToggle={onAngleToggle} />)
-    fireEvent.click(screen.getByText('DEG'))
+    fireEvent.click(screen.getByText('Deg'))
     expect(onAngleToggle).toHaveBeenCalled()
   })
 })
