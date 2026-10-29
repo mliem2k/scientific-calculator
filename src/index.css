@@ -31,9 +31,6 @@ button { -webkit-tap-highlight-color: transparent; font: inherit; }
 
 :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
 
-/* Landscape phones are too short to stack display above keypad. */
-@custom-variant short (@media (orientation: landscape) and (max-height: 540px));
-
 /* Keys press by brightness so one rule serves every theme. */
 .key { transition: filter 120ms ease-out; }
 .key:active { filter: brightness(var(--c-press)); transition-duration: 0ms; }
@@ -63,7 +60,3 @@ button { -webkit-tap-highlight-color: transparent; font: inherit; }
 
 /* Fixed-height pad block: as tall as five round keys at full width, capped for short phones. */
 .pad-frame { height: min(calc((100vw - 2rem - 30px) / 4 * 5 + 40px), 54dvh); }
-@media (orientation: landscape) and (max-height: 540px) {
-  .pad-frame { height: auto; flex: 1 1 0; min-width: 0; }
-  .pad { justify-content: space-evenly; --g: 6px; }
-}

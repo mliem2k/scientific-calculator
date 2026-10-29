@@ -49,7 +49,7 @@ export function Calculator() {
       className="flex h-dvh flex-col bg-bg"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)', paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="min-h-[8rem] flex-1 short:min-h-0 short:flex-none short:h-[44dvh]">
+      <div className="min-h-[8rem] flex-1">
         <Display
           expression={state.expression}
           cursor={state.cursor}

@@ -111,7 +111,7 @@ export function Display({
         onPointerCancel={endDrag}
         onPointerLeave={endDrag}
         aria-label="Expression. Drag to move the cursor"
-        className="flex min-h-0 touch-none overflow-x-auto overflow-y-auto text-[2.75rem] font-light leading-none text-ink short:text-[1.75rem] [scrollbar-width:none]"
+        className="flex min-h-0 touch-none overflow-x-auto overflow-y-auto text-[2.75rem] font-light leading-none text-ink [scrollbar-width:none]"
       >
         <div className="ml-auto flex w-max items-center whitespace-nowrap py-2">
           {empty
