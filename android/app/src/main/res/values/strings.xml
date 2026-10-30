@@ -149,7 +149,6 @@
     <string name="key_decimal_point">Decimal point</string>
     <string name="key_equals">Equals</string>
     <string name="key_equals_shift">Fraction decimal toggle</string>
-    <string name="key_inverse">Inverse functions</string>
     <string name="key_pow10">Ten to the power</string>
     <string name="key_power10_shift">Times ten to the power</string>
     <string name="key_variable_store">Store in variable</string>

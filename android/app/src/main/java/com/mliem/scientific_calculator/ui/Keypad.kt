@@ -123,7 +123,7 @@ private fun keyTextSize(label: String, role: KeyRole) = when {
     else -> 34
 }
 
-/** What a key turns into while inverse, hyperbolic or store is active. */
+/** What a key turns into while shifted, hyperbolic or store is active. */
 private class Variant(val key: Key, val label: String, @param:StringRes val name: Int)
 
 private class KeyDef(
@@ -131,13 +131,13 @@ private class KeyDef(
     val label: String,
     val role: KeyRole,
     @param:StringRes val name: Int? = null,
-    val inverse: Variant? = null,
+    val shifted: Variant? = null,
     val hyperbolic: Variant? = null,
     val store: Variant? = null,
 )
 
-private fun sci(key: Key, label: String, name: Int, inverse: Variant? = null, hyperbolic: Variant? = null, store: Variant? = null) =
-    KeyDef(key, label, KeyRole.Sci, name, inverse, hyperbolic, store)
+private fun sci(key: Key, label: String, name: Int, shifted: Variant? = null, hyperbolic: Variant? = null, store: Variant? = null) =
+    KeyDef(key, label, KeyRole.Sci, name, shifted, hyperbolic, store)
 
 private fun digit(key: Key) = KeyDef(key, key.digit.toString(), KeyRole.Digit)
 
@@ -160,7 +160,7 @@ private val PAD = listOf(
     listOf(DOUBLE_ZERO, digit(Key.D0), DOT, EQUALS),
 )
 
-private fun KeyDef.copyWith(inverse: Variant) = KeyDef(key, label, role, name, inverse, hyperbolic, store)
+private fun KeyDef.copyWith(shifted: Variant) = KeyDef(key, label, role, name, shifted, hyperbolic, store)
 
 /** The ColorOS scientific pad: five columns, with extra rows for the keys it does not have. */
 private val SCIENTIFIC = listOf(
@@ -176,7 +176,7 @@ private val SCIENTIFIC = listOf(
         sci(Key.Ln, "ln", R.string.key_ln, Variant(Key.ExpFn, "eˣ", R.string.key_e_shift)),
         sci(Key.Pi, "π", R.string.key_pi),
         sci(Key.E, "e", R.string.key_e, Variant(Key.TimesTenPower, "×10ˣ", R.string.key_times_ten)),
-        sci(Key.Shift, "inv", R.string.key_inverse),
+        sci(Key.Shift, "shift", R.string.key_shift),
     ),
     listOf(
         sci(Key.Factorial, "!", R.string.key_factorial, Variant(Key.Ncr, "nCr", R.string.key_combination)),
@@ -213,7 +213,7 @@ private class Resolved(val key: Key, val label: String, @param:StringRes val nam
 private fun KeyDef.resolve(state: CalculatorState): Resolved {
     val variant = when {
         state.stoMode && store != null -> store
-        state.shiftActive && inverse != null -> inverse
+        state.shiftActive && shifted != null -> shifted
         state.hypActive && hyperbolic != null -> hyperbolic
         else -> null
     }
@@ -298,7 +298,8 @@ private fun KeyGrid(
 /** Textbook fraction glyph: a box over a bar over a box, with a whole part box when [mixed]. */
 @Composable
 fun FractionGlyph(mixed: Boolean, color: Color) {
-    Canvas(Modifier.size(width = if (mixed) 30.dp else 20.dp, height = 22.dp)) {
+    // The canvas is exactly as wide as the drawing (a 12dp bar, plus the whole part box when mixed), so it centers.
+    Canvas(Modifier.size(width = if (mixed) 23.dp else 12.dp, height = 22.dp)) {
         val stroke = Stroke(1.5.dp.toPx())
         val corner = CornerRadius(2.dp.toPx())
         val box = Size(9.dp.toPx(), 6.5.dp.toPx())

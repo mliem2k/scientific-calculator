@@ -79,7 +79,7 @@ fun FloatingCalculator(
                     translucent = !translucent
                     onTransparency(translucent)
                 }
-                IconAction(R.drawable.ic_window, stringResource(R.string.full_screen), onFullScreen)
+                IconAction(R.drawable.ic_fullscreen, stringResource(R.string.full_screen), onFullScreen)
             }
             Column(Modifier.padding(horizontal = 8.dp)) {
                 Expression(
