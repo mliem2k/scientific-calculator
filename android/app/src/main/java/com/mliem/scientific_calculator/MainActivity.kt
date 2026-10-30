@@ -42,7 +42,7 @@ import com.mliem.scientific_calculator.ui.CalculatorViewModel
 import com.mliem.scientific_calculator.ui.ConverterGrid
 import com.mliem.scientific_calculator.ui.CurrencyScreen
 import com.mliem.scientific_calculator.ui.Display
-import com.mliem.scientific_calculator.ui.HistoryScreen
+import com.mliem.scientific_calculator.ui.HistoryPanel
 import com.mliem.scientific_calculator.ui.LocalCalcColors
 import com.mliem.scientific_calculator.ui.NumberPad
 import com.mliem.scientific_calculator.ui.NumberSystemScreen
@@ -99,13 +99,8 @@ private fun CalculatorRoot(viewModel: CalculatorViewModel) {
                 label = "screen",
             ) { current ->
                 when (current) {
-                    Screen.Calculator -> CalculatorScreen(viewModel, state, settings.hapticFeedback, voiceOn, speaker::speak)
-                    Screen.History -> HistoryScreen(
-                        history = state.history,
-                        onBack = { viewModel.open(Screen.Calculator) },
-                        onClear = viewModel::clearHistory,
-                        onRestore = viewModel::restore,
-                    )
+                    Screen.Calculator, Screen.History ->
+                        CalculatorScreen(viewModel, state, settings.hapticFeedback, voiceOn, speaker::speak, current == Screen.History)
                     Screen.Settings -> SettingsScreen(
                         settings = settings,
                         checking = checking,
@@ -136,11 +131,12 @@ private fun CalculatorScreen(
     haptics: Boolean,
     voice: Boolean,
     speak: (String) -> Unit,
+    showHistory: Boolean,
 ) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var scientific by rememberSaveable { mutableStateOf(false) }
+    var scientific by rememberSaveable { mutableStateOf(true) }
     val speakKey: (String) -> Unit = { if (voice) speak(it) }
     val onPasteRequest: () -> Unit = {
         scope.launch {
@@ -151,6 +147,18 @@ private fun CalculatorScreen(
         }
     }
     val onKey: (Key) -> Unit = viewModel::press
+    if (showHistory) {
+        HistoryPanel(
+            state = state,
+            haptics = haptics,
+            onKey = onKey,
+            onJump = viewModel::jumpTo,
+            onInsert = viewModel::insertResult,
+            onClear = viewModel::clearHistory,
+            onBack = { viewModel.open(Screen.Calculator) },
+        )
+        return
+    }
     Column(Modifier.fillMaxSize()) {
         Display(
             state = state,

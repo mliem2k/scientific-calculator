@@ -52,8 +52,7 @@ import com.mliem.scientific_calculator.engine.Key
 enum class KeyRole { Digit, Func, Equals, Sci }
 
 /**
- * A round glossy key. [active] fills it with the accent (a toggle that is on); [accentText] only tints the
- * label (a mode that is selected, such as deg).
+ * A round glossy key. [active] fills it with the accent (a toggle that is on).
  */
 @Composable
 fun GlossyKey(
@@ -62,14 +61,13 @@ fun GlossyKey(
     description: String,
     modifier: Modifier = Modifier,
     active: Boolean = false,
-    accentText: Boolean = false,
     toggleState: String? = null,
     glyph: (@Composable (Color) -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     val colors = LocalCalcColors.current
     val brush: Brush
-    var content: Color
+    val content: Color
     when {
         active -> { brush = Brush.verticalGradient(listOf(colors.accent, colors.accent)); content = colors.background }
         role == KeyRole.Digit -> { brush = Brush.verticalGradient(listOf(colors.digitTop, colors.digitBottom)); content = colors.text }
@@ -77,7 +75,6 @@ fun GlossyKey(
         role == KeyRole.Equals -> { brush = Brush.verticalGradient(listOf(colors.equalsTop, colors.equalsBottom)); content = colors.equalsText }
         else -> { brush = Brush.verticalGradient(listOf(colors.sciKey, colors.sciKey)); content = colors.sciText }
     }
-    if (accentText && !active) content = colors.accent
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.93f else 1f, label = "keyPress")
@@ -171,14 +168,14 @@ private val SCIENTIFIC = listOf(
         sci(Key.Sin, "sin", R.string.key_sin, Variant(Key.Asin, "sin⁻¹", R.string.key_sin_shift), Variant(Key.Sinh, "sinh", R.string.key_sin_hyp)),
         sci(Key.Cos, "cos", R.string.key_cos, Variant(Key.Acos, "cos⁻¹", R.string.key_cos_shift), Variant(Key.Cosh, "cosh", R.string.key_cos_hyp)),
         sci(Key.Tan, "tan", R.string.key_tan, Variant(Key.Atan, "tan⁻¹", R.string.key_tan_shift), Variant(Key.Tanh, "tanh", R.string.key_tan_hyp)),
-        sci(Key.Rad, "rad", R.string.key_rad),
-        sci(Key.Deg, "deg", R.string.key_deg),
+        sci(Key.ParenOpen, "(", R.string.key_paren_open),
+        sci(Key.ParenClose, ")", R.string.key_paren_close),
     ),
     listOf(
         sci(Key.Log, "log", R.string.key_log, Variant(Key.Pow10, "10ˣ", R.string.key_pow10)),
         sci(Key.Ln, "ln", R.string.key_ln, Variant(Key.ExpFn, "eˣ", R.string.key_e_shift)),
-        sci(Key.ParenOpen, "(", R.string.key_paren_open),
-        sci(Key.ParenClose, ")", R.string.key_paren_close),
+        sci(Key.Pi, "π", R.string.key_pi),
+        sci(Key.E, "e", R.string.key_e, Variant(Key.TimesTenPower, "×10ˣ", R.string.key_times_ten)),
         sci(Key.Shift, "inv", R.string.key_inverse),
     ),
     listOf(
@@ -193,17 +190,21 @@ private val SCIENTIFIC = listOf(
         sci(Key.Sqrt, "√", R.string.key_sqrt, Variant(Key.Cbrt, "³√", R.string.key_sqrt_shift)),
         digit(Key.D4), digit(Key.D5), digit(Key.D6), MINUS,
     ),
-    listOf(sci(Key.Pi, "π", R.string.key_pi), digit(Key.D1), digit(Key.D2), digit(Key.D3), PLUS),
     listOf(
-        sci(Key.E, "e", R.string.key_e, Variant(Key.TimesTenPower, "×10ˣ", R.string.key_times_ten)),
-        DOUBLE_ZERO, digit(Key.D0), DOT, EQUALS,
+        sci(Key.Square, "x²", R.string.key_square, Variant(Key.Cube, "x³", R.string.key_square_shift)),
+        digit(Key.D1), digit(Key.D2), digit(Key.D3), PLUS,
     ),
     listOf(
+        sci(Key.Abs, "|x|", R.string.key_abs, Variant(Key.Hyp, "hyp", R.string.key_absolute_hyp)),
+        DOUBLE_ZERO, digit(Key.D0), DOT, EQUALS,
+    ),
+    // After Sto, A or B stores the result in that variable; otherwise they insert it.
+    listOf(
         sci(Key.Fraction, "", R.string.key_fraction, Variant(Key.Mixed, "", R.string.key_fraction_shift)),
-        sci(Key.Square, "x²", R.string.key_square, Variant(Key.Cube, "x³", R.string.key_square_shift), store = Variant(Key.MemA, "A", R.string.key_variable_a)),
-        sci(Key.Abs, "|x|", R.string.key_abs, Variant(Key.Hyp, "hyp", R.string.key_absolute_hyp), store = Variant(Key.MemB, "B", R.string.key_variable_b)),
-        sci(Key.Ans, "Ans", R.string.key_answer, store = Variant(Key.MemX, "X", R.string.key_variable_x)),
-        sci(Key.Store, "Sto", R.string.key_store, store = Variant(Key.MemY, "Y", R.string.key_variable_y)),
+        sci(Key.Ans, "Ans", R.string.key_answer, Variant(Key.MixedToggle, "a b/c", R.string.key_mixed_toggle)),
+        sci(Key.Store, "Sto", R.string.key_store),
+        sci(Key.MemA, "A", R.string.key_variable_a),
+        sci(Key.MemB, "B", R.string.key_variable_b),
     ),
 )
 
@@ -235,8 +236,6 @@ private fun CalcKey(def: KeyDef, state: CalculatorState, modifier: Modifier, onP
     val description = resolved.name?.let { stringResource(it) } ?: resolved.label
     val lit = (def.key == Key.Shift && state.shiftActive) || (def.key == Key.Store && state.stoMode) ||
         (def.key == Key.Abs && state.hypActive)
-    val selectedMode = (def.key == Key.Deg && state.angleMode == com.mliem.scientific_calculator.engine.AngleMode.Deg) ||
-        (def.key == Key.Rad && state.angleMode == com.mliem.scientific_calculator.engine.AngleMode.Rad)
     val toggle = def.key == Key.Shift || def.key == Key.Store
     val on = stringResource(R.string.state_on)
     val off = stringResource(R.string.state_off)
@@ -246,7 +245,6 @@ private fun CalcKey(def: KeyDef, state: CalculatorState, modifier: Modifier, onP
         description = description,
         modifier = modifier,
         active = lit,
-        accentText = selectedMode,
         toggleState = if (toggle) (if (lit) on else off) else null,
         glyph = if (def.key == Key.Fraction) { color -> FractionGlyph(mixed = state.shiftActive, color = color) } else null,
         onClick = { onPress(def, description) },

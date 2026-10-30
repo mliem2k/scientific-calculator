@@ -14,12 +14,12 @@ import com.mliem.scientific_calculator.engine.CalculatorState
 import com.mliem.scientific_calculator.engine.Cursor
 import com.mliem.scientific_calculator.engine.HistoryEntry
 import com.mliem.scientific_calculator.engine.Key
+import com.mliem.scientific_calculator.engine.Num
 import com.mliem.scientific_calculator.engine.Segment
 import com.mliem.scientific_calculator.engine.UnitCategory
 import com.mliem.scientific_calculator.engine.parseExpression
 import com.mliem.scientific_calculator.engine.pasteNodes
 import com.mliem.scientific_calculator.engine.press
-import com.mliem.scientific_calculator.engine.restore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -98,9 +98,9 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
         return true
     }
 
-    fun restore(entry: HistoryEntry) {
-        _calc.update { it.restore(entry) }
-        _screen.value = Screen.Calculator
+    /** Puts a past result into the expression at the caret, so it can be carried into a new calculation. */
+    fun insertResult(entry: HistoryEntry) {
+        _calc.update { it.pasteNodes(listOf(Num(entry.result)), _settings.value.resultPrecision) }
     }
 
     fun clearHistory() {

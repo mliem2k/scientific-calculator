@@ -28,7 +28,8 @@
 
     <!-- History -->
     <string name="clear">Clear</string>
-    <string name="no_history">No calculations yet</string>
+    <string name="no_history">No history</string>
+    <string name="delete_history">Delete history</string>
     <string name="restore_description">Restore %1$s equals %2$s</string>
 
     <!-- Settings -->
@@ -148,8 +149,6 @@
     <string name="key_decimal_point">Decimal point</string>
     <string name="key_equals">Equals</string>
     <string name="key_equals_shift">Fraction decimal toggle</string>
-    <string name="key_rad">Radians</string>
-    <string name="key_deg">Degrees</string>
     <string name="key_inverse">Inverse functions</string>
     <string name="key_pow10">Ten to the power</string>
     <string name="key_power10_shift">Times ten to the power</string>

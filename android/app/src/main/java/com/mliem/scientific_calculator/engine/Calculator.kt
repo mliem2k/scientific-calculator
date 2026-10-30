@@ -13,7 +13,7 @@ enum class Key(val digit: Char? = null) {
     Factorial, Percent, DoubleZero, Ncr, Npr, ParenOpen, ParenClose, Pi, E, Ans, TimesTenPower,
     Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh, Log, Ln, Pow10, ExpFn, Abs,
     Delete, AllClear, Left, Right, Up, Down, Equals,
-    Shift, Hyp, DegRad, Rad, Deg, Store, MemA, MemB, MemX, MemY,
+    Shift, Hyp, DegRad, Store, MemA, MemB, MemX, MemY,
     FractionToggle, MixedToggle,
 }
 
@@ -68,10 +68,6 @@ fun CalculatorState.press(key: Key, precision: Int = 0, entries: EntryFactory = 
         Key.Hyp -> copy(hypActive = !hypActive, shiftActive = false)
         Key.DegRad -> copy(
             angleMode = if (angleMode == AngleMode.Deg) AngleMode.Rad else AngleMode.Deg,
-            shiftActive = false,
-        ).evaluated(expression, cursor, precision)
-        Key.Rad, Key.Deg -> copy(
-            angleMode = if (key == Key.Rad) AngleMode.Rad else AngleMode.Deg,
             shiftActive = false,
         ).evaluated(expression, cursor, precision)
         Key.Store -> copy(stoMode = true, shiftActive = false, hypActive = false)
