@@ -2,6 +2,7 @@ package com.mliem.scientific_calculator.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -95,7 +100,7 @@ private val SCIENTIFIC = listOf(
     listOf(
         sci(Key.ParenOpen, "(", R.string.key_paren_open),
         sci(Key.ParenClose, ")", R.string.key_paren_close, Key.MemY, "Y", R.string.key_variable_y),
-        sci(Key.Fraction, "a/b", R.string.key_fraction, Key.Mixed, "mix", R.string.key_fraction_shift),
+        sci(Key.Fraction, "", R.string.key_fraction, Key.Mixed, "", R.string.key_fraction_shift),
     ),
 )
 
@@ -217,6 +222,10 @@ private fun CalcKey(def: KeyDef, state: CalculatorState, lit: Boolean, modifier:
             },
         contentAlignment = Alignment.Center,
     ) {
+        if (def.key == Key.Fraction) {
+            FractionGlyph(mixed = state.shiftActive, color = content)
+            return@Box
+        }
         BasicText(
             label,
             style = TextStyle(
@@ -232,6 +241,23 @@ private fun CalcKey(def: KeyDef, state: CalculatorState, lit: Boolean, modifier:
             maxLines = 1,
             softWrap = false,
         )
+    }
+}
+
+/** Textbook fraction glyph: a box over a bar over a box, with a whole part box when [mixed]. */
+@Composable
+private fun FractionGlyph(mixed: Boolean, color: Color) {
+    Canvas(Modifier.size(width = if (mixed) 36.dp else 24.dp, height = 26.dp)) {
+        val stroke = Stroke(1.6.dp.toPx())
+        val corner = CornerRadius(2.dp.toPx())
+        val box = Size(11.dp.toPx(), 8.dp.toPx())
+        val left = if (mixed) 13.dp.toPx() else 0f
+        val barWidth = 14.dp.toPx()
+        val boxLeft = left + (barWidth - box.width) / 2
+        if (mixed) drawRoundRect(color, Offset(0f, 5.dp.toPx()), Size(9.dp.toPx(), 16.dp.toPx()), corner, stroke)
+        drawRoundRect(color, Offset(boxLeft, 0.8.dp.toPx()), box, corner, stroke)
+        drawLine(color, Offset(left, 13.dp.toPx()), Offset(left + barWidth, 13.dp.toPx()), 1.6.dp.toPx())
+        drawRoundRect(color, Offset(boxLeft, 17.2.dp.toPx()), box, corner, stroke)
     }
 }
 

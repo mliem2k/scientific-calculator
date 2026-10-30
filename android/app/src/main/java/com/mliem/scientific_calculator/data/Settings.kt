@@ -12,7 +12,7 @@ import com.mliem.scientific_calculator.engine.AngleMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-enum class ThemeChoice { System, Light, Dark }
+enum class ThemeChoice { System, Light, Dark, Amoled }
 
 data class Settings(
     val theme: ThemeChoice = ThemeChoice.System,

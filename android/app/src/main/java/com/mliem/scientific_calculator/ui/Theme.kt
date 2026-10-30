@@ -65,16 +65,33 @@ val DarkColors = CalcColors(
     accent = Color(0xFFF08AEA),
 )
 
+/** Dark with a pure black background, so lit pixels stay off on an OLED panel. */
+val AmoledColors = CalcColors(
+    isDark = true,
+    background = Color(0xFF000000), surface = Color(0xFF0F0F11), line = Color(0xFF212124),
+    text = Color(0xFFF5F5F7), dim = Color(0xFF9A9AA0),
+    digitTop = Color(0xFF303134), digitBottom = Color(0xFF1E1F21),
+    funcTop = Color(0xFF1F2022), funcBottom = Color(0xFF131315),
+    equalsTop = Color(0xFFF58BEE), equalsBottom = Color(0xFFE53DD0), equalsText = Color(0xFFFFFFFF),
+    rim = Color(0x2EFFFFFF),
+    sciKey = Color(0xFF171719), sciText = Color(0xFFE8E8EA),
+    accent = Color(0xFFF08AEA),
+)
+
+/** The palette a choice resolves to; System follows [systemDark]. */
+fun colorsFor(choice: ThemeChoice, systemDark: Boolean) = when (choice) {
+    ThemeChoice.System -> if (systemDark) DarkColors else LightColors
+    ThemeChoice.Light -> LightColors
+    ThemeChoice.Dark -> DarkColors
+    ThemeChoice.Amoled -> AmoledColors
+}
+
 val LocalCalcColors = staticCompositionLocalOf { LightColors }
 
 @Composable
 fun CalculatorTheme(choice: ThemeChoice, content: @Composable () -> Unit) {
-    val dark = when (choice) {
-        ThemeChoice.System -> isSystemInDarkTheme()
-        ThemeChoice.Light -> false
-        ThemeChoice.Dark -> true
-    }
-    val colors = if (dark) DarkColors else LightColors
+    val colors = colorsFor(choice, isSystemInDarkTheme())
+    val dark = colors.isDark
 
     val view = LocalView.current
     if (!view.isInEditMode) {

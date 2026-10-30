@@ -250,24 +250,25 @@ private fun ThemePicker(selected: ThemeChoice, onSelect: (ThemeChoice) -> Unit) 
     val colors = LocalCalcColors.current
     Column(Modifier.padding(bottom = 20.dp)) {
         BasicText(stringResource(R.string.appearance), Modifier.padding(start = 20.dp, bottom = 6.dp), style = TextStyle(color = colors.dim, fontSize = 13.sp))
-        androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ThemeChoice.entries.forEach { choice ->
                 val active = choice == selected
                 val name = stringResource(when (choice) {
                     ThemeChoice.System -> R.string.theme_system
                     ThemeChoice.Light -> R.string.theme_light
                     ThemeChoice.Dark -> R.string.theme_dark
+                    ThemeChoice.Amoled -> R.string.theme_amoled
                 })
                 Column(
                     Modifier.weight(1f).clip(RoundedCornerShape(20.dp)).background(colors.surface)
                         .border(2.dp, if (active) colors.accent else Color.Transparent, RoundedCornerShape(20.dp))
                         .selectable(active, role = Role.RadioButton) { onSelect(choice) }
-                        .padding(vertical = 14.dp),
+                        .padding(vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     ThemeSwatch(choice)
-                    BasicText(name, style = TextStyle(color = if (active) colors.accent else colors.text, fontSize = 14.sp,
+                    BasicText(name, style = TextStyle(color = if (active) colors.accent else colors.text, fontSize = 13.sp,
                         fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal))
                 }
             }
@@ -277,11 +278,10 @@ private fun ThemePicker(selected: ThemeChoice, onSelect: (ThemeChoice) -> Unit) 
 
 @Composable
 private fun ThemeSwatch(choice: ThemeChoice) {
-    val light = LightColors
-    val dark = DarkColors
-    Box(Modifier.size(64.dp).clip(RoundedCornerShape(14.dp)).border(1.dp, LocalCalcColors.current.line, RoundedCornerShape(14.dp))) {
-        val left = if (choice == ThemeChoice.Dark) dark else light
-        val right = if (choice == ThemeChoice.Light) light else dark
+    // System shows both halves; every other choice shows its own palette twice.
+    val left = colorsFor(choice, systemDark = false)
+    val right = colorsFor(choice, systemDark = true)
+    Box(Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).border(1.dp, LocalCalcColors.current.line, RoundedCornerShape(14.dp))) {
         androidx.compose.foundation.layout.Row(Modifier.fillMaxSize()) {
             Box(Modifier.weight(1f).fillMaxSize().background(left.background), contentAlignment = Alignment.BottomCenter) {
                 Box(Modifier.padding(bottom = 10.dp).size(14.dp).clip(RoundedCornerShape(5.dp)).background(left.equalsBottom))
