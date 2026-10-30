@@ -210,7 +210,7 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.hapticFeedback,
                         onCheckedChange = null,
-                        colors = SwitchDefaults.colors(checkedTrackColor = colors.equalsKey, checkedThumbColor = Color.White,
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.equalsBottom, checkedThumbColor = Color.White,
                             uncheckedTrackColor = colors.line, uncheckedThumbColor = Color.White, uncheckedBorderColor = Color.Transparent),
                     )
                 }
@@ -222,7 +222,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Image(painterResource(R.mipmap.ic_launcher), null, Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)))
+                    Image(painterResource(R.drawable.app_icon), null, Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)))
                     Column {
                         BasicText(stringResource(R.string.app_name), style = TextStyle(color = colors.text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold))
                         BasicText(Updater.versionLabel(BuildConfig.BUILD_NUMBER), style = TextStyle(color = colors.dim, fontSize = 13.sp))
@@ -284,10 +284,10 @@ private fun ThemeSwatch(choice: ThemeChoice) {
         val right = if (choice == ThemeChoice.Light) light else dark
         androidx.compose.foundation.layout.Row(Modifier.fillMaxSize()) {
             Box(Modifier.weight(1f).fillMaxSize().background(left.background), contentAlignment = Alignment.BottomCenter) {
-                Box(Modifier.padding(bottom = 10.dp).size(14.dp).clip(RoundedCornerShape(5.dp)).background(left.equalsKey))
+                Box(Modifier.padding(bottom = 10.dp).size(14.dp).clip(RoundedCornerShape(5.dp)).background(left.equalsBottom))
             }
             Box(Modifier.weight(1f).fillMaxSize().background(right.background), contentAlignment = Alignment.BottomCenter) {
-                Box(Modifier.padding(bottom = 10.dp).size(14.dp).clip(RoundedCornerShape(5.dp)).background(right.digitKey))
+                Box(Modifier.padding(bottom = 10.dp).size(14.dp).clip(RoundedCornerShape(5.dp)).background(right.digitBottom))
             }
         }
     }

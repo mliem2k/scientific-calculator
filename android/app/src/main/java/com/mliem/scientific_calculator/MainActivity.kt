@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -18,6 +19,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
@@ -28,7 +32,8 @@ import com.mliem.scientific_calculator.ui.CalculatorTheme
 import com.mliem.scientific_calculator.ui.CalculatorViewModel
 import com.mliem.scientific_calculator.ui.Display
 import com.mliem.scientific_calculator.ui.HistoryScreen
-import com.mliem.scientific_calculator.ui.Keypad
+import com.mliem.scientific_calculator.ui.NumberPad
+import com.mliem.scientific_calculator.ui.SciPanel
 import com.mliem.scientific_calculator.ui.LocalCalcColors
 import com.mliem.scientific_calculator.ui.Screen
 import com.mliem.scientific_calculator.ui.SettingsScreen
@@ -110,15 +115,19 @@ private fun CalculatorScreen(
             viewModel.press(key)
         }
     }
+    var scientific by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         Display(
             state = state,
+            scientific = scientific,
+            onToggleScientific = { scientific = !scientific },
             onKey = onKey,
             onJump = viewModel::jumpTo,
             onHistory = { viewModel.open(Screen.History) },
             onSettings = { viewModel.open(Screen.Settings) },
             modifier = Modifier.weight(1f),
         )
-        Keypad(state, haptics, onKey, Modifier.weight(1.75f))
+        AnimatedVisibility(scientific) { SciPanel(state, haptics, onKey) }
+        NumberPad(state, haptics, onKey, Modifier.weight(1.25f))
     }
 }

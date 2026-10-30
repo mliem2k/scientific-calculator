@@ -15,6 +15,7 @@ import com.mliem.scientific_calculator.engine.Num
 import com.mliem.scientific_calculator.engine.Op
 import com.mliem.scientific_calculator.engine.Operator
 import com.mliem.scientific_calculator.engine.Paren
+import com.mliem.scientific_calculator.engine.Percent
 import com.mliem.scientific_calculator.engine.Radical
 import org.json.JSONArray
 import org.json.JSONObject
@@ -52,6 +53,7 @@ object HistoryCodec {
         is Radical -> JSONObject().put("t", "root").put("a", encodeNodes(node.degree)).put("b", encodeNodes(node.radicand))
         is Func -> JSONObject().put("t", "fn").put("v", node.name.name).put("a", encodeNodes(node.argument))
         is Factorial -> JSONObject().put("t", "fact").put("a", encodeNodes(node.operand))
+        is Percent -> JSONObject().put("t", "pct").put("a", encodeNodes(node.operand))
         is Ncr -> JSONObject().put("t", "ncr").put("a", encodeNodes(node.n)).put("b", encodeNodes(node.r))
         is Npr -> JSONObject().put("t", "npr").put("a", encodeNodes(node.n)).put("b", encodeNodes(node.r))
         is Paren -> JSONObject().put("t", "paren").put("a", encodeNodes(node.children))
@@ -71,6 +73,7 @@ object HistoryCodec {
             "root" -> Radical(a(), b())
             "fn" -> Func(FunctionName.valueOf(o.getString("v")), a())
             "fact" -> Factorial(a())
+            "pct" -> Percent(a())
             "ncr" -> Ncr(a(), b())
             "npr" -> Npr(a(), b())
             "paren" -> Paren(a())

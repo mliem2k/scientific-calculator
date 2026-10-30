@@ -115,6 +115,7 @@ private class Parser(
         is Radical -> root(nested(node.radicand), if (node.degree.isEmpty()) 2.0 else nested(node.degree))
         is Func -> function(node.name, nested(node.argument))
         is Factorial -> factorial(nested(node.operand))
+        is Percent -> nested(node.operand) / 100
         is Ncr -> combinations(nested(node.n), nested(node.r))
         is Npr -> permutations(nested(node.n), nested(node.r))
         is Paren -> nested(node.children)

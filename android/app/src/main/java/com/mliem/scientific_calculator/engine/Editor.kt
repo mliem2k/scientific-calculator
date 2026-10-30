@@ -108,6 +108,9 @@ object Editor {
     fun factorial(expr: List<Node>, cursor: Cursor) =
         wrapPrevious(expr, cursor) { Factorial(it) }.caretAfter()
 
+    fun percent(expr: List<Node>, cursor: Cursor) =
+        wrapPrevious(expr, cursor) { Percent(it) }.caretAfter()
+
     fun combinations(expr: List<Node>, cursor: Cursor) =
         wrapPrevious(expr, cursor) { Ncr(it, emptyList()) }.caretIn(Slot.R)
 

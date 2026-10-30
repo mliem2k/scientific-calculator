@@ -123,3 +123,22 @@ class CalculatorTest {
         assertEquals(emptyList<Node>(), fresh.keys(Key.D5, Key.AllClear).expression)
     }
 }
+
+class PercentAndDoubleZeroTest {
+    private val fresh = CalculatorState()
+
+    @Test fun percentDividesThePreviousNumberByOneHundred() {
+        val state = fresh.keys(Key.D5, Key.D0, Key.Percent)
+        assertEquals(listOf<Node>(Percent(listOf(Num("50")))), state.expression)
+        assertEquals("0.5", state.result)
+    }
+
+    @Test fun percentInsideASum() {
+        assertEquals("200.1", fresh.keys(Key.D2, Key.D0, Key.D0, Key.Plus, Key.D1, Key.D0, Key.Percent).result)
+    }
+
+    @Test fun doubleZeroAppendsTwoZeros() {
+        val state = fresh.keys(Key.D5, Key.DoubleZero)
+        assertEquals(listOf<Node>(Num("500")), state.expression)
+    }
+}

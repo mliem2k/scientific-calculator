@@ -10,7 +10,7 @@ data class HistoryEntry(val id: String, val expression: List<Node>, val result: 
 enum class Key(val digit: Char? = null) {
     D0('0'), D1('1'), D2('2'), D3('3'), D4('4'), D5('5'), D6('6'), D7('7'), D8('8'), D9('9'),
     Dot, Plus, Minus, Times, Divide, Fraction, Mixed, Power, Square, Cube, Sqrt, Cbrt, NthRoot,
-    Factorial, Ncr, Npr, ParenOpen, ParenClose, Pi, E, Ans, TimesTenPower,
+    Factorial, Percent, DoubleZero, Ncr, Npr, ParenOpen, ParenClose, Pi, E, Ans, TimesTenPower,
     Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh, Log, Ln, ExpFn, Abs,
     Delete, AllClear, Left, Right, Up, Down, Equals,
     Shift, Hyp, DegRad, Store, MemA, MemB, MemX, MemY,
@@ -65,6 +65,7 @@ fun CalculatorState.press(key: Key, precision: Int = 0, entries: EntryFactory = 
         Key.MemA, Key.MemB, Key.MemX, Key.MemY -> pressMemory(checkNotNull(memoryKeys[key]), precision)
         Key.FractionToggle -> toggleFraction(settled)
         Key.MixedToggle -> toggleMixed(settled)
+        Key.DoubleZero -> press(Key.D0, precision, entries).press(Key.D0, precision, entries)
         Key.Left -> copy(cursor = Navigator.left(expression, cursor))
         Key.Right -> copy(cursor = Navigator.right(expression, cursor))
         Key.Up -> copy(cursor = Navigator.up(expression, cursor))
@@ -114,6 +115,7 @@ private fun CalculatorState.edit(key: Key): Edit? {
         Key.Cbrt -> Editor.cubeRoot(expression, cursor)
         Key.NthRoot -> Editor.nthRoot(expression, cursor)
         Key.Factorial -> Editor.factorial(expression, cursor)
+        Key.Percent -> Editor.percent(expression, cursor)
         Key.Ncr -> Editor.combinations(expression, cursor)
         Key.Npr -> Editor.permutations(expression, cursor)
         Key.ParenOpen -> Editor.openParen(expression, cursor)

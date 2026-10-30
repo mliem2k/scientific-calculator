@@ -50,6 +50,7 @@ import com.mliem.scientific_calculator.engine.Num
 import com.mliem.scientific_calculator.engine.Op
 import com.mliem.scientific_calculator.engine.Operator
 import com.mliem.scientific_calculator.engine.Paren
+import com.mliem.scientific_calculator.engine.Percent
 import com.mliem.scientific_calculator.engine.Radical
 import com.mliem.scientific_calculator.engine.Segment
 import com.mliem.scientific_calculator.engine.Slot
@@ -142,6 +143,10 @@ private fun NodeView(node: Node, index: Int, path: List<Segment>, size: Float, s
         is Factorial -> Row(verticalAlignment = Alignment.CenterVertically) {
             MathNodes(node.operand, size, style, slot(Slot.Operand))
             MathText("!", size, style.color)
+        }
+        is Percent -> Row(verticalAlignment = Alignment.CenterVertically) {
+            MathNodes(node.operand, size, style, slot(Slot.Operand))
+            MathText("%", size, style.color)
         }
         is Ncr -> Row(verticalAlignment = Alignment.CenterVertically) {
             MathNodes(node.n, size, style, slot(Slot.N))

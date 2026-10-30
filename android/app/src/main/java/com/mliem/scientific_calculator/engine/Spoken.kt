@@ -17,6 +17,7 @@ private fun Node.spoken(): String = when (this) {
     is Radical -> if (degree.isEmpty()) "square root of ${radicand.spoken()}" else "root ${degree.spoken()} of ${radicand.spoken()}"
     is Func -> "${name.name.lowercase()} of ${argument.spoken()}"
     is Factorial -> "${operand.spoken()} factorial"
+    is Percent -> "${operand.spoken()} percent"
     is Ncr -> "${n.spoken()} choose ${r.spoken()}"
     is Npr -> "${n.spoken()} permute ${r.spoken()}"
     is Paren -> "(${children.spoken()})"

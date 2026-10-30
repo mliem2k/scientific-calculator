@@ -98,6 +98,14 @@ data class Factorial(val operand: List<Node>) : Node {
     override fun withSlot(slot: Slot, nodes: List<Node>) = if (slot == Slot.Operand) copy(operand = nodes) else this
 }
 
+data class Percent(val operand: List<Node>) : Node {
+    override val slots = listOf(Slot.Operand)
+
+    override fun slot(slot: Slot) = if (slot == Slot.Operand) operand else null
+
+    override fun withSlot(slot: Slot, nodes: List<Node>) = if (slot == Slot.Operand) copy(operand = nodes) else this
+}
+
 data class Ncr(val n: List<Node>, val r: List<Node>) : Node {
     override val slots = listOf(Slot.N, Slot.R)
 

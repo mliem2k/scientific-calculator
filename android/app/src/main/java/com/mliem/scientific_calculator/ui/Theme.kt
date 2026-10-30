@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.mliem.scientific_calculator.data.ThemeChoice
 
-/** Flat, light surfaces with one green accent: the ColorOS calculator look. */
+/** Glossy round keys on a flat background with a pink equals key: the ColorOS calculator look. */
 @Immutable
 class CalcColors(
     val isDark: Boolean,
@@ -25,42 +25,44 @@ class CalcColors(
     val line: Color,
     val text: Color,
     val dim: Color,
-    val digitKey: Color,
-    val digitText: Color,
+    /** Gradients run top to bottom; the rim is the light edge along the top of a key. */
+    val digitTop: Color,
+    val digitBottom: Color,
+    val funcTop: Color,
+    val funcBottom: Color,
+    val equalsTop: Color,
+    val equalsBottom: Color,
+    val equalsText: Color,
+    val rim: Color,
+    /** Flat keys of the scientific panel. */
     val sciKey: Color,
     val sciText: Color,
-    val utilKey: Color,
-    val utilText: Color,
-    val opKey: Color,
-    val opText: Color,
-    val equalsKey: Color,
-    val equalsText: Color,
     /** Caret, links and the active state. */
     val accent: Color,
 )
 
 val LightColors = CalcColors(
     isDark = false,
-    background = Color(0xFFF5F5F5), surface = Color(0xFFFFFFFF), line = Color(0xFFE4E4E6),
-    text = Color(0xFF111111), dim = Color(0xFF6F6F74),
-    digitKey = Color(0xFFFFFFFF), digitText = Color(0xFF111111),
-    sciKey = Color(0xFFEBEBED), sciText = Color(0xFF2B2B2D),
-    utilKey = Color(0xFFE3E3E6), utilText = Color(0xFF111111),
-    opKey = Color(0xFFDDF3E6), opText = Color(0xFF00693A),
-    equalsKey = Color(0xFF00A85A), equalsText = Color(0xFFFFFFFF),
-    accent = Color(0xFF00793F),
+    background = Color(0xFFF2F2F5), surface = Color(0xFFFFFFFF), line = Color(0xFFE3E3E8),
+    text = Color(0xFF111111), dim = Color(0xFF6F6F76),
+    digitTop = Color(0xFFFFFFFF), digitBottom = Color(0xFFF1F1F5),
+    funcTop = Color(0xFFE9E9EE), funcBottom = Color(0xFFDADAE1),
+    equalsTop = Color(0xFFF06CE6), equalsBottom = Color(0xFFD42FBF), equalsText = Color(0xFFFFFFFF),
+    rim = Color(0xCCFFFFFF),
+    sciKey = Color(0xFFE6E6EB), sciText = Color(0xFF2B2B2D),
+    accent = Color(0xFFB8239F),
 )
 
 val DarkColors = CalcColors(
     isDark = true,
-    background = Color(0xFF000000), surface = Color(0xFF1C1C1E), line = Color(0xFF2C2C2E),
-    text = Color(0xFFF2F2F2), dim = Color(0xFF98989F),
-    digitKey = Color(0xFF1F1F21), digitText = Color(0xFFFFFFFF),
-    sciKey = Color(0xFF161617), sciText = Color(0xFFE6E6E8),
-    utilKey = Color(0xFF2C2C2E), utilText = Color(0xFFFFFFFF),
-    opKey = Color(0xFF12301F), opText = Color(0xFF4FE08C),
-    equalsKey = Color(0xFF2FD27A), equalsText = Color(0xFF00210F),
-    accent = Color(0xFF4FE08C),
+    background = Color(0xFF18181A), surface = Color(0xFF242426), line = Color(0xFF343437),
+    text = Color(0xFFF5F5F7), dim = Color(0xFF9A9AA0),
+    digitTop = Color(0xFF48494C), digitBottom = Color(0xFF343538),
+    funcTop = Color(0xFF36373A), funcBottom = Color(0xFF27282A),
+    equalsTop = Color(0xFFF58BEE), equalsBottom = Color(0xFFE53DD0), equalsText = Color(0xFFFFFFFF),
+    rim = Color(0x33FFFFFF),
+    sciKey = Color(0xFF2A2B2E), sciText = Color(0xFFE8E8EA),
+    accent = Color(0xFFF08AEA),
 )
 
 val LocalCalcColors = staticCompositionLocalOf { LightColors }

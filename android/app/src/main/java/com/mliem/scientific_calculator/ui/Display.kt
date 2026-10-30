@@ -47,6 +47,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.ColorFilter
 import com.mliem.scientific_calculator.R
 import com.mliem.scientific_calculator.engine.AngleMode
@@ -65,6 +70,8 @@ private const val DRAG_STEP_DP = 22
 @Composable
 fun Display(
     state: CalculatorState,
+    scientific: Boolean,
+    onToggleScientific: () -> Unit,
     onKey: (Key) -> Unit,
     onJump: (List<Segment>, Int) -> Unit,
     onHistory: () -> Unit,
@@ -89,8 +96,8 @@ fun Display(
             if (state.stoMode) Badge(stringResource(R.string.badge_store))
             if (state.shiftActive) Badge(stringResource(R.string.badge_shift))
             Spacer(Modifier.weight(1f))
-            IconAction(R.drawable.ic_history, stringResource(R.string.history), onHistory)
-            IconAction(R.drawable.ic_settings, stringResource(R.string.settings), onSettings)
+            ScientificToggle(scientific, onToggleScientific)
+            MoreMenu(onHistory, onSettings)
         }
         Expression(state, onKey, onJump, Modifier.weight(1f).fillMaxWidth())
         ResultLine(state.result)
@@ -102,9 +109,47 @@ private fun Badge(label: String) {
     val colors = LocalCalcColors.current
     BasicText(
         label,
-        modifier = Modifier.padding(start = 8.dp).clip(CircleShape).background(colors.opKey).padding(horizontal = 10.dp, vertical = 4.dp),
-        style = TextStyle(color = colors.opText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+        modifier = Modifier.padding(start = 8.dp).clip(CircleShape).background(colors.accent.copy(alpha = 0.18f)).padding(horizontal = 10.dp, vertical = 4.dp),
+        style = TextStyle(color = colors.accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
     )
+}
+
+@Composable
+private fun ScientificToggle(active: Boolean, onClick: () -> Unit) {
+    val colors = LocalCalcColors.current
+    val description = stringResource(R.string.scientific_functions)
+    Box(
+        Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onClick)
+            .semantics { contentDescription = description; stateDescription = if (active) "On" else "Off" },
+        contentAlignment = Alignment.Center,
+    ) {
+        BasicText(
+            "√π\ne=",
+            style = TextStyle(
+                color = if (active) colors.accent else colors.text,
+                fontSize = 13.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun MoreMenu(onHistory: () -> Unit, onSettings: () -> Unit) {
+    val colors = LocalCalcColors.current
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconAction(R.drawable.ic_more, stringResource(R.string.more_options)) { open = true }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = colors.surface) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.history), color = colors.text) },
+                onClick = { open = false; onHistory() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.settings), color = colors.text) },
+                onClick = { open = false; onSettings() },
+            )
+        }
+    }
 }
 
 @Composable

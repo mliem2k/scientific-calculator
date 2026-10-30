@@ -11,6 +11,8 @@
     <string name="badge_store">Store</string>
     <string name="badge_shift">shift</string>
     <string name="history">History</string>
+    <string name="scientific_functions">Scientific functions</string>
+    <string name="more_options">More options</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
     <string name="expression_description">Expression. Drag to move the cursor</string>
@@ -94,6 +96,8 @@
     <string name="key_variable_y">Variable Y</string>
     <string name="key_all_clear">All clear</string>
     <string name="key_delete">Delete</string>
+    <string name="key_percent">Percent</string>
+    <string name="key_double_zero">Double zero</string>
     <string name="key_fraction">Fraction</string>
     <string name="key_fraction_shift">Mixed fraction</string>
     <string name="key_divide">Divide</string>
