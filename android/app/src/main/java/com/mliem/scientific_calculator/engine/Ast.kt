@@ -7,7 +7,7 @@ enum class Operator(val symbol: Char) { Plus('+'), Minus('-'), Times('×'), Divi
 
 enum class ConstantName { Pi, E, Ans, A, B, X, Y }
 
-enum class FunctionName { Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh, Log, Ln, Exp, Abs }
+enum class FunctionName { Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh, Log, Ln, Pow10, Exp, Abs }
 
 /**
  * The expression tree the editor builds and the evaluator reads. Every node is immutable, so an edit

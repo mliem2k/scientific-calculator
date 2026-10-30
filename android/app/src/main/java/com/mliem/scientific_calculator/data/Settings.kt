@@ -15,11 +15,13 @@ import kotlinx.coroutines.flow.map
 enum class ThemeChoice { System, Light, Dark, Amoled }
 
 data class Settings(
-    val theme: ThemeChoice = ThemeChoice.System,
+    val theme: ThemeChoice = ThemeChoice.Amoled,
     val defaultAngleMode: AngleMode = AngleMode.Deg,
     /** Decimal places, 0 means automatic. */
     val resultPrecision: Int = 0,
     val hapticFeedback: Boolean = true,
+    /** Reads pressed keys and results aloud. */
+    val voiceFeedback: Boolean = false,
 )
 
 val PRECISION_CHOICES = listOf(0, 4, 6, 8, 10)
@@ -31,13 +33,15 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
     private val angle = stringPreferencesKey("angle")
     private val precision = intPreferencesKey("precision")
     private val haptics = booleanPreferencesKey("haptics")
+    private val voice = booleanPreferencesKey("voice")
 
     val settings: Flow<Settings> = store.data.map { prefs ->
         Settings(
-            theme = prefs[theme].toEnumOr(ThemeChoice.System),
+            theme = prefs[theme].toEnumOr(ThemeChoice.Amoled),
             defaultAngleMode = prefs[angle].toEnumOr(AngleMode.Deg),
             resultPrecision = (prefs[precision] ?: 0).takeIf { it in PRECISION_CHOICES } ?: 0,
             hapticFeedback = prefs[haptics] ?: true,
+            voiceFeedback = prefs[voice] ?: false,
         )
     }
 
@@ -48,6 +52,8 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
     suspend fun setResultPrecision(value: Int) = store.edit { it[precision] = value }
 
     suspend fun setHapticFeedback(value: Boolean) = store.edit { it[haptics] = value }
+
+    suspend fun setVoiceFeedback(value: Boolean) = store.edit { it[voice] = value }
 }
 
 private inline fun <reified E : Enum<E>> String?.toEnumOr(default: E): E =

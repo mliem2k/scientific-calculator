@@ -11,10 +11,10 @@ enum class Key(val digit: Char? = null) {
     D0('0'), D1('1'), D2('2'), D3('3'), D4('4'), D5('5'), D6('6'), D7('7'), D8('8'), D9('9'),
     Dot, Plus, Minus, Times, Divide, Fraction, Mixed, Power, Square, Cube, Sqrt, Cbrt, NthRoot,
     Factorial, Percent, DoubleZero, Ncr, Npr, ParenOpen, ParenClose, Pi, E, Ans, TimesTenPower,
-    Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh, Log, Ln, ExpFn, Abs,
+    Sin, Cos, Tan, Asin, Acos, Atan, Sinh, Cosh, Tanh, Log, Ln, Pow10, ExpFn, Abs,
     Delete, AllClear, Left, Right, Up, Down, Equals,
-    Shift, Hyp, DegRad, Store, MemA, MemB, MemX, MemY,
-    FractionToggle, MixedToggle, Paste,
+    Shift, Hyp, DegRad, Rad, Deg, Store, MemA, MemB, MemX, MemY,
+    FractionToggle, MixedToggle,
 }
 
 data class CalculatorState(
@@ -33,13 +33,22 @@ data class CalculatorState(
 )
 
 const val MAX_HISTORY = 50
-const val MATH_ERROR = "Math Error"
+const val DIVIDE_BY_ZERO = "Can't divide by 0"
+const val NOT_A_NUMBER = "Not a number"
+const val INFINITE_VALUE = "Infinite value"
+
+/** What the result line shows for a failed calculation. */
+fun MathErrorReason.text() = when (this) {
+    MathErrorReason.DivideByZero -> DIVIDE_BY_ZERO
+    MathErrorReason.NotANumber -> NOT_A_NUMBER
+    MathErrorReason.Infinite -> INFINITE_VALUE
+}
 
 private val functionKeys = mapOf(
     Key.Sin to FunctionName.Sin, Key.Cos to FunctionName.Cos, Key.Tan to FunctionName.Tan,
     Key.Asin to FunctionName.Asin, Key.Acos to FunctionName.Acos, Key.Atan to FunctionName.Atan,
     Key.Sinh to FunctionName.Sinh, Key.Cosh to FunctionName.Cosh, Key.Tanh to FunctionName.Tanh,
-    Key.Log to FunctionName.Log, Key.Ln to FunctionName.Ln, Key.ExpFn to FunctionName.Exp, Key.Abs to FunctionName.Abs,
+    Key.Log to FunctionName.Log, Key.Ln to FunctionName.Ln, Key.Pow10 to FunctionName.Pow10, Key.ExpFn to FunctionName.Exp, Key.Abs to FunctionName.Abs,
 )
 
 private val memoryKeys = mapOf(
@@ -61,6 +70,10 @@ fun CalculatorState.press(key: Key, precision: Int = 0, entries: EntryFactory = 
             angleMode = if (angleMode == AngleMode.Deg) AngleMode.Rad else AngleMode.Deg,
             shiftActive = false,
         ).evaluated(expression, cursor, precision)
+        Key.Rad, Key.Deg -> copy(
+            angleMode = if (key == Key.Rad) AngleMode.Rad else AngleMode.Deg,
+            shiftActive = false,
+        ).evaluated(expression, cursor, precision)
         Key.Store -> copy(stoMode = true, shiftActive = false, hypActive = false)
         Key.MemA, Key.MemB, Key.MemX, Key.MemY -> pressMemory(checkNotNull(memoryKeys[key]), precision)
         Key.FractionToggle -> toggleFraction(settled)
@@ -71,7 +84,6 @@ fun CalculatorState.press(key: Key, precision: Int = 0, entries: EntryFactory = 
         Key.Up -> copy(cursor = Navigator.up(expression, cursor))
         Key.Down -> copy(cursor = Navigator.down(expression, cursor))
         Key.Equals -> settled.commit(precision, entries)
-        Key.Paste -> settled
         else -> {
             val edit = edit(key) ?: return settled
             settled.evaluated(edit.expression, edit.cursor, precision)
@@ -79,11 +91,13 @@ fun CalculatorState.press(key: Key, precision: Int = 0, entries: EntryFactory = 
     }
 }
 
-/** Inserts a pasted number at the caret. */
-fun CalculatorState.pasteNumber(text: String, precision: Int = 0): CalculatorState {
-    val edit = Editor.numberLiteral(expression, cursor, text)
+/** Inserts pasted nodes at the caret. */
+fun CalculatorState.pasteNodes(nodes: List<Node>, precision: Int = 0): CalculatorState {
+    val updated = expression.updateAt(cursor.path) { list ->
+        list.toMutableList().also { it.addAll(cursor.insertAt, nodes) }
+    }
     return copy(shiftActive = false, hypActive = false, stoMode = false)
-        .evaluated(edit.expression, edit.cursor, precision)
+        .evaluated(updated, cursor.copy(insertAt = cursor.insertAt + nodes.size), precision)
 }
 
 /** Loads a history entry back into the editor with the caret at its end. */
@@ -134,7 +148,7 @@ private fun CalculatorState.edit(key: Key): Edit? {
 private fun CalculatorState.evaluated(expression: List<Node>, cursor: Cursor, precision: Int): CalculatorState {
     val shown = when (val outcome = evaluate(expression, angleMode, answer(), memory)) {
         is Evaluation.Value -> formatNumber(outcome.number, precision)
-        Evaluation.MathError -> MATH_ERROR
+        is Evaluation.MathError -> outcome.reason.text()
         Evaluation.Incomplete -> null
     }
     return copy(expression = expression, cursor = cursor, result = shown, resultMode = ResultMode.Decimal)
@@ -144,7 +158,7 @@ private fun CalculatorState.answer() = lastResult?.toDoubleOrNull() ?: 0.0
 
 private fun CalculatorState.commit(precision: Int, entries: EntryFactory): CalculatorState {
     val outcome = evaluate(expression, angleMode, answer(), memory)
-    if (outcome == Evaluation.MathError) return copy(result = MATH_ERROR, resultMode = ResultMode.Decimal)
+    if (outcome is Evaluation.MathError) return copy(result = outcome.reason.text(), resultMode = ResultMode.Decimal)
     if (outcome !is Evaluation.Value) return this
     val text = formatNumber(outcome.number, precision)
     val entry = HistoryEntry(entries.newId(), expression, text, entries.now())

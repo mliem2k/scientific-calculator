@@ -76,13 +76,19 @@ fun Display(
     onToggleScientific: () -> Unit,
     onKey: (Key) -> Unit,
     onJump: (List<Segment>, Int) -> Unit,
+    onPasteRequest: () -> Unit,
+    onFloating: (() -> Unit)?,
+    onConverters: () -> Unit,
     onHistory: () -> Unit,
     onSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalCalcColors.current
-    Column(modifier.padding(start = 20.dp, end = 12.dp, bottom = 4.dp)) {
+    Column(modifier.padding(start = 12.dp, end = 12.dp, bottom = 4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (onFloating != null) {
+                IconAction(R.drawable.ic_window, stringResource(R.string.floating_window), onFloating)
+            }
             val radians = state.angleMode == AngleMode.Rad
             BasicText(
                 stringResource(if (radians) R.string.radians_short else R.string.degrees_short),
@@ -91,7 +97,7 @@ fun Display(
                     .widthIn(min = 48.dp)
                     .clickable { onKey(Key.DegRad) }
                     .semantics { contentDescription = "" }
-                    .padding(vertical = 14.dp),
+                    .padding(horizontal = 8.dp, vertical = 14.dp),
                 style = TextStyle(color = colors.dim, fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
             )
             if (state.hypActive) Badge(stringResource(R.string.badge_hyperbolic))
@@ -99,9 +105,10 @@ fun Display(
             if (state.shiftActive) Badge(stringResource(R.string.badge_shift))
             Spacer(Modifier.weight(1f))
             ScientificToggle(scientific, onToggleScientific)
+            IconAction(R.drawable.ic_grid, stringResource(R.string.unit_converter), onConverters)
             MoreMenu(onHistory, onSettings)
         }
-        Expression(state, onKey, onJump, Modifier.weight(1f).fillMaxWidth())
+        Expression(state, onKey, onJump, onPasteRequest, Modifier.weight(1f).fillMaxWidth().padding(start = 8.dp))
         ResultLine(state.result)
     }
 }
@@ -126,9 +133,9 @@ private fun ScientificToggle(active: Boolean, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         BasicText(
-            "√π\ne=",
+            if (active) "+−\n×=" else "√π\ne=",
             style = TextStyle(
-                color = if (active) colors.accent else colors.text,
+                color = colors.text,
                 fontSize = 13.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center,
             ),
         )
@@ -171,7 +178,13 @@ fun IconAction(iconRes: Int, description: String, onClick: () -> Unit) {
  * of the natural height gives the scale.
  */
 @Composable
-private fun Expression(state: CalculatorState, onKey: (Key) -> Unit, onJump: (List<Segment>, Int) -> Unit, modifier: Modifier) {
+internal fun Expression(
+    state: CalculatorState,
+    onKey: (Key) -> Unit,
+    onJump: (List<Segment>, Int) -> Unit,
+    onPasteRequest: () -> Unit,
+    modifier: Modifier,
+) {
     val colors = LocalCalcColors.current
     val stepPx = with(LocalDensity.current) { DRAG_STEP_DP.dp.toPx() }
     val scroll = rememberScrollState()
@@ -187,7 +200,10 @@ private fun Expression(state: CalculatorState, onKey: (Key) -> Unit, onJump: (Li
             .systemGestureExclusion()
             // A tap on empty space puts the caret at the end of the expression.
             .pointerInput(state.expression.size) {
-                detectTapGestures { onJump(emptyList(), state.expression.size) }
+                detectTapGestures(
+                    onLongPress = { onPasteRequest() },
+                    onTap = { onJump(emptyList(), state.expression.size) },
+                )
             }
             .pointerInput(stepPx) {
                 var dx = 0f
@@ -238,7 +254,7 @@ private fun Expression(state: CalculatorState, onKey: (Key) -> Unit, onJump: (Li
 }
 
 @Composable
-private fun ResultLine(result: String?) {
+internal fun ResultLine(result: String?) {
     val colors = LocalCalcColors.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()

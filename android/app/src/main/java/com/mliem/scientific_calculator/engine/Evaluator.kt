@@ -20,6 +20,8 @@ import kotlin.math.tanh
 
 enum class AngleMode { Deg, Rad }
 
+enum class MathErrorReason { DivideByZero, NotANumber, Infinite }
+
 /** The four store slots, keyed by the constant that reads them. */
 data class Memory(val values: Map<ConstantName, Double> = emptyMap()) {
     operator fun get(name: ConstantName) = values[name]
@@ -30,8 +32,8 @@ data class Memory(val values: Map<ConstantName, Double> = emptyMap()) {
 sealed interface Evaluation {
     data class Value(val number: Double) : Evaluation
 
-    /** The expression is well formed but has no real result, for example 1 ÷ 0. */
-    data object MathError : Evaluation
+    /** The expression is well formed but has no real result; [reason] says which kind. */
+    data class MathError(val reason: MathErrorReason) : Evaluation
 
     /** The expression is empty or still has an open slot, so there is nothing to show yet. */
     data object Incomplete : Evaluation
@@ -46,13 +48,21 @@ fun evaluate(
     if (nodes.isEmpty()) return Evaluation.Incomplete
     return try {
         val value = Parser(nodes, angleMode, answer, memory).parseAll()
-        if (value.isFinite()) Evaluation.Value(value) else Evaluation.MathError
+        when {
+            value.isFinite() -> Evaluation.Value(value)
+            value.isNaN() -> Evaluation.MathError(MathErrorReason.NotANumber)
+            else -> Evaluation.MathError(MathErrorReason.Infinite)
+        }
     } catch (_: IncompleteExpression) {
         Evaluation.Incomplete
+    } catch (_: DivisionByZero) {
+        Evaluation.MathError(MathErrorReason.DivideByZero)
     }
 }
 
 private class IncompleteExpression : Exception()
+
+private class DivisionByZero : Exception()
 
 /**
  * Recursive descent over the node list: + and − bind loosest, then × ÷ and implicit multiplication
@@ -70,6 +80,11 @@ private class Parser(
         val value = sum()
         if (pos != nodes.size) throw IncompleteExpression()
         return value
+    }
+
+    private fun divide(numerator: Double, denominator: Double): Double {
+        if (denominator == 0.0) throw DivisionByZero()
+        return numerator / denominator
     }
 
     private fun nested(list: List<Node>) = Parser(list, angleMode, answer, memory).parseAll()
@@ -92,7 +107,7 @@ private class Parser(
         while (pos < nodes.size) {
             when (peekOperator()) {
                 Operator.Times -> { pos++; value *= signed() }
-                Operator.Divide -> { pos++; value /= signed() }
+                Operator.Divide -> { pos++; value = divide(value, signed()) }
                 null -> value *= signed()
                 else -> return value
             }
@@ -110,7 +125,7 @@ private class Parser(
         is Num -> number(node).toDoubleOrNull() ?: throw IncompleteExpression()
         is Op -> throw IncompleteExpression()
         is Const -> constant(node.name)
-        is Fraction -> nested(node.numerator) / nested(node.denominator)
+        is Fraction -> divide(nested(node.numerator), nested(node.denominator))
         is Exponent -> nested(node.base).pow(nested(node.exponent))
         is Radical -> root(nested(node.radicand), if (node.degree.isEmpty()) 2.0 else nested(node.degree))
         is Func -> function(node.name, nested(node.argument))
@@ -162,6 +177,7 @@ private class Parser(
         FunctionName.Tanh -> tanh(x)
         FunctionName.Log -> log10(x)
         FunctionName.Ln -> ln(x)
+        FunctionName.Pow10 -> 10.0.pow(x)
         FunctionName.Exp -> exp(x)
         FunctionName.Abs -> abs(x)
     }

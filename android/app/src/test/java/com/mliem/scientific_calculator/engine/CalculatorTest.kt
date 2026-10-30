@@ -35,7 +35,7 @@ class CalculatorTest {
 
     @Test fun equalsOnAMathErrorShowsItWithoutHistoryOrAnswer() {
         val state = fresh.keys(Key.D1, Key.Divide, Key.D0, Key.Equals)
-        assertEquals(MATH_ERROR, state.result)
+        assertEquals(DIVIDE_BY_ZERO, state.result)
         assertTrue(state.history.isEmpty())
         assertNull(state.lastResult)
     }
@@ -113,9 +113,15 @@ class CalculatorTest {
     }
 
     @Test fun pasteInsertsANumberLiteral() {
-        val state = fresh.pasteNumber("12.5")
+        val state = fresh.pasteNodes(listOf(Num("12.5")))
         assertEquals(listOf<Node>(Num("12.5")), state.expression)
         assertEquals("12.5", state.result)
+    }
+
+    @Test fun pastedExpressionLandsAtTheCaretAndEvaluates() {
+        val state = fresh.keys(Key.D1, Key.Plus).pasteNodes(checkNotNull(parseExpression("2*3")))
+        assertEquals("7", state.result)
+        assertEquals(5, state.cursor.insertAt)
     }
 
     @Test fun deleteAndAllClear() {

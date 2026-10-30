@@ -43,10 +43,10 @@ class EvaluatorTest {
         assertEquals(Evaluation.Incomplete, eval(listOf(Fraction(listOf(num("1")), emptyList()))))
 
     @Test fun divisionByZeroIsAMathError() =
-        assertEquals(Evaluation.MathError, eval(listOf(num("1"), op(Operator.Divide), num("0"))))
+        assertEquals(Evaluation.MathError(MathErrorReason.DivideByZero), eval(listOf(num("1"), op(Operator.Divide), num("0"))))
 
     @Test fun negativeSquareRootIsAMathError() =
-        assertEquals(Evaluation.MathError, eval(listOf(Radical(emptyList(), listOf(num("-4"))))))
+        assertEquals(Evaluation.MathError(MathErrorReason.NotANumber), eval(listOf(Radical(emptyList(), listOf(num("-4"))))))
 
     @Test fun squareRootPowerAndCubeRoot() {
         assertEquals(2.0, value(listOf(Radical(emptyList(), listOf(num("4"))))), 0.0)
@@ -61,8 +61,8 @@ class EvaluatorTest {
         assertEquals(120.0, value(listOf(Factorial(listOf(num("5"))))), 0.0)
         assertEquals(10.0, value(listOf(Ncr(listOf(num("5")), listOf(num("2"))))), 0.0)
         assertEquals(20.0, value(listOf(Npr(listOf(num("5")), listOf(num("2"))))), 0.0)
-        assertEquals(Evaluation.MathError, eval(listOf(Ncr(listOf(num("2")), listOf(num("5"))))))
-        assertEquals(Evaluation.MathError, eval(listOf(Factorial(listOf(num("-1"))))))
+        assertTrue(eval(listOf(Ncr(listOf(num("2")), listOf(num("5"))))) is Evaluation.MathError)
+        assertTrue(eval(listOf(Factorial(listOf(num("-1"))))) is Evaluation.MathError)
     }
 
     @Test fun factorialOfAFractionUsesTheGammaFunction() =
@@ -77,7 +77,7 @@ class EvaluatorTest {
     }
 
     @Test fun tangentOfNinetyDegreesIsAMathError() =
-        assertEquals(Evaluation.MathError, eval(listOf(Func(FunctionName.Tan, listOf(num("90")))), AngleMode.Deg))
+        assertTrue(eval(listOf(Func(FunctionName.Tan, listOf(num("90")))), AngleMode.Deg) is Evaluation.MathError)
 
     @Test fun hyperbolicFunctionsIgnoreTheAngleMode() {
         val sinh = listOf(Func(FunctionName.Sinh, listOf(num("1"))))

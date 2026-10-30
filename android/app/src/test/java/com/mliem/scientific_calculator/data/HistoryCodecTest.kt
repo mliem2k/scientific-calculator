@@ -69,3 +69,20 @@ class UpdaterTest {
         assertEquals("weird", Updater.formatTag("weird"))
     }
 }
+
+class CurrencyRatesTest {
+    private val json = """{"result":"success","base_code":"USD","rates":{"USD":1,"EUR":0.5,"JPY":150.0}}"""
+
+    @Test fun parsesRatesAndConvertsThroughTheDollar() {
+        val rates = CurrencyRepository.parse(json, 42L)
+        assertEquals(listOf("EUR", "JPY", "USD"), rates.codes)
+        assertEquals(42L, rates.updatedAtMillis)
+        assertEquals(300.0, rates.convert(1.0, "EUR", "JPY")!!, 1e-9)
+        assertEquals(0.5, rates.convert(1.0, "USD", "EUR")!!, 1e-9)
+        assertNull(rates.convert(1.0, "USD", "XXX"))
+    }
+
+    @Test fun aFailedResponseIsRejected() {
+        assertNull(runCatching { CurrencyRepository.parse("""{"result":"error"}""", 0L) }.getOrNull())
+    }
+}

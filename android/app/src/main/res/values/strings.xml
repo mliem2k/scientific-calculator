@@ -14,6 +14,12 @@
     <string name="scientific_functions">Scientific functions</string>
     <string name="more_options">More options</string>
     <string name="settings">Settings</string>
+    <string name="floating_window">Display calculator in floating window</string>
+    <string name="full_screen">Display calculator in full screen</string>
+    <string name="close_calculator">Close calculator</string>
+    <string name="floating_transparency">Floating window transparency</string>
+    <string name="overlay_permission_needed">Allow "Display over other apps" for Calculator to use the floating window.</string>
+    <string name="unit_converter">Unit converter</string>
     <string name="back">Back</string>
     <string name="expression_description">Expression. Drag to move the cursor</string>
     <string name="result_description">Result %1$s, tap to copy</string>
@@ -57,6 +63,38 @@
     <string name="download">Download</string>
     <string name="open_in_browser">Open in browser</string>
     <string name="got_it">Got it</string>
+
+    <!-- Converters -->
+    <string name="unit_converter_title">Unit converter</string>
+    <string name="category_length">Length</string>
+    <string name="category_area">Area</string>
+    <string name="category_volume">Volume</string>
+    <string name="category_weight">Weight</string>
+    <string name="category_temperature">Temperature</string>
+    <string name="category_speed">Speed</string>
+    <string name="category_pressure">Pressure</string>
+    <string name="category_power">Power</string>
+    <string name="category_number_system">Number system</string>
+    <string name="category_currency">Currency</string>
+    <string name="conversion_title">%1$s conversion</string>
+    <string name="select_unit">Select unit</string>
+    <string name="select_currency">Select currency</string>
+    <string name="search_currency">Search for a currency or country</string>
+    <string name="swap_currencies">Swap currencies</string>
+    <string name="currency_updated">Last updated: %1$s</string>
+    <string name="currency_updating">Updating...</string>
+    <string name="currency_update_failed">Update failed. Tap to get the latest exchange rates.</string>
+    <string name="currency_converter">Currency converter</string>
+    <string name="no_results">No results</string>
+    <string name="sign_toggle">Above and below zero</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_all_history_title">Delete all history?</string>
+    <string name="delete_all_history_body">All history will be permanently deleted from this device. This action cannot be undone.</string>
+    <string name="delete_all">Delete all</string>
+    <string name="voice_feedback">Voice feedback</string>
+    <string name="voice_feedback_hint">Read aloud the pressed keys and results in calculator mode.</string>
+    <string name="voice_feedback_talkback">Voice feedback can\'t be used with TalkBack on.</string>
+    <string name="paste_invalid">Only numbers and mathematical symbols can be pasted</string>
 
     <!-- Key names for screen readers -->
     <string name="key_shift">Shift</string>
@@ -110,6 +148,16 @@
     <string name="key_decimal_point">Decimal point</string>
     <string name="key_equals">Equals</string>
     <string name="key_equals_shift">Fraction decimal toggle</string>
+    <string name="key_rad">Radians</string>
+    <string name="key_deg">Degrees</string>
+    <string name="key_inverse">Inverse functions</string>
+    <string name="key_pow10">Ten to the power</string>
+    <string name="key_power10_shift">Times ten to the power</string>
+    <string name="key_variable_store">Store in variable</string>
+    <string name="key_mixed_toggle">Mixed fraction toggle</string>
+    <string name="key_absolute_hyp">Hyperbolic</string>
+    <string name="key_square_shift">Cube</string>
+    <string name="key_combination_short">Combination</string>
     <string name="state_on">On</string>
     <string name="state_off">Off</string>
 </resources>

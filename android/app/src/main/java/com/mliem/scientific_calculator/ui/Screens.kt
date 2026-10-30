@@ -65,7 +65,13 @@ import com.mliem.scientific_calculator.engine.spoken
 private const val REPO_URL = "https://github.com/mliem2k/scientific-calculator"
 
 @Composable
-private fun ScreenShell(title: String, onBack: () -> Unit, action: (@Composable () -> Unit)? = null, content: @Composable () -> Unit) {
+fun ScreenShell(
+    title: String,
+    onBack: () -> Unit,
+    action: (@Composable () -> Unit)? = null,
+    titleSize: Int = 32,
+    content: @Composable () -> Unit,
+) {
     val colors = LocalCalcColors.current
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -82,7 +88,7 @@ private fun ScreenShell(title: String, onBack: () -> Unit, action: (@Composable 
         BasicText(
             title,
             modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 12.dp),
-            style = TextStyle(color = colors.text, fontSize = 32.sp, fontWeight = FontWeight.SemiBold),
+            style = TextStyle(color = colors.text, fontSize = titleSize.sp, fontWeight = FontWeight.SemiBold),
         )
         Box(Modifier.weight(1f).fillMaxWidth()) { content() }
     }
@@ -91,6 +97,21 @@ private fun ScreenShell(title: String, onBack: () -> Unit, action: (@Composable 
 @Composable
 fun HistoryScreen(history: List<HistoryEntry>, onBack: () -> Unit, onClear: () -> Unit, onRestore: (HistoryEntry) -> Unit) {
     val colors = LocalCalcColors.current
+    var confirmClear by remember { mutableStateOf(false) }
+    if (confirmClear) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmClear = false },
+            containerColor = colors.surface,
+            title = { Text(stringResource(R.string.delete_all_history_title), color = colors.text) },
+            text = { Text(stringResource(R.string.delete_all_history_body), color = colors.dim) },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.cancel), color = colors.dim) }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { confirmClear = false; onClear() }) { Text(stringResource(R.string.delete_all), color = colors.accent) }
+            },
+        )
+    }
     ScreenShell(
         title = stringResource(R.string.history),
         onBack = onBack,
@@ -98,7 +119,7 @@ fun HistoryScreen(history: List<HistoryEntry>, onBack: () -> Unit, onClear: () -
             {
                 BasicText(
                     stringResource(R.string.clear),
-                    modifier = Modifier.heightIn(min = 48.dp).clickable(onClick = onClear).padding(horizontal = 16.dp, vertical = 13.dp),
+                    modifier = Modifier.heightIn(min = 48.dp).clickable { confirmClear = true }.padding(horizontal = 16.dp, vertical = 13.dp),
                     style = TextStyle(color = colors.accent, fontSize = 17.sp),
                 )
             }
@@ -176,6 +197,8 @@ fun SettingsScreen(
     onAngle: (AngleMode) -> Unit,
     onPrecision: (Int) -> Unit,
     onHaptics: (Boolean) -> Unit,
+    onVoice: (Boolean) -> Unit,
+    talkBackOn: Boolean,
     onCheckUpdates: () -> Unit,
 ) {
     val colors = LocalCalcColors.current
@@ -210,6 +233,22 @@ fun SettingsScreen(
                     Switch(
                         checked = settings.hapticFeedback,
                         onCheckedChange = null,
+                        colors = SwitchDefaults.colors(checkedTrackColor = colors.equalsBottom, checkedThumbColor = Color.White,
+                            uncheckedTrackColor = colors.line, uncheckedThumbColor = Color.White, uncheckedBorderColor = Color.Transparent),
+                    )
+                }
+            }
+
+            Section(stringResource(R.string.voice_feedback)) {
+                Row(
+                    stringResource(R.string.voice_feedback),
+                    stringResource(if (talkBackOn) R.string.voice_feedback_talkback else R.string.voice_feedback_hint),
+                    Modifier.toggleable(settings.voiceFeedback && !talkBackOn, enabled = !talkBackOn, role = Role.Switch, onValueChange = onVoice),
+                ) {
+                    Switch(
+                        checked = settings.voiceFeedback && !talkBackOn,
+                        onCheckedChange = null,
+                        enabled = !talkBackOn,
                         colors = SwitchDefaults.colors(checkedTrackColor = colors.equalsBottom, checkedThumbColor = Color.White,
                             uncheckedTrackColor = colors.line, uncheckedThumbColor = Color.White, uncheckedBorderColor = Color.Transparent),
                     )

@@ -65,17 +65,20 @@ val DarkColors = CalcColors(
     accent = Color(0xFFF08AEA),
 )
 
-/** Dark with a pure black background, so lit pixels stay off on an OLED panel. */
+/**
+ * Dark with a pure black background, so unlit pixels stay off on an OLED panel. Digit keys sit well above
+ * the black, operator keys sink toward it, and the cards are only a step lighter than the background.
+ */
 val AmoledColors = CalcColors(
     isDark = true,
-    background = Color(0xFF000000), surface = Color(0xFF0F0F11), line = Color(0xFF212124),
-    text = Color(0xFFF5F5F7), dim = Color(0xFF9A9AA0),
-    digitTop = Color(0xFF303134), digitBottom = Color(0xFF1E1F21),
-    funcTop = Color(0xFF1F2022), funcBottom = Color(0xFF131315),
-    equalsTop = Color(0xFFF58BEE), equalsBottom = Color(0xFFE53DD0), equalsText = Color(0xFFFFFFFF),
-    rim = Color(0x2EFFFFFF),
-    sciKey = Color(0xFF171719), sciText = Color(0xFFE8E8EA),
-    accent = Color(0xFFF08AEA),
+    background = Color(0xFF000000), surface = Color(0xFF121214), line = Color(0xFF26262A),
+    text = Color(0xFFFFFFFF), dim = Color(0xFF8E8E95),
+    digitTop = Color(0xFF34353A), digitBottom = Color(0xFF1F2023),
+    funcTop = Color(0xFF1F2023), funcBottom = Color(0xFF111113),
+    equalsTop = Color(0xFFF58BEE), equalsBottom = Color(0xFFE23FCD), equalsText = Color(0xFFFFFFFF),
+    rim = Color(0x40FFFFFF),
+    sciKey = Color(0xFF18181B), sciText = Color(0xFFEDEDF0),
+    accent = Color(0xFFF58BEE),
 )
 
 /** The palette a choice resolves to; System follows [systemDark]. */
@@ -96,7 +99,7 @@ fun CalculatorTheme(choice: ThemeChoice, content: @Composable () -> Unit) {
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
             // The app draws behind both bars, so only the icon tint and the 3-button scrim follow the theme.
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = !dark

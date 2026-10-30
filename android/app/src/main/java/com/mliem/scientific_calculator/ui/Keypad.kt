@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,10 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -52,220 +49,267 @@ import com.mliem.scientific_calculator.R
 import com.mliem.scientific_calculator.engine.CalculatorState
 import com.mliem.scientific_calculator.engine.Key
 
-private enum class Role { Digit, Func, Equals, Sci }
+enum class KeyRole { Digit, Func, Equals, Sci }
 
-/** One key and what it turns into under shift or hyp. */
-private class KeyDef(
-    val key: Key,
-    val label: String,
-    val role: Role,
-    @param:StringRes val name: Int? = null,
-    val shiftKey: Key? = null,
-    val shiftLabel: String? = null,
-    @param:StringRes val shiftName: Int? = null,
-    val hypKey: Key? = null,
-    val hypLabel: String? = null,
-    @param:StringRes val hypName: Int? = null,
-)
-
-private fun sci(key: Key, label: String, name: Int, shiftKey: Key? = null, shiftLabel: String? = null, shiftName: Int? = null,
-                hypKey: Key? = null, hypLabel: String? = null, hypName: Int? = null) =
-    KeyDef(key, label, Role.Sci, name, shiftKey, shiftLabel, shiftName, hypKey, hypLabel, hypName)
-
-private val SCIENTIFIC = listOf(
-    listOf(
-        sci(Key.Shift, "shift", R.string.key_shift),
-        sci(Key.Hyp, "hyp", R.string.key_hyperbolic),
-        sci(Key.Pi, "π", R.string.key_pi),
-        sci(Key.E, "e", R.string.key_e, Key.ExpFn, "eˣ", R.string.key_e_shift),
-        sci(Key.Ans, "Ans", R.string.key_answer),
-        sci(Key.Store, "Store", R.string.key_store, Key.Paste, "Paste", R.string.key_store_shift),
-    ),
-    listOf(
-        sci(Key.Sin, "sin", R.string.key_sin, Key.Asin, "sin⁻¹", R.string.key_sin_shift, Key.Sinh, "sinh", R.string.key_sin_hyp),
-        sci(Key.Cos, "cos", R.string.key_cos, Key.Acos, "cos⁻¹", R.string.key_cos_shift, Key.Cosh, "cosh", R.string.key_cos_hyp),
-        sci(Key.Tan, "tan", R.string.key_tan, Key.Atan, "tan⁻¹", R.string.key_tan_shift, Key.Tanh, "tanh", R.string.key_tan_hyp),
-        sci(Key.Log, "log", R.string.key_log, Key.MixedToggle, "a b/c", R.string.key_log_shift),
-        sci(Key.Ln, "ln", R.string.key_ln, Key.FractionToggle, "F⇄D", R.string.key_ln_shift),
-        sci(Key.Abs, "|x|", R.string.key_abs),
-    ),
-    listOf(
-        sci(Key.Sqrt, "√", R.string.key_sqrt, Key.Cbrt, "³√", R.string.key_sqrt_shift),
-        sci(Key.Square, "x²", R.string.key_square, Key.MemX, "X", R.string.key_variable_x),
-        sci(Key.Cube, "x³", R.string.key_cube, Key.MemB, "B", R.string.key_variable_b),
-        sci(Key.Power, "xʸ", R.string.key_power, Key.NthRoot, "ⁿ√", R.string.key_power_shift),
-        sci(Key.Factorial, "x!", R.string.key_factorial, Key.MemA, "A", R.string.key_variable_a),
-        sci(Key.TimesTenPower, "×10ˣ", R.string.key_times_ten),
-    ),
-    listOf(
-        sci(Key.ParenOpen, "(", R.string.key_paren_open),
-        sci(Key.ParenClose, ")", R.string.key_paren_close, Key.MemY, "Y", R.string.key_variable_y),
-        sci(Key.Fraction, "", R.string.key_fraction, Key.Mixed, "", R.string.key_fraction_shift),
-    ),
-)
-
-private fun digit(key: Key) = KeyDef(key, key.digit.toString(), Role.Digit)
-
-private val PAD = listOf(
-    listOf(
-        KeyDef(Key.AllClear, "AC", Role.Func, R.string.key_all_clear),
-        KeyDef(Key.Percent, "%", Role.Func, R.string.key_percent),
-        KeyDef(Key.Delete, "⌫", Role.Func, R.string.key_delete),
-        KeyDef(Key.Divide, "÷", Role.Func, R.string.key_divide, Key.Ncr, "nCr", R.string.key_combination),
-    ),
-    listOf(
-        digit(Key.D7), digit(Key.D8), digit(Key.D9),
-        KeyDef(Key.Times, "×", Role.Func, R.string.key_multiply, Key.Npr, "nPr", R.string.key_permutation),
-    ),
-    listOf(digit(Key.D4), digit(Key.D5), digit(Key.D6), KeyDef(Key.Minus, "−", Role.Func, R.string.key_minus)),
-    listOf(digit(Key.D1), digit(Key.D2), digit(Key.D3), KeyDef(Key.Plus, "+", Role.Func, R.string.key_plus)),
-    listOf(
-        KeyDef(Key.DoubleZero, "00", Role.Digit, R.string.key_double_zero),
-        digit(Key.D0),
-        KeyDef(Key.Dot, ".", Role.Digit, R.string.key_decimal_point),
-        KeyDef(Key.Equals, "=", Role.Equals, R.string.key_equals, Key.FractionToggle, "S⇄D", R.string.key_equals_shift),
-    ),
-)
-
+/**
+ * A round glossy key. [active] fills it with the accent (a toggle that is on); [accentText] only tints the
+ * label (a mode that is selected, such as deg).
+ */
 @Composable
-private fun rememberPress(state: CalculatorState, haptics: Boolean, onKey: (Key) -> Unit): (KeyDef) -> Unit {
-    val haptic = LocalHapticFeedback.current
-    return { def ->
-        if (haptics) haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-        onKey(
-            when {
-                state.shiftActive -> def.shiftKey ?: def.key
-                state.hypActive -> def.hypKey ?: def.key
-                else -> def.key
-            },
-        )
-    }
-}
-
-/** The scientific keys, shown above the pad while the display's toggle is on. */
-@Composable
-fun SciPanel(state: CalculatorState, haptics: Boolean, onKey: (Key) -> Unit, modifier: Modifier = Modifier) {
-    val press = rememberPress(state, haptics, onKey)
-    Column(modifier.padding(horizontal = 16.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        SCIENTIFIC.forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                row.forEach { def ->
-                    val lit = (def.key == Key.Shift && state.shiftActive) ||
-                        (def.key == Key.Hyp && state.hypActive) || (def.key == Key.Store && state.stoMode)
-                    val weight = if (row.size < 6) 2f else 1f
-                    CalcKey(def, state, lit, Modifier.weight(weight).heightIn(min = 40.dp), CircleShape) { press(def) }
-                }
-            }
-        }
-    }
-}
-
-/** Five rows of round keys. The circles are as wide as the columns allow and shrink when height is short. */
-@Composable
-fun NumberPad(state: CalculatorState, haptics: Boolean, onKey: (Key) -> Unit, modifier: Modifier = Modifier) {
-    val press = rememberPress(state, haptics, onKey)
-    val gap = 14.dp
-    BoxWithConstraints(modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)) {
-        val diameter = minOf((maxWidth - gap * 3) / 4, (maxHeight - gap * 4) / 5)
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-            PAD.forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    row.forEach { def -> CalcKey(def, state, false, Modifier.size(diameter), CircleShape) { press(def) } }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CalcKey(def: KeyDef, state: CalculatorState, lit: Boolean, modifier: Modifier, shape: Shape, onClick: () -> Unit) {
+fun GlossyKey(
+    label: String,
+    role: KeyRole,
+    description: String,
+    modifier: Modifier = Modifier,
+    active: Boolean = false,
+    accentText: Boolean = false,
+    toggleState: String? = null,
+    glyph: (@Composable (Color) -> Unit)? = null,
+    onClick: () -> Unit,
+) {
     val colors = LocalCalcColors.current
-    val label = when {
-        state.shiftActive && def.shiftLabel != null -> def.shiftLabel
-        state.hypActive && def.hypLabel != null -> def.hypLabel
-        else -> def.label
-    }
-    val nameRes = when {
-        state.shiftActive && def.shiftName != null -> def.shiftName
-        state.hypActive && def.hypName != null -> def.hypName
-        else -> def.name
-    }
-    val description = if (nameRes != null) stringResource(nameRes) else label
-    val sci = def.role == Role.Sci
     val brush: Brush
-    val content: Color
+    var content: Color
     when {
-        lit -> { brush = Brush.verticalGradient(listOf(colors.accent, colors.accent)); content = colors.background }
-        def.role == Role.Digit -> { brush = Brush.verticalGradient(listOf(colors.digitTop, colors.digitBottom)); content = colors.text }
-        def.role == Role.Func -> { brush = Brush.verticalGradient(listOf(colors.funcTop, colors.funcBottom)); content = colors.text }
-        def.role == Role.Equals -> { brush = Brush.verticalGradient(listOf(colors.equalsTop, colors.equalsBottom)); content = colors.equalsText }
+        active -> { brush = Brush.verticalGradient(listOf(colors.accent, colors.accent)); content = colors.background }
+        role == KeyRole.Digit -> { brush = Brush.verticalGradient(listOf(colors.digitTop, colors.digitBottom)); content = colors.text }
+        role == KeyRole.Func -> { brush = Brush.verticalGradient(listOf(colors.funcTop, colors.funcBottom)); content = colors.text }
+        role == KeyRole.Equals -> { brush = Brush.verticalGradient(listOf(colors.equalsTop, colors.equalsBottom)); content = colors.equalsText }
         else -> { brush = Brush.verticalGradient(listOf(colors.sciKey, colors.sciKey)); content = colors.sciText }
     }
+    if (accentText && !active) content = colors.accent
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.93f else 1f, label = "keyPress")
-    val toggle = def.key == Key.Shift || def.key == Key.Hyp || def.key == Key.Store
-    val on = stringResource(R.string.state_on)
-    val off = stringResource(R.string.state_off)
 
     Box(
         modifier
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(shape)
+            .clip(CircleShape)
             .background(brush)
-            .border(1.dp, Brush.verticalGradient(listOf(colors.rim, Color.Transparent)), shape)
+            .border(1.dp, Brush.verticalGradient(listOf(colors.rim, Color.Transparent)), CircleShape)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .semantics {
                 contentDescription = description
-                role = SemanticsRole.Button
-                if (toggle) stateDescription = if (lit) on else off
+                this.role = SemanticsRole.Button
+                if (toggleState != null) stateDescription = toggleState
             },
         contentAlignment = Alignment.Center,
     ) {
-        if (def.key == Key.Fraction) {
-            FractionGlyph(mixed = state.shiftActive, color = content)
-            return@Box
+        if (glyph != null) {
+            glyph(content)
+        } else {
+            BasicText(
+                label,
+                style = TextStyle(
+                    color = content,
+                    fontSize = keyTextSize(label, role).sp,
+                    fontWeight = when {
+                        role == KeyRole.Sci -> FontWeight.Medium
+                        label == "AC" || label == "%" -> FontWeight.Bold
+                        else -> FontWeight.Light
+                    },
+                    textAlign = TextAlign.Center,
+                ),
+                maxLines = 1,
+                softWrap = false,
+            )
         }
-        BasicText(
-            label,
-            style = TextStyle(
-                color = content,
-                fontSize = (if (sci) sciSize(label) else padSize(label)).sp,
-                fontWeight = when {
-                    sci -> FontWeight.Medium
-                    label == "AC" || label == "%" -> FontWeight.Bold
-                    else -> FontWeight.Light
-                },
-                textAlign = TextAlign.Center,
-            ),
-            maxLines = 1,
-            softWrap = false,
-        )
+    }
+}
+
+private fun keyTextSize(label: String, role: KeyRole) = when {
+    role == KeyRole.Sci -> if (label.length > 4) 15 else 19
+    label == "AC" -> 22
+    label == "%" -> 24
+    label.length > 1 -> 30
+    else -> 34
+}
+
+/** What a key turns into while inverse, hyperbolic or store is active. */
+private class Variant(val key: Key, val label: String, @param:StringRes val name: Int)
+
+private class KeyDef(
+    val key: Key,
+    val label: String,
+    val role: KeyRole,
+    @param:StringRes val name: Int? = null,
+    val inverse: Variant? = null,
+    val hyperbolic: Variant? = null,
+    val store: Variant? = null,
+)
+
+private fun sci(key: Key, label: String, name: Int, inverse: Variant? = null, hyperbolic: Variant? = null, store: Variant? = null) =
+    KeyDef(key, label, KeyRole.Sci, name, inverse, hyperbolic, store)
+
+private fun digit(key: Key) = KeyDef(key, key.digit.toString(), KeyRole.Digit)
+
+private val DIVIDE = KeyDef(Key.Divide, "÷", KeyRole.Func, R.string.key_divide)
+private val TIMES = KeyDef(Key.Times, "×", KeyRole.Func, R.string.key_multiply, Variant(Key.Npr, "nPr", R.string.key_permutation))
+private val MINUS = KeyDef(Key.Minus, "−", KeyRole.Func, R.string.key_minus)
+private val PLUS = KeyDef(Key.Plus, "+", KeyRole.Func, R.string.key_plus)
+private val ALL_CLEAR = KeyDef(Key.AllClear, "AC", KeyRole.Func, R.string.key_all_clear)
+private val PERCENT = KeyDef(Key.Percent, "%", KeyRole.Func, R.string.key_percent)
+private val DELETE = KeyDef(Key.Delete, "⌫", KeyRole.Func, R.string.key_delete)
+private val DOUBLE_ZERO = KeyDef(Key.DoubleZero, "00", KeyRole.Digit, R.string.key_double_zero)
+private val DOT = KeyDef(Key.Dot, ".", KeyRole.Digit, R.string.key_decimal_point)
+private val EQUALS = KeyDef(Key.Equals, "=", KeyRole.Equals, R.string.key_equals, Variant(Key.FractionToggle, "S⇄D", R.string.key_equals_shift))
+
+private val PAD = listOf(
+    listOf(ALL_CLEAR, PERCENT, DELETE, DIVIDE.copyWith(Variant(Key.Ncr, "nCr", R.string.key_combination))),
+    listOf(digit(Key.D7), digit(Key.D8), digit(Key.D9), TIMES),
+    listOf(digit(Key.D4), digit(Key.D5), digit(Key.D6), MINUS),
+    listOf(digit(Key.D1), digit(Key.D2), digit(Key.D3), PLUS),
+    listOf(DOUBLE_ZERO, digit(Key.D0), DOT, EQUALS),
+)
+
+private fun KeyDef.copyWith(inverse: Variant) = KeyDef(key, label, role, name, inverse, hyperbolic, store)
+
+/** The ColorOS scientific pad: five columns, with extra rows for the keys it does not have. */
+private val SCIENTIFIC = listOf(
+    listOf(
+        sci(Key.Sin, "sin", R.string.key_sin, Variant(Key.Asin, "sin⁻¹", R.string.key_sin_shift), Variant(Key.Sinh, "sinh", R.string.key_sin_hyp)),
+        sci(Key.Cos, "cos", R.string.key_cos, Variant(Key.Acos, "cos⁻¹", R.string.key_cos_shift), Variant(Key.Cosh, "cosh", R.string.key_cos_hyp)),
+        sci(Key.Tan, "tan", R.string.key_tan, Variant(Key.Atan, "tan⁻¹", R.string.key_tan_shift), Variant(Key.Tanh, "tanh", R.string.key_tan_hyp)),
+        sci(Key.Rad, "rad", R.string.key_rad),
+        sci(Key.Deg, "deg", R.string.key_deg),
+    ),
+    listOf(
+        sci(Key.Log, "log", R.string.key_log, Variant(Key.Pow10, "10ˣ", R.string.key_pow10)),
+        sci(Key.Ln, "ln", R.string.key_ln, Variant(Key.ExpFn, "eˣ", R.string.key_e_shift)),
+        sci(Key.ParenOpen, "(", R.string.key_paren_open),
+        sci(Key.ParenClose, ")", R.string.key_paren_close),
+        sci(Key.Shift, "inv", R.string.key_inverse),
+    ),
+    listOf(
+        sci(Key.Factorial, "!", R.string.key_factorial, Variant(Key.Ncr, "nCr", R.string.key_combination)),
+        ALL_CLEAR, PERCENT, DELETE, DIVIDE,
+    ),
+    listOf(
+        sci(Key.Power, "^", R.string.key_power, Variant(Key.NthRoot, "ⁿ√", R.string.key_power_shift)),
+        digit(Key.D7), digit(Key.D8), digit(Key.D9), TIMES,
+    ),
+    listOf(
+        sci(Key.Sqrt, "√", R.string.key_sqrt, Variant(Key.Cbrt, "³√", R.string.key_sqrt_shift)),
+        digit(Key.D4), digit(Key.D5), digit(Key.D6), MINUS,
+    ),
+    listOf(sci(Key.Pi, "π", R.string.key_pi), digit(Key.D1), digit(Key.D2), digit(Key.D3), PLUS),
+    listOf(
+        sci(Key.E, "e", R.string.key_e, Variant(Key.TimesTenPower, "×10ˣ", R.string.key_times_ten)),
+        DOUBLE_ZERO, digit(Key.D0), DOT, EQUALS,
+    ),
+    listOf(
+        sci(Key.Fraction, "", R.string.key_fraction, Variant(Key.Mixed, "", R.string.key_fraction_shift)),
+        sci(Key.Square, "x²", R.string.key_square, Variant(Key.Cube, "x³", R.string.key_square_shift), store = Variant(Key.MemA, "A", R.string.key_variable_a)),
+        sci(Key.Abs, "|x|", R.string.key_abs, Variant(Key.Hyp, "hyp", R.string.key_absolute_hyp), store = Variant(Key.MemB, "B", R.string.key_variable_b)),
+        sci(Key.Ans, "Ans", R.string.key_answer, store = Variant(Key.MemX, "X", R.string.key_variable_x)),
+        sci(Key.Store, "Sto", R.string.key_store, store = Variant(Key.MemY, "Y", R.string.key_variable_y)),
+    ),
+)
+
+private class Resolved(val key: Key, val label: String, @param:StringRes val name: Int?)
+
+private fun KeyDef.resolve(state: CalculatorState): Resolved {
+    val variant = when {
+        state.stoMode && store != null -> store
+        state.shiftActive && inverse != null -> inverse
+        state.hypActive && hyperbolic != null -> hyperbolic
+        else -> null
+    }
+    return if (variant != null) Resolved(variant.key, variant.label, variant.name) else Resolved(key, label, name)
+}
+
+@Composable
+private fun rememberKeyPress(state: CalculatorState, haptics: Boolean, speak: (String) -> Unit, onKey: (Key) -> Unit): (KeyDef, String) -> Unit {
+    val haptic = LocalHapticFeedback.current
+    return { def, spoken ->
+        if (haptics) haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+        speak(spoken)
+        onKey(def.resolve(state).key)
+    }
+}
+
+@Composable
+private fun CalcKey(def: KeyDef, state: CalculatorState, modifier: Modifier, onPress: (KeyDef, String) -> Unit) {
+    val resolved = def.resolve(state)
+    val description = resolved.name?.let { stringResource(it) } ?: resolved.label
+    val lit = (def.key == Key.Shift && state.shiftActive) || (def.key == Key.Store && state.stoMode) ||
+        (def.key == Key.Abs && state.hypActive)
+    val selectedMode = (def.key == Key.Deg && state.angleMode == com.mliem.scientific_calculator.engine.AngleMode.Deg) ||
+        (def.key == Key.Rad && state.angleMode == com.mliem.scientific_calculator.engine.AngleMode.Rad)
+    val toggle = def.key == Key.Shift || def.key == Key.Store
+    val on = stringResource(R.string.state_on)
+    val off = stringResource(R.string.state_off)
+    GlossyKey(
+        label = resolved.label,
+        role = def.role,
+        description = description,
+        modifier = modifier,
+        active = lit,
+        accentText = selectedMode,
+        toggleState = if (toggle) (if (lit) on else off) else null,
+        glyph = if (def.key == Key.Fraction) { color -> FractionGlyph(mixed = state.shiftActive, color = color) } else null,
+        onClick = { onPress(def, description) },
+    )
+}
+
+/** Five rows of round keys, as wide as the columns allow and smaller when the height is short. */
+@Composable
+fun NumberPad(
+    state: CalculatorState,
+    haptics: Boolean,
+    onKey: (Key) -> Unit,
+    modifier: Modifier = Modifier,
+    speak: (String) -> Unit = {},
+) = KeyGrid(PAD, 4, 14.dp, state, haptics, onKey, modifier, speak)
+
+/** The scientific layout: ColorOS rows plus a row for fractions, memory and absolute value. */
+@Composable
+fun ScientificPad(
+    state: CalculatorState,
+    haptics: Boolean,
+    onKey: (Key) -> Unit,
+    modifier: Modifier = Modifier,
+    speak: (String) -> Unit = {},
+) = KeyGrid(SCIENTIFIC, 5, 8.dp, state, haptics, onKey, modifier, speak)
+
+@Composable
+private fun KeyGrid(
+    rows: List<List<KeyDef>>,
+    columns: Int,
+    gap: androidx.compose.ui.unit.Dp,
+    state: CalculatorState,
+    haptics: Boolean,
+    onKey: (Key) -> Unit,
+    modifier: Modifier,
+    speak: (String) -> Unit,
+) {
+    val press = rememberKeyPress(state, haptics, speak, onKey)
+    BoxWithConstraints(modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)) {
+        val diameter = minOf((maxWidth - gap * (columns - 1)) / columns, (maxHeight - gap * (rows.size - 1)) / rows.size)
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+            rows.forEach { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    row.forEach { def -> CalcKey(def, state, Modifier.size(diameter), press) }
+                }
+            }
+        }
     }
 }
 
 /** Textbook fraction glyph: a box over a bar over a box, with a whole part box when [mixed]. */
 @Composable
-private fun FractionGlyph(mixed: Boolean, color: Color) {
-    Canvas(Modifier.size(width = if (mixed) 36.dp else 24.dp, height = 26.dp)) {
-        val stroke = Stroke(1.6.dp.toPx())
+fun FractionGlyph(mixed: Boolean, color: Color) {
+    Canvas(Modifier.size(width = if (mixed) 30.dp else 20.dp, height = 22.dp)) {
+        val stroke = Stroke(1.5.dp.toPx())
         val corner = CornerRadius(2.dp.toPx())
-        val box = Size(11.dp.toPx(), 8.dp.toPx())
-        val left = if (mixed) 13.dp.toPx() else 0f
-        val barWidth = 14.dp.toPx()
+        val box = Size(9.dp.toPx(), 6.5.dp.toPx())
+        val left = if (mixed) 11.dp.toPx() else 0f
+        val barWidth = 12.dp.toPx()
         val boxLeft = left + (barWidth - box.width) / 2
-        if (mixed) drawRoundRect(color, Offset(0f, 5.dp.toPx()), Size(9.dp.toPx(), 16.dp.toPx()), corner, stroke)
+        if (mixed) drawRoundRect(color, Offset(0f, 4.dp.toPx()), Size(8.dp.toPx(), 14.dp.toPx()), corner, stroke)
         drawRoundRect(color, Offset(boxLeft, 0.8.dp.toPx()), box, corner, stroke)
-        drawLine(color, Offset(left, 13.dp.toPx()), Offset(left + barWidth, 13.dp.toPx()), 1.6.dp.toPx())
-        drawRoundRect(color, Offset(boxLeft, 17.2.dp.toPx()), box, corner, stroke)
+        drawLine(color, Offset(left, 11.dp.toPx()), Offset(left + barWidth, 11.dp.toPx()), 1.5.dp.toPx())
+        drawRoundRect(color, Offset(boxLeft, 14.7.dp.toPx()), box, corner, stroke)
     }
-}
-
-private fun sciSize(label: String) = if (label.length > 4) 13 else 16
-
-private fun padSize(label: String) = when {
-    label == "AC" -> 24
-    label == "%" -> 26
-    label.length > 1 -> 34
-    else -> 38
 }
