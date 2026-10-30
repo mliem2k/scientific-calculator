@@ -2,6 +2,7 @@ package com.mliem.scientific_calculator.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -29,6 +30,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -96,7 +98,12 @@ fun MathNodes(nodes: List<Node>, size: Float, style: MathStyle, path: List<Segme
 
 @Composable
 private fun NodeView(node: Node, index: Int, path: List<Segment>, size: Float, style: MathStyle) {
-    val tap = style.onJump?.let { jump -> Modifier.tappable { jump(path, index + 1) } } ?: Modifier
+    val tap = style.onJump?.let { jump ->
+        // The left half of a node puts the caret before it and the right half after it.
+        Modifier.pointerInput(path, index) {
+            detectTapGestures { offset -> jump(path, if (offset.x < this.size.width / 2f) index else index + 1) }
+        }
+    } ?: Modifier
     fun slot(slot: Slot) = path + Segment(index, slot)
     when (node) {
         is Num -> MathText(node.value, size, style.color, tap)

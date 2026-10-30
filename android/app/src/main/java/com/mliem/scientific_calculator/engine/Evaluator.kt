@@ -107,7 +107,7 @@ private class Parser(
     }
 
     private fun operand(): Double = when (val node = nodes.getOrNull(pos++) ?: throw IncompleteExpression()) {
-        is Num -> node.value.toDoubleOrNull() ?: throw IncompleteExpression()
+        is Num -> number(node).toDoubleOrNull() ?: throw IncompleteExpression()
         is Op -> throw IncompleteExpression()
         is Const -> constant(node.name)
         is Fraction -> nested(node.numerator) / nested(node.denominator)
@@ -119,6 +119,17 @@ private class Parser(
         is Ncr -> combinations(nested(node.n), nested(node.r))
         is Npr -> permutations(nested(node.n), nested(node.r))
         is Paren -> nested(node.children)
+    }
+
+    /** Digits typed before an existing number sit in a node of their own but read as one number. */
+    private fun number(first: Num): String {
+        var text = first.value
+        while (true) {
+            val next = nodes.getOrNull(pos) as? Num ?: return text
+            if (next.value.startsWith('-')) return text
+            text += next.value
+            pos++
+        }
     }
 
     private fun constant(name: ConstantName) = when (name) {

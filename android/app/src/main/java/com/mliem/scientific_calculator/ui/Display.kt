@@ -4,6 +4,8 @@ import android.content.ClipData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -181,6 +183,12 @@ private fun Expression(state: CalculatorState, onKey: (Key) -> Unit, onJump: (Li
     BoxWithConstraints(
         modifier
             .semantics { contentDescription = description + " " + state.expression.spoken() }
+            // Keep the system back gesture off the edges so the caret can be dragged and tapped there.
+            .systemGestureExclusion()
+            // A tap on empty space puts the caret at the end of the expression.
+            .pointerInput(state.expression.size) {
+                detectTapGestures { onJump(emptyList(), state.expression.size) }
+            }
             .pointerInput(stepPx) {
                 var dx = 0f
                 var dy = 0f

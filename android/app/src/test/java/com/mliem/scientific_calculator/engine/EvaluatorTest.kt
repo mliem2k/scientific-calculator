@@ -22,6 +22,9 @@ class EvaluatorTest {
         assertEquals(Evaluation.Incomplete, eval(listOf(num("2"), plus)))
     }
 
+    @Test fun adjacentNumberNodesReadAsOneNumber() =
+        assertEquals(975263.0, value(listOf(num("9"), num("75263"))), 0.0)
+
     @Test fun addition() = assertEquals(5.0, value(listOf(num("2"), plus, num("3"))), 0.0)
 
     @Test fun multiplicationBindsTighterThanAddition() =
