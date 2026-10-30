@@ -17,8 +17,6 @@ const found = await $`which gh`.quiet().nothrow();
 if (found.exitCode !== 0) { console.error('gh not found'); process.exit(1); }
 
 console.log(`Building nightly APK (build ${build})...`);
-await $`bunx vite build`.env({ ...process.env, VITE_BUILD_NUMBER: String(build) });
-await $`bunx cap sync android`;
 await $`./gradlew assembleRelease -PbuildNumber=${build}`.cwd('android');
 await $`cp ${apk} ${renamedApk}`;
 

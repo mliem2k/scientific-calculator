@@ -1,25 +1,19 @@
 # IDE
 .idea/
 
-# Web / Node
+# Node (landing page)
 node_modules/
 dist/
-tsconfig.node.tsbuildinfo
 .playwright-mcp/
 
 # Superpowers plans (never commit)
 docs/superpowers/plans/
 
-# Capacitor / Android
+# Android
 android/.gradle/
 android/build/
 android/app/build/
 android/local.properties
-android/capacitor-cordova-android-plugins/
-android/app/src/main/assets/public/
-android/app/src/main/assets/capacitor.config.json
-android/app/src/main/assets/capacitor.plugins.json
-android/app/src/main/res/xml/config.xml
 
 # AI planning notes (never commit)
 docs/superpowers/

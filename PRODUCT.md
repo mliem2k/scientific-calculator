@@ -6,7 +6,7 @@ product
 
 ## Users
 
-Students using a phone one-handed, in class or exams, entering expressions quickly and reading results at a glance. A secondary web/PWA build and an Astro landing page (landing/) serve people who find the app.
+Students using a phone one-handed, in class or exams, entering expressions quickly and reading results at a glance. An Astro landing page (landing/) serves people who find the app.
 
 ## Product Purpose
 
@@ -14,12 +14,12 @@ A scientific calculator with a natural textbook display (fractions, roots, power
 
 ## Brand Personality
 
-Calm, clear, precise. References: iOS Calculator and Desmos for large type, restrained color and a single accent.
+Calm, clear, precise. References: the ColorOS calculator for flat rounded keys and a single green accent, and Desmos for large type.
 
 ## Anti-references
 
 1. Cluttered Casio-clone: tiny labels, every function visible at once.
-2. Generic Material default: stock buttons, elevation, purple seed color.
+2. Generic Material default: stock buttons, elevation, purple seed color (Material is used only for dialogs and switches, restyled).
 3. SaaS-style landing: hero metrics, identical feature card grids, gradient text.
 4. Neon or glossy gamer calculator: glow, gradients, saturated key colors.
 

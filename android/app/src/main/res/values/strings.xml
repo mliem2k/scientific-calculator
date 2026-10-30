@@ -1,7 +1,110 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Scientific Calculator</string>
-    <string name="title_activity_main">Scientific Calculator</string>
-    <string name="package_name">com.mliem.scientific_calculator</string>
-    <string name="custom_url_scheme">com.mliem.scientific_calculator</string>
+
+    <!-- Display -->
+    <string name="degrees_short">Deg</string>
+    <string name="radians_short">Rad</string>
+    <string name="angle_to_radians">Degrees, switch to radians</string>
+    <string name="angle_to_degrees">Radians, switch to degrees</string>
+    <string name="badge_hyperbolic">hyperbolic</string>
+    <string name="badge_store">Store</string>
+    <string name="badge_shift">shift</string>
+    <string name="history">History</string>
+    <string name="settings">Settings</string>
+    <string name="back">Back</string>
+    <string name="expression_description">Expression. Drag to move the cursor</string>
+    <string name="result_description">Result %1$s, tap to copy</string>
+    <string name="copied">Copied</string>
+    <string name="empty_expression">0</string>
+
+    <!-- History -->
+    <string name="clear">Clear</string>
+    <string name="no_history">No calculations yet</string>
+    <string name="restore_description">Restore %1$s equals %2$s</string>
+
+    <!-- Settings -->
+    <string name="appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="calculator">Calculator</string>
+    <string name="default_angle_mode">Default angle mode</string>
+    <string name="degrees">Degrees</string>
+    <string name="radians">Radians</string>
+    <string name="result_precision">Result precision</string>
+    <string name="precision_automatic">Automatic</string>
+    <string name="precision_decimals">%1$d decimals</string>
+    <string name="haptic_feedback">Haptic feedback</string>
+    <string name="haptic_feedback_hint">Vibrate on key press</string>
+    <string name="about">About</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="checking">Checking...</string>
+    <string name="check_for_updates_hint">Compare with the latest GitHub release</string>
+    <string name="source_code">Source code</string>
+
+    <!-- Updates -->
+    <string name="update_available">Update available</string>
+    <string name="update_ready">%1$s is ready to download.</string>
+    <string name="up_to_date">Up to date</string>
+    <string name="up_to_date_body">You\'re running the latest version.</string>
+    <string name="check_failed">Check failed</string>
+    <string name="check_failed_body">Could not reach GitHub. Check your connection and try again.</string>
+    <string name="later">Later</string>
+    <string name="download">Download</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="got_it">Got it</string>
+
+    <!-- Key names for screen readers -->
+    <string name="key_shift">Shift</string>
+    <string name="key_hyperbolic">Hyperbolic</string>
+    <string name="key_pi">Pi</string>
+    <string name="key_e">e</string>
+    <string name="key_e_shift">e to the x</string>
+    <string name="key_answer">Previous answer</string>
+    <string name="key_store">Store</string>
+    <string name="key_store_shift">Paste code</string>
+    <string name="key_power">Power</string>
+    <string name="key_power_shift">Nth root</string>
+    <string name="key_times_ten">Times ten to the power</string>
+    <string name="key_sin">Sine</string>
+    <string name="key_sin_shift">Inverse sine</string>
+    <string name="key_sin_hyp">Hyperbolic sine</string>
+    <string name="key_cos">Cosine</string>
+    <string name="key_cos_shift">Inverse cosine</string>
+    <string name="key_cos_hyp">Hyperbolic cosine</string>
+    <string name="key_tan">Tangent</string>
+    <string name="key_tan_shift">Inverse tangent</string>
+    <string name="key_tan_hyp">Hyperbolic tangent</string>
+    <string name="key_abs">Absolute value</string>
+    <string name="key_log">Log</string>
+    <string name="key_log_shift">Mixed fraction toggle</string>
+    <string name="key_ln">Natural log</string>
+    <string name="key_ln_shift">Decimal fraction toggle</string>
+    <string name="key_sqrt">Square root</string>
+    <string name="key_sqrt_shift">Cube root</string>
+    <string name="key_factorial">Factorial</string>
+    <string name="key_variable_a">Variable A</string>
+    <string name="key_square">Square</string>
+    <string name="key_variable_x">Variable X</string>
+    <string name="key_cube">Cube</string>
+    <string name="key_variable_b">Variable B</string>
+    <string name="key_paren_open">Open parenthesis</string>
+    <string name="key_paren_close">Close parenthesis</string>
+    <string name="key_variable_y">Variable Y</string>
+    <string name="key_all_clear">All clear</string>
+    <string name="key_delete">Delete</string>
+    <string name="key_fraction">Fraction</string>
+    <string name="key_fraction_shift">Mixed fraction</string>
+    <string name="key_divide">Divide</string>
+    <string name="key_combination">Combination</string>
+    <string name="key_multiply">Multiply</string>
+    <string name="key_permutation">Permutation</string>
+    <string name="key_minus">Minus</string>
+    <string name="key_plus">Plus</string>
+    <string name="key_decimal_point">Decimal point</string>
+    <string name="key_equals">Equals</string>
+    <string name="key_equals_shift">Fraction decimal toggle</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
 </resources>

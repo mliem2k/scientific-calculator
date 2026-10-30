@@ -1,23 +1,23 @@
 # Scientific Calculator
 
-Scientific calculator with natural textbook display (fractions, roots and powers rendered as written). TypeScript, React and Tailwind, built with Bun and Vite, packaged for Android with Capacitor.
+Scientific calculator for Android with a natural textbook display (fractions, roots and powers rendered as written). Native Kotlin and Jetpack Compose, styled after the ColorOS calculator.
 
 ## Develop
 
-```sh
-bun install
-bun run dev        # web, http://localhost:5173
-bun run test       # vitest
-bun run build      # type check and bundle to dist/
-```
-
-## Android
-
-Needs JDK 17 and the Android SDK (`ANDROID_HOME`).
+Needs the Android SDK (`sdk.dir` in `android/local.properties`); Gradle fetches JDK 21.
 
 ```sh
-bun run cap:sync   # build web and copy it into android/
-bun run release    # build a signed nightly APK and publish a GitHub prerelease
+cd android
+./gradlew testDebugUnitTest   # engine, editor, history and updater tests
+./gradlew installDebug        # build and install on a connected device
 ```
+
+## Release
+
+```sh
+bun scripts/release.js   # build a signed nightly APK and publish a GitHub prerelease
+```
+
+The app checks these releases for updates; a local build has build number 0 and skips the check.
 
 The landing page lives in `landing/` (Astro) and deploys to Vercel.
