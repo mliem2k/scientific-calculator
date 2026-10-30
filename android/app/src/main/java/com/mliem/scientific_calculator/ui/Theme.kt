@@ -23,6 +23,8 @@ class CalcColors(
     /** Grouped rows in the history and settings screens. */
     val surface: Color,
     val line: Color,
+    /** Menus and popups, a step above the background. */
+    val popup: Color,
     val text: Color,
     val dim: Color,
     /** Gradients run top to bottom; the rim is the light edge along the top of a key. */
@@ -43,7 +45,7 @@ class CalcColors(
 
 val LightColors = CalcColors(
     isDark = false,
-    background = Color(0xFFF2F2F5), surface = Color(0xFFFFFFFF), line = Color(0xFFE3E3E8),
+    background = Color(0xFFF2F2F5), surface = Color(0xFFFFFFFF), line = Color(0xFFE3E3E8), popup = Color(0xFFFFFFFF),
     text = Color(0xFF111111), dim = Color(0xFF6F6F76),
     digitTop = Color(0xFFFFFFFF), digitBottom = Color(0xFFF1F1F5),
     funcTop = Color(0xFFE9E9EE), funcBottom = Color(0xFFDADAE1),
@@ -55,7 +57,7 @@ val LightColors = CalcColors(
 
 val DarkColors = CalcColors(
     isDark = true,
-    background = Color(0xFF18181A), surface = Color(0xFF242426), line = Color(0xFF343437),
+    background = Color(0xFF18181A), surface = Color(0xFF242426), line = Color(0xFF343437), popup = Color(0xFF303033),
     text = Color(0xFFF5F5F7), dim = Color(0xFF9A9AA0),
     digitTop = Color(0xFF48494C), digitBottom = Color(0xFF343538),
     funcTop = Color(0xFF36373A), funcBottom = Color(0xFF27282A),
@@ -71,7 +73,7 @@ val DarkColors = CalcColors(
  */
 val AmoledColors = CalcColors(
     isDark = true,
-    background = Color(0xFF000000), surface = Color(0xFF121214), line = Color(0xFF26262A),
+    background = Color(0xFF000000), surface = Color(0xFF121214), line = Color(0xFF26262A), popup = Color(0xFF2E2E31),
     text = Color(0xFFFFFFFF), dim = Color(0xFF8E8E95),
     digitTop = Color(0xFF34353A), digitBottom = Color(0xFF1F2023),
     funcTop = Color(0xFF1F2023), funcBottom = Color(0xFF111113),

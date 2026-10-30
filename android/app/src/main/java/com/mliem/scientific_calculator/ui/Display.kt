@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +52,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.material3.Text
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -78,6 +83,7 @@ fun Display(
     onJump: (List<Segment>, Int) -> Unit,
     onPasteRequest: () -> Unit,
     onFloating: (() -> Unit)?,
+    updateAvailable: Boolean,
     onConverters: () -> Unit,
     onHistory: () -> Unit,
     onSettings: () -> Unit,
@@ -106,7 +112,7 @@ fun Display(
             Spacer(Modifier.weight(1f))
             ScientificToggle(scientific, onToggleScientific)
             IconAction(R.drawable.ic_grid, stringResource(R.string.unit_converter), onConverters)
-            MoreMenu(onHistory, onSettings)
+            MoreMenu(updateAvailable, onHistory, onSettings)
         }
         Expression(state, onKey, onJump, onPasteRequest, Modifier.weight(1f).fillMaxWidth().padding(start = 8.dp))
         ResultLine(state.result)
@@ -142,23 +148,52 @@ private fun ScientificToggle(active: Boolean, onClick: () -> Unit) {
     }
 }
 
+private val MenuWidth = 176.dp
+
+/** The overflow menu: a rounded card under the button, right aligned, with a hairline between its items. */
 @Composable
-private fun MoreMenu(onHistory: () -> Unit, onSettings: () -> Unit) {
+private fun MoreMenu(updateAvailable: Boolean, onHistory: () -> Unit, onSettings: () -> Unit) {
     val colors = LocalCalcColors.current
     var open by remember { mutableStateOf(false) }
+    val item = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
     Box {
         IconAction(R.drawable.ic_more, stringResource(R.string.more_options)) { open = true }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = colors.surface) {
+        if (updateAvailable) UpdateDot(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp))
+        DropdownMenu(
+            expanded = open,
+            onDismissRequest = { open = false },
+            // Right edge of the card lines up with the right edge of the button.
+            offset = DpOffset(48.dp - MenuWidth, 0.dp),
+            shape = RoundedCornerShape(22.dp),
+            containerColor = colors.popup,
+            tonalElevation = 0.dp,
+            shadowElevation = 12.dp,
+            modifier = Modifier.width(MenuWidth),
+        ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.history), color = colors.text) },
+                text = { MenuText(stringResource(R.string.history)) },
+                contentPadding = item,
                 onClick = { open = false; onHistory() },
             )
+            HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = colors.line)
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.settings), color = colors.text) },
+                text = { MenuText(stringResource(R.string.settings)) },
+                trailingIcon = if (updateAvailable) ({ UpdateDot(Modifier) }) else null,
+                contentPadding = item,
                 onClick = { open = false; onSettings() },
             )
         }
     }
+}
+
+@Composable
+private fun MenuText(text: String) {
+    BasicText(text, style = TextStyle(color = LocalCalcColors.current.text, fontSize = 17.sp))
+}
+
+@Composable
+private fun UpdateDot(modifier: Modifier) {
+    Box(modifier.size(8.dp).clip(CircleShape).background(Color(0xFFF44336)))
 }
 
 @Composable

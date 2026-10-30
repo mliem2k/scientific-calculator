@@ -68,6 +68,10 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
     private val _updatePrompt = MutableStateFlow<UpdatePrompt?>(null)
     val updatePrompt: StateFlow<UpdatePrompt?> = _updatePrompt.asStateFlow()
 
+    /** True once a newer release is found, so the menu can show a dot until the app is restarted. */
+    private val _updateAvailable = MutableStateFlow(false)
+    val updateAvailable: StateFlow<Boolean> = _updateAvailable.asStateFlow()
+
     private val _checking = MutableStateFlow(false)
     val checking: StateFlow<Boolean> = _checking.asStateFlow()
 
@@ -164,6 +168,7 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
             _checking.value = true
             runCatching { updater.check() }
                 .onSuccess { found ->
+                    _updateAvailable.value = found != null
                     if (found != null) _updatePrompt.value = UpdatePrompt.Available(found)
                     else if (manual) _updatePrompt.value = UpdatePrompt.UpToDate
                 }

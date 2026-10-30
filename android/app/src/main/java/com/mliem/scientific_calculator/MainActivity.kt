@@ -74,6 +74,7 @@ private fun CalculatorRoot(viewModel: CalculatorViewModel) {
     val screen by viewModel.screen.collectAsStateWithLifecycle()
     val prompt by viewModel.updatePrompt.collectAsStateWithLifecycle()
     val checking by viewModel.checking.collectAsStateWithLifecycle()
+    val updateAvailable by viewModel.updateAvailable.collectAsStateWithLifecycle()
     val currency by viewModel.currency.collectAsStateWithLifecycle()
     val currencyRefreshing by viewModel.currencyRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -100,7 +101,7 @@ private fun CalculatorRoot(viewModel: CalculatorViewModel) {
             ) { current ->
                 when (current) {
                     Screen.Calculator, Screen.History ->
-                        CalculatorScreen(viewModel, state, settings.hapticFeedback, voiceOn, speaker::speak, current == Screen.History)
+                        CalculatorScreen(viewModel, state, settings.hapticFeedback, voiceOn, speaker::speak, current == Screen.History, updateAvailable)
                     Screen.Settings -> SettingsScreen(
                         settings = settings,
                         checking = checking,
@@ -132,6 +133,7 @@ private fun CalculatorScreen(
     voice: Boolean,
     speak: (String) -> Unit,
     showHistory: Boolean,
+    updateAvailable: Boolean,
 ) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
@@ -176,6 +178,7 @@ private fun CalculatorScreen(
                     context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}")))
                 }
             },
+            updateAvailable = updateAvailable,
             onConverters = { viewModel.open(Screen.Converters) },
             onHistory = { viewModel.open(Screen.History) },
             onSettings = { viewModel.open(Screen.Settings) },
