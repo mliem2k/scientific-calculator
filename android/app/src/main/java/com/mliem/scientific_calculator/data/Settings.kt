@@ -11,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.mliem.scientific_calculator.engine.AngleMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.enums.enumEntries
 
 enum class ThemeChoice { System, Light, Dark, Amoled }
 
@@ -57,4 +58,4 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
 }
 
 private inline fun <reified E : Enum<E>> String?.toEnumOr(default: E): E =
-    enumValues<E>().firstOrNull { it.name == this } ?: default
+    enumEntries<E>().firstOrNull { it.name == this } ?: default
