@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mliem.scientific_calculator.CalculatorApp
 import com.mliem.scientific_calculator.data.Settings
 import com.mliem.scientific_calculator.data.ThemeChoice
+import com.mliem.scientific_calculator.data.InstallState
 import com.mliem.scientific_calculator.data.UpdateInfo
 import com.mliem.scientific_calculator.engine.AngleMode
 import com.mliem.scientific_calculator.engine.CalculatorState
@@ -44,12 +45,16 @@ sealed interface UpdatePrompt {
     data class Available(val info: UpdateInfo) : UpdatePrompt
     data object UpToDate : UpdatePrompt
     data object Failed : UpdatePrompt
+    /** [percent] is null once the download is done and the system installer has the file. */
+    data class Installing(val percent: Int?) : UpdatePrompt
+    data class InstallFailed(val message: String) : UpdatePrompt
 }
 
 class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
     private val settingsRepository = app.settings
     private val historyRepository = app.history
     private val updater = app.updater
+    private val installer = app.installer
     private val currencyRepository = app.currency
 
     private val _calc = MutableStateFlow(CalculatorState())
@@ -76,6 +81,16 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
     val checking: StateFlow<Boolean> = _checking.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            installer.state.collect { state ->
+                when (state) {
+                    InstallState.Idle -> Unit
+                    is InstallState.Downloading -> _updatePrompt.value = UpdatePrompt.Installing(state.percent)
+                    InstallState.Installing -> _updatePrompt.value = UpdatePrompt.Installing(null)
+                    is InstallState.Failed -> _updatePrompt.value = UpdatePrompt.InstallFailed(state.message)
+                }
+            }
+        }
         viewModelScope.launch {
             val saved = settingsRepository.settings.first()
             _settings.value = saved
@@ -159,6 +174,11 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
 
     fun dismissUpdatePrompt() {
         _updatePrompt.value = null
+        installer.reset()
+    }
+
+    fun installUpdate(info: UpdateInfo) {
+        viewModelScope.launch { installer.install(info) }
     }
 
     /** A launch check only speaks up when there is an update; a manual one always answers. */

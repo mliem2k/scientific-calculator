@@ -10,7 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 
-data class UpdateInfo(val tagName: String, val releaseUrl: String, val apkUrl: String?)
+/** [sha256] is null when GitHub reports no digest for the asset (older uploads). */
+data class UpdateInfo(
+    val tagName: String,
+    val releaseUrl: String,
+    val apkUrl: String?,
+    val sizeBytes: Long = -1L,
+    val sha256: String? = null,
+)
 
 /** Compares the installed build with the nightly releases on GitHub. */
 class Updater(
@@ -46,7 +53,13 @@ class Updater(
                 val assets = release.optJSONArray("assets") ?: JSONArray()
                 val apk = (0 until assets.length()).map { assets.getJSONObject(it) }
                     .firstOrNull { it.optString("name").endsWith(".apk") }
-                best = UpdateInfo(tag, url, apk?.optString("browser_download_url")?.takeIf { it.isNotEmpty() })
+                best = UpdateInfo(
+                    tagName = tag,
+                    releaseUrl = url,
+                    apkUrl = apk?.optString("browser_download_url")?.takeIf { it.isNotEmpty() },
+                    sizeBytes = apk?.optLong("size", -1L) ?: -1L,
+                    sha256 = apk?.optString("digest")?.removePrefix("sha256:")?.ifBlank { null },
+                )
             }
             return best
         }

@@ -1,6 +1,7 @@
 package com.mliem.scientific_calculator
 
 import android.app.Application
+import com.mliem.scientific_calculator.data.ApkInstaller
 import com.mliem.scientific_calculator.data.CurrencyRepository
 import com.mliem.scientific_calculator.data.HistoryRepository
 import com.mliem.scientific_calculator.data.SettingsRepository
@@ -12,5 +13,6 @@ class CalculatorApp : Application() {
     val settings by lazy { SettingsRepository(dataStore) }
     val history by lazy { HistoryRepository(dataStore) }
     val updater by lazy { Updater() }
+    val installer by lazy { ApkInstaller(this) }
     val currency by lazy { CurrencyRepository(dataStore) }
 }

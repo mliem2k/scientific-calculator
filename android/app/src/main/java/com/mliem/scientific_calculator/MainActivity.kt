@@ -120,7 +120,7 @@ private fun CalculatorRoot(viewModel: CalculatorViewModel) {
                     Screen.CurrencyConverter -> CurrencyScreen(currency, currencyRefreshing, viewModel::refreshCurrency) { viewModel.open(Screen.Converters) }
                 }
             }
-            prompt?.let { UpdateDialog(it, viewModel::dismissUpdatePrompt) }
+            prompt?.let { UpdateDialog(it, viewModel::installUpdate, viewModel::dismissUpdatePrompt) }
         }
     }
 }

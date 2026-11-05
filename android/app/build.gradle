@@ -23,10 +23,24 @@ android {
         buildConfigField "long", "BUILD_NUMBER", "${buildNumber}L"
     }
 
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("SIGNING_KEYSTORE_PATH")
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // The debug key keeps the signature of earlier releases so installs upgrade in place.
-            signingConfig signingConfigs.debug
+            // Earlier releases were signed with the debug key, so without SIGNING_KEYSTORE_PATH the release
+            // keeps that key and installs upgrade in place. Setting the variables signs with a real key,
+            // which installs only after the old build is uninstalled once.
+            signingConfig System.getenv("SIGNING_KEYSTORE_PATH") ? signingConfigs.release : signingConfigs.debug
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
