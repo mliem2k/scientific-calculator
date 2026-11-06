@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "landing/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    uses: mliem2k/kit/.github/workflows/deploy-pages.yml@main
+    with:
+      project: scientific-calculator
+      working_directory: landing
+      output_directory: dist
+    secrets: inherit
