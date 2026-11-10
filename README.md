@@ -4,7 +4,7 @@ Scientific calculator for Android with a natural textbook display (fractions, ro
 
 ## Develop
 
-Needs the Android SDK (`sdk.dir` in `android/local.properties`); Gradle fetches JDK 21.
+Needs the Android SDK (`sdk.dir` in `android/local.properties`); Gradle fetches JDK 21. The self-updater lives in the shared [android-core](https://github.com/mliem2k/android-core) checkout beside this repository, or set `ANDROID_CORE_DIR` to its path.
 
 ```sh
 cd android

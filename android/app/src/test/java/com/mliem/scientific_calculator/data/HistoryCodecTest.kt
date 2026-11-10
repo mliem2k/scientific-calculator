@@ -15,7 +15,6 @@ import com.mliem.scientific_calculator.engine.Op
 import com.mliem.scientific_calculator.engine.Operator
 import com.mliem.scientific_calculator.engine.Paren
 import com.mliem.scientific_calculator.engine.Radical
-import org.json.JSONArray
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -40,33 +39,6 @@ class HistoryCodecTest {
     @Test fun anUnknownNodeTypeFailsToDecode() {
         val json = """[{"id":"a","result":"1","time":1,"expr":[{"t":"mystery"}]}]"""
         assertNull(runCatching { HistoryCodec.decode(json) }.getOrNull())
-    }
-}
-
-class UpdaterTest {
-    private fun releases(vararg tags: String) = JSONArray().also { array ->
-        tags.forEach { tag ->
-            array.put(
-                org.json.JSONObject().put("tag_name", tag).put("html_url", "https://example.test/$tag")
-                    .put("assets", JSONArray().put(org.json.JSONObject().put("name", "app-$tag.apk").put("browser_download_url", "https://example.test/$tag.apk"))),
-            )
-        }
-    }
-
-    @Test fun picksTheHighestBuildNewerThanTheInstalledOne() {
-        val found = Updater.newest(releases("nightly-20260610-100", "nightly-20260612-300", "nightly-20260611-200"), installed = 150)
-        assertEquals("nightly-20260612-300", found?.tagName)
-        assertEquals("https://example.test/nightly-20260612-300.apk", found?.apkUrl)
-    }
-
-    @Test fun reportsNothingWhenUpToDateOrTagsHaveNoBuildNumber() {
-        assertNull(Updater.newest(releases("nightly-20260610-100"), installed = 100))
-        assertNull(Updater.newest(releases("v1.0"), installed = 1))
-    }
-
-    @Test fun formatsATagAsADate() {
-        assertEquals("Nightly, Jun 16, 2026", Updater.formatTag("nightly-20260616-1781592056"))
-        assertEquals("weird", Updater.formatTag("weird"))
     }
 }
 
