@@ -32,8 +32,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role as SemanticsRole
 import androidx.compose.ui.semantics.contentDescription
@@ -222,9 +220,9 @@ private fun KeyDef.resolve(state: CalculatorState): Resolved {
 
 @Composable
 private fun rememberKeyPress(state: CalculatorState, haptics: Boolean, speak: (String) -> Unit, onKey: (Key) -> Unit): (KeyDef, String) -> Unit {
-    val haptic = LocalHapticFeedback.current
+    val keyHaptics = rememberKeyHaptics(haptics)
     return { def, spoken ->
-        if (haptics) haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+        keyHaptics.tap()
         speak(spoken)
         onKey(def.resolve(state).key)
     }

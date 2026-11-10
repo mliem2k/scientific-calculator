@@ -21,15 +21,19 @@ import com.mliem.scientific_calculator.engine.Key
 import com.mliem.scientific_calculator.engine.Num
 import com.mliem.scientific_calculator.engine.Segment
 import com.mliem.scientific_calculator.engine.UnitCategory
+import com.mliem.scientific_calculator.engine.mergeHistory
 import com.mliem.scientific_calculator.engine.parseExpression
 import com.mliem.scientific_calculator.engine.pasteNodes
 import com.mliem.scientific_calculator.engine.press
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 sealed interface Screen {
     /** The screen back leads to, or null at the root. */
@@ -65,9 +69,19 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
     private val _settings = MutableStateFlow(Settings())
     val settings: StateFlow<Settings> = _settings.asStateFlow()
 
-    /** False until saved settings and history are read, which keeps the splash screen up. */
-    private val _ready = MutableStateFlow(false)
-    val ready: StateFlow<Boolean> = _ready.asStateFlow()
+    /** False until saved settings are read, which keeps the splash screen up. */
+    private val _settingsLoaded = MutableStateFlow(false)
+    val settingsLoaded: StateFlow<Boolean> = _settingsLoaded.asStateFlow()
+
+    /** False until the stored history is read, so the panel can tell "no history" from "not loaded yet". */
+    private val _historyLoaded = MutableStateFlow(false)
+    val historyLoaded: StateFlow<Boolean> = _historyLoaded.asStateFlow()
+
+    /** Set when history changed before the stored list arrived, so the merged list must still be written. */
+    private var historyDirty = false
+
+    /** Set when clear was pressed before the stored list arrived, so the load cannot bring entries back. */
+    private var historyCleared = false
 
     private val _screen = MutableStateFlow<Screen>(Screen.Calculator)
     val screen: StateFlow<Screen> = _screen.asStateFlow()
@@ -84,31 +98,52 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            updates.state.collect { state ->
-                when (state) {
-                    is UpdateState.Available -> {
-                        _updateAvailable.value = true
-                        _updatePrompt.value = UpdatePrompt.Available(state.info)
-                    }
-                    is UpdateState.Downloading -> _updatePrompt.value = UpdatePrompt.Installing(state.percent)
-                    UpdateState.Installing -> _updatePrompt.value = UpdatePrompt.Installing(null)
-                    is UpdateState.Failed -> {
-                        // A failed launch check is silent; only a failed install takes over the dialog.
-                        if (state.kind == FailureKind.INSTALL && _updatePrompt.value is UpdatePrompt.Installing) {
-                            _updatePrompt.value = UpdatePrompt.InstallFailed(state.message)
-                        }
-                    }
-                    else -> Unit
-                }
-            }
-        }
-        viewModelScope.launch {
             val saved = settingsRepository.settings.first()
             _settings.value = saved
-            _calc.value = CalculatorState(angleMode = saved.defaultAngleMode, history = historyRepository.load())
-            _ready.value = true
+            _calc.update { it.copy(angleMode = saved.defaultAngleMode) }
+            _settingsLoaded.value = true
             launch { settingsRepository.settings.collect { _settings.value = it } }
+            launch {
+                updates.state.collect { state ->
+                    when (state) {
+                        is UpdateState.Available -> {
+                            _updateAvailable.value = true
+                            _updatePrompt.value = UpdatePrompt.Available(state.info)
+                        }
+                        is UpdateState.Downloading -> _updatePrompt.value = UpdatePrompt.Installing(state.percent)
+                        UpdateState.Installing -> _updatePrompt.value = UpdatePrompt.Installing(null)
+                        is UpdateState.Failed -> {
+                            // A failed launch check is silent; only a failed install takes over the dialog.
+                            if (state.kind == FailureKind.INSTALL && _updatePrompt.value is UpdatePrompt.Installing) {
+                                _updatePrompt.value = UpdatePrompt.InstallFailed(state.message)
+                            }
+                        }
+                        else -> Unit
+                    }
+                }
+            }
             checkForUpdates(manual = false)
+        }
+        loadHistory()
+    }
+
+    /** Reads the stored history off the main thread, so the first frame never waits for it. */
+    private fun loadHistory() {
+        viewModelScope.launch {
+            val loaded = try {
+                withContext(Dispatchers.Default) { historyRepository.load() }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // Unreadable storage must not block saving forever; the live list stands in for the stored one.
+                emptyList()
+            }
+            val merged = mergeHistory(loaded, _calc.value.history, cleared = historyCleared)
+            _calc.update { it.copy(history = merged) }
+            _historyLoaded.value = true
+            if (historyDirty) {
+                if (runCatching { historyRepository.save(merged) }.isSuccess) historyDirty = false
+            }
         }
     }
 
@@ -116,7 +151,10 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
         val before = _calc.value
         val after = before.press(key, _settings.value.resultPrecision)
         _calc.value = after
-        if (after.history != before.history) saveHistory(after.history)
+        if (after.history != before.history) {
+            // Until the stored list is in, saving would replace it with just this one entry.
+            if (_historyLoaded.value) saveHistory(after.history) else historyDirty = true
+        }
     }
 
     fun jumpTo(path: List<Segment>, insertAt: Int) = _calc.update { it.copy(cursor = Cursor(path, insertAt)) }
@@ -136,6 +174,11 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
     fun clearHistory() {
         _calc.update { it.copy(history = emptyList()) }
         saveHistory(emptyList())
+        if (!_historyLoaded.value) {
+            // The in-flight read may still deliver the old list; drop it and rewrite the empty result after.
+            historyCleared = true
+            historyDirty = true
+        }
     }
 
     fun open(screen: Screen) {

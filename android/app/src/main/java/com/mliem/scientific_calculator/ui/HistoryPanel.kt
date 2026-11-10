@@ -27,8 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -57,12 +55,14 @@ private val SIDE_KEYS = listOf(
 
 /**
  * History as the ColorOS calculator shows it: the live display stays on top, and the keypad area becomes a
- * list of cards next to a slim column of operator keys. Tapping a card inserts its result.
+ * list of cards next to a slim column of operator keys. Tapping a card inserts its result. Until the stored
+ * list has loaded, an empty list shows nothing rather than the "No history" message.
  */
 @Composable
 fun HistoryPanel(
     state: CalculatorState,
     haptics: Boolean,
+    historyLoaded: Boolean,
     onKey: (Key) -> Unit,
     onJump: (List<Segment>, Int) -> Unit,
     onInsert: (HistoryEntry) -> Unit,
@@ -70,7 +70,7 @@ fun HistoryPanel(
     onBack: () -> Unit,
 ) {
     val colors = LocalCalcColors.current
-    val haptic = LocalHapticFeedback.current
+    val keyHaptics = rememberKeyHaptics(haptics)
     var confirmClear by remember { mutableStateOf(false) }
     if (confirmClear) {
         AlertDialog(
@@ -99,16 +99,21 @@ fun HistoryPanel(
         }
         Row(Modifier.weight(1.25f).fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
             Box(Modifier.weight(1f).fillMaxHeight()) {
-                if (state.history.isEmpty()) {
-                    BasicText(
+                when {
+                    state.history.isNotEmpty() ->
+                        LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            items(state.history, key = { it.id }) { entry ->
+                                HistoryCard(entry) {
+                                    keyHaptics.tap()
+                                    onInsert(entry)
+                                }
+                            }
+                        }
+                    historyLoaded -> BasicText(
                         stringResource(R.string.no_history),
                         Modifier.fillMaxWidth().padding(top = 32.dp),
                         style = TextStyle(color = colors.dim, fontSize = 16.sp, textAlign = TextAlign.Center),
                     )
-                } else {
-                    LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(state.history, key = { it.id }) { entry -> HistoryCard(entry) { onInsert(entry) } }
-                    }
                 }
             }
             Column(
@@ -117,12 +122,12 @@ fun HistoryPanel(
             ) {
                 SIDE_KEYS.forEach { (key, label, name) ->
                     GlossyKey(label, KeyRole.Func, stringResource(name), Modifier.size(58.dp)) {
-                        if (haptics) haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                        keyHaptics.tap()
                         onKey(key)
                     }
                 }
                 GlossyKey("=", KeyRole.Equals, stringResource(R.string.key_equals), Modifier.size(58.dp)) {
-                    if (haptics) haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    keyHaptics.tap()
                     onKey(Key.Equals)
                 }
             }
