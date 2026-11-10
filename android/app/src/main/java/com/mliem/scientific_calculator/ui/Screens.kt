@@ -57,7 +57,6 @@ import com.mliem.scientific_calculator.R
 import com.mliem.scientific_calculator.data.PRECISION_CHOICES
 import com.mliem.scientific_calculator.data.Settings
 import com.mliem.scientific_calculator.data.ThemeChoice
-import com.mliem.scientific_calculator.data.Updater
 import com.mliem.scientific_calculator.engine.AngleMode
 import com.mliem.scientific_calculator.engine.HistoryEntry
 import com.mliem.scientific_calculator.engine.spoken
@@ -200,7 +199,7 @@ fun SettingsScreen(
                     Image(painterResource(R.drawable.app_icon), null, Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)))
                     Column {
                         BasicText(stringResource(R.string.app_name), style = TextStyle(color = colors.text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold))
-                        BasicText(Updater.versionLabel(BuildConfig.BUILD_NUMBER), style = TextStyle(color = colors.dim, fontSize = 13.sp))
+                        BasicText(versionLabel(BuildConfig.BUILD_NUMBER), style = TextStyle(color = colors.dim, fontSize = 13.sp))
                     }
                 }
                 Divider()

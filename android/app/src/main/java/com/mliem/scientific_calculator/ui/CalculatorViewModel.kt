@@ -5,11 +5,14 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.mliem.android.update.CheckResult
+import com.mliem.android.update.FailureKind
+import com.mliem.android.update.InstallResult
+import com.mliem.android.update.UpdateInfo
+import com.mliem.android.update.UpdateState
 import com.mliem.scientific_calculator.CalculatorApp
 import com.mliem.scientific_calculator.data.Settings
 import com.mliem.scientific_calculator.data.ThemeChoice
-import com.mliem.scientific_calculator.data.InstallState
-import com.mliem.scientific_calculator.data.UpdateInfo
 import com.mliem.scientific_calculator.engine.AngleMode
 import com.mliem.scientific_calculator.engine.CalculatorState
 import com.mliem.scientific_calculator.engine.Cursor
@@ -53,8 +56,7 @@ sealed interface UpdatePrompt {
 class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
     private val settingsRepository = app.settings
     private val historyRepository = app.history
-    private val updater = app.updater
-    private val installer = app.installer
+    private val updates = app.updates
     private val currencyRepository = app.currency
 
     private val _calc = MutableStateFlow(CalculatorState())
@@ -82,12 +84,21 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            installer.state.collect { state ->
+            updates.state.collect { state ->
                 when (state) {
-                    InstallState.Idle -> Unit
-                    is InstallState.Downloading -> _updatePrompt.value = UpdatePrompt.Installing(state.percent)
-                    InstallState.Installing -> _updatePrompt.value = UpdatePrompt.Installing(null)
-                    is InstallState.Failed -> _updatePrompt.value = UpdatePrompt.InstallFailed(state.message)
+                    is UpdateState.Available -> {
+                        _updateAvailable.value = true
+                        _updatePrompt.value = UpdatePrompt.Available(state.info)
+                    }
+                    is UpdateState.Downloading -> _updatePrompt.value = UpdatePrompt.Installing(state.percent)
+                    UpdateState.Installing -> _updatePrompt.value = UpdatePrompt.Installing(null)
+                    is UpdateState.Failed -> {
+                        // A failed launch check is silent; only a failed install takes over the dialog.
+                        if (state.kind == FailureKind.INSTALL && _updatePrompt.value is UpdatePrompt.Installing) {
+                            _updatePrompt.value = UpdatePrompt.InstallFailed(state.message)
+                        }
+                    }
+                    else -> Unit
                 }
             }
         }
@@ -174,25 +185,33 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
 
     fun dismissUpdatePrompt() {
         _updatePrompt.value = null
-        installer.reset()
+        updates.reset()
     }
 
     fun installUpdate(info: UpdateInfo) {
-        viewModelScope.launch { installer.install(info) }
+        viewModelScope.launch {
+            when (val result = updates.install(info)) {
+                is InstallResult.Failed -> _updatePrompt.value = UpdatePrompt.InstallFailed(result.message)
+                is InstallResult.PermissionRequired -> _updatePrompt.value = UpdatePrompt.InstallFailed(result.message)
+                InstallResult.Started -> Unit
+            }
+        }
     }
 
     /** A launch check only speaks up when there is an update; a manual one always answers. */
     fun checkForUpdates(manual: Boolean) {
-        if (_checking.value || !updater.enabled) return
+        if (_checking.value || !updates.enabled) return
         viewModelScope.launch {
             _checking.value = true
-            runCatching { updater.check() }
-                .onSuccess { found ->
-                    _updateAvailable.value = found != null
-                    if (found != null) _updatePrompt.value = UpdatePrompt.Available(found)
-                    else if (manual) _updatePrompt.value = UpdatePrompt.UpToDate
+            when (val result = updates.checkNow()) {
+                is CheckResult.Available -> {
+                    _updateAvailable.value = true
+                    _updatePrompt.value = UpdatePrompt.Available(result.info)
                 }
-                .onFailure { if (manual) _updatePrompt.value = UpdatePrompt.Failed }
+                CheckResult.UpToDate -> if (manual) _updatePrompt.value = UpdatePrompt.UpToDate
+                is CheckResult.Failed -> if (manual) _updatePrompt.value = UpdatePrompt.Failed
+                CheckResult.Throttled, CheckResult.Unsupported -> if (manual) _updatePrompt.value = UpdatePrompt.UpToDate
+            }
             _checking.value = false
         }
     }

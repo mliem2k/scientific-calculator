@@ -8,9 +8,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.mliem.android.update.UpdateInfo
 import com.mliem.scientific_calculator.R
-import com.mliem.scientific_calculator.data.UpdateInfo
-import com.mliem.scientific_calculator.data.Updater
 
 @Composable
 fun UpdateDialog(prompt: UpdatePrompt, onInstall: (UpdateInfo) -> Unit, onDismiss: () -> Unit) {
@@ -27,7 +26,7 @@ fun UpdateDialog(prompt: UpdatePrompt, onInstall: (UpdateInfo) -> Unit, onDismis
         is UpdatePrompt.InstallFailed -> R.string.install_failed_title
     }
     val body = when (prompt) {
-        is UpdatePrompt.Available -> stringResource(R.string.update_ready, Updater.formatTag(prompt.info.tagName))
+        is UpdatePrompt.Available -> stringResource(R.string.update_ready, formatTag(prompt.info.tag))
         UpdatePrompt.UpToDate -> stringResource(R.string.up_to_date_body)
         UpdatePrompt.Failed -> stringResource(R.string.check_failed_body)
         is UpdatePrompt.Installing ->

@@ -62,7 +62,13 @@
     <string name="install_failed">The update could not be installed. Try again or download it from the release page.</string>
     <string name="install_allow">Allow Calculator to install apps in the settings screen that just opened, then tap Update again.</string>
     <string name="install_checksum">The downloaded file did not match its checksum, so it was not installed.</string>
+    <string name="install_no_digest">This release does not publish a checksum, so it was not installed.</string>
     <string name="install_signature">This build is signed with a different key than the installed app. Uninstall Calculator once, then install the new APK.</string>
+    <string name="install_no_apk">This release does not include an APK.</string>
+    <string name="install_insecure">The update is not served over https.</string>
+    <string name="install_different_app">This update is for a different app.</string>
+    <string name="install_not_newer">This update is not newer than the installed app.</string>
+    <string name="install_incomplete">The download was incomplete, so it was not installed.</string>
     <string name="update">Update</string>
     <string name="up_to_date">Up to date</string>
     <string name="up_to_date_body">You\'re running the latest version.</string>
