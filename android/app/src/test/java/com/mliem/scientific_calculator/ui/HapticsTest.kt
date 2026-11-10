@@ -58,4 +58,27 @@ class HapticsTest {
         assertFalse(KeyHaptics(enabled = false, sink = sink).tap())
         assertEquals(emptyList<Pair<Int, Int>>(), sink.calls)
     }
+
+    @Test fun aRealVibrationSkipsTheViewHaptic() {
+        val view = RecordingSink(true)
+        var vibrations = 0
+        val sink = DeviceHapticSink(vibrate = { vibrations++; true }, fallback = view)
+        assertTrue(KeyHaptics(enabled = true, sink = sink).tap())
+        assertEquals(1, vibrations)
+        assertEquals(emptyList<Pair<Int, Int>>(), view.calls)
+    }
+
+    @Test fun aMissingVibratorFallsBackToTheViewHaptic() {
+        val view = RecordingSink(true)
+        val sink = DeviceHapticSink(vibrate = { false }, fallback = view)
+        assertTrue(KeyHaptics(enabled = true, sink = sink).tap())
+        assertEquals(listOf(keyboardTap), view.calls)
+    }
+
+    @Test fun neitherAVibratorNorTheViewHapticSucceeds() {
+        val view = RecordingSink(false, false)
+        val sink = DeviceHapticSink(vibrate = { false }, fallback = view)
+        assertFalse(KeyHaptics(enabled = true, sink = sink).tap())
+        assertEquals(listOf(keyboardTap, clockTick), view.calls)
+    }
 }

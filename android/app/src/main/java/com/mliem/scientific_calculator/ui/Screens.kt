@@ -172,6 +172,17 @@ fun SettingsScreen(
                             uncheckedTrackColor = colors.line, uncheckedThumbColor = Color.White, uncheckedBorderColor = Color.Transparent),
                     )
                 }
+                if (settings.hapticFeedback && !rememberSystemHapticsEnabled()) {
+                    Divider()
+                    BasicText(
+                        stringResource(R.string.system_haptics_off),
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { openSystemVibrationSettings(context) }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        style = TextStyle(color = colors.accent, fontSize = 14.sp),
+                    )
+                }
             }
 
             Section(stringResource(R.string.voice_feedback)) {
