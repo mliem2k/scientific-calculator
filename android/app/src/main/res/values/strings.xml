@@ -47,6 +47,7 @@
     <string name="precision_decimals">%1$d decimals</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="haptic_feedback_hint">Vibrate on key press</string>
+    <string name="system_haptics_off">System touch vibration is off. Tap to open sound settings.</string>
     <string name="about">About</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="checking">Checking...</string>
