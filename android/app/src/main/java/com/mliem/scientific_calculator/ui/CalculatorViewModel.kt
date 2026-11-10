@@ -100,7 +100,7 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
         viewModelScope.launch {
             val saved = settingsRepository.settings.first()
             _settings.value = saved
-            _calc.value = CalculatorState(angleMode = saved.defaultAngleMode)
+            _calc.update { it.copy(angleMode = saved.defaultAngleMode) }
             _settingsLoaded.value = true
             launch { settingsRepository.settings.collect { _settings.value = it } }
             launch {
@@ -142,8 +142,7 @@ class CalculatorViewModel(app: CalculatorApp) : ViewModel() {
             _calc.update { it.copy(history = merged) }
             _historyLoaded.value = true
             if (historyDirty) {
-                historyRepository.save(merged)
-                historyDirty = false
+                if (runCatching { historyRepository.save(merged) }.isSuccess) historyDirty = false
             }
         }
     }
