@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
-        splash.setKeepOnScreenCondition { !viewModel.ready.value }
+        splash.setKeepOnScreenCondition { !viewModel.settingsLoaded.value }
         enableEdgeToEdge()
         setContent { CalculatorRoot(viewModel) }
     }
@@ -68,7 +68,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun CalculatorRoot(viewModel: CalculatorViewModel) {
-    val ready by viewModel.ready.collectAsStateWithLifecycle()
+    val settingsLoaded by viewModel.settingsLoaded.collectAsStateWithLifecycle()
+    val historyLoaded by viewModel.historyLoaded.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val state by viewModel.calc.collectAsStateWithLifecycle()
     val screen by viewModel.screen.collectAsStateWithLifecycle()
@@ -92,7 +93,7 @@ private fun CalculatorRoot(viewModel: CalculatorViewModel) {
         val colors = LocalCalcColors.current
         // The background fills the whole window, including behind the system bars; only content is inset.
         Column(Modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.safeDrawing)) {
-            if (!ready) return@Column
+            if (!settingsLoaded) return@Column
             BackHandler(enabled = screen.parent != null) { screen.parent?.let(viewModel::open) }
             AnimatedContent(
                 targetState = screen,
@@ -101,7 +102,7 @@ private fun CalculatorRoot(viewModel: CalculatorViewModel) {
             ) { current ->
                 when (current) {
                     Screen.Calculator, Screen.History ->
-                        CalculatorScreen(viewModel, state, settings.hapticFeedback, voiceOn, speaker::speak, current == Screen.History, updateAvailable)
+                        CalculatorScreen(viewModel, state, settings.hapticFeedback, voiceOn, speaker::speak, current == Screen.History, updateAvailable, historyLoaded)
                     Screen.Settings -> SettingsScreen(
                         settings = settings,
                         checking = checking,
@@ -134,6 +135,7 @@ private fun CalculatorScreen(
     speak: (String) -> Unit,
     showHistory: Boolean,
     updateAvailable: Boolean,
+    historyLoaded: Boolean,
 ) {
     val clipboard = LocalClipboard.current
     val context = LocalContext.current
@@ -153,6 +155,7 @@ private fun CalculatorScreen(
         HistoryPanel(
             state = state,
             haptics = haptics,
+            historyLoaded = historyLoaded,
             onKey = onKey,
             onJump = viewModel::jumpTo,
             onInsert = viewModel::insertResult,
