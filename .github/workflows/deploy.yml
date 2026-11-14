@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy:
-    uses: mliem2k/kit/.github/workflows/deploy-pages.yml@main
+    uses: mliemm/kit/.github/workflows/deploy-pages.yml@main
     with:
       project: scientific-calculator
       working_directory: landing
